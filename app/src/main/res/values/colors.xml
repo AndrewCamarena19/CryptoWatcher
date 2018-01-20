@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#6b6b6b</color>
+    <color name="colorPrimaryDark">#393939</color>
+    <color name="colorText">#ffffff</color>
+    <color name="colorAccent">#ffffff</color>
+    <color name="TickerNameColor">#d0ff00</color>
+    <color name="colorBorder">#838383</color>
+</resources>

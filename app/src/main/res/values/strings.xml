@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">CryptoWatcher</string>
+    <string name="searchiconaction">searchIconAction</string>
+</resources>

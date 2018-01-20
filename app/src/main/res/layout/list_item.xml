@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="75dp"
+    android:paddingBottom="5dp"
+    android:background="@drawable/background_borders"
+    android:paddingTop="5dp">
+
+    <ImageView
+        android:id="@+id/tickerIcon"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/CoinPlace"
+        android:contentDescription="Cream"
+        app:srcCompat="@drawable/cream"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/tickerName"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/tickerIcon"
+        android:text="A menu item"
+        android:textColor="@color/TickerNameColor"
+        android:textSize="14sp"
+        tools:ignore="HardcodedText" />
+
+    <TextView
+        android:id="@+id/tickerSymbol"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/tickerName"
+        android:text="(BTC)"
+        android:textColor="@color/TickerNameColor"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/Pricelbl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/tickerIcon"
+        android:text="Price: "
+        android:textColor="@color/colorText"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/tickerPrice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/Pricelbl"
+        android:text="$1200.00"
+        android:textColor="@color/colorText"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/MarketCaplbl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@+id/tickerIcon"
+        android:text="MarketCap: "
+        android:textColor="@color/colorText"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/MarketCap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/MarketCaplbl"
+        android:layout_toEndOf="@+id/MarketCaplbl"
+        android:text=" $ 123,456,987,641.00"
+        android:textColor="@color/colorText"
+        android:textSize="14sp" />
+
+    <CheckBox
+        android:id="@+id/checkFavorite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/tickerSymbol"
+        android:button="@drawable/star"
+        android:checked="false" />
+
+    <TextView
+        android:id="@+id/PriceChange"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/tickerName"
+        android:layout_alignParentEnd="true"
+        android:text="TextView" />
+
+    <TextView
+        android:id="@+id/CoinPlace"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:text="1"
+        android:textColor="@color/colorText"
+        android:textSize="25sp" />
+
+
+</RelativeLayout>
