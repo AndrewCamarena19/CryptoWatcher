@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.preference.PreferenceManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -17,12 +18,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import com.andyisdope.cryptowatch.Currency
+import com.squareup.picasso.Picasso
 
 import java.io.IOException
 
 class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayList<Currency>) : RecyclerView.Adapter<CurrencyAdapter.ViewHolder>() {
 
     private val list: ArrayList<HashMap<String, Currency>>? = null
+    private val Image_Base_URL = "https://www.cryptocompare.com"
+    private val Data_Base_URL = "https://api.cryptowat.ch"
 
     override fun getItemCount(): Int {
         return mItems.size
@@ -47,9 +51,10 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
         val item = mItems[position]
 
         try {
-            val inputStream = mContext.assets.open(item.Symbol.plus(".png"))
-            val d = Drawable.createFromStream(inputStream, null)
-            holder.tickerImage.setImageDrawable(d)
+            //val inputStream = mContext.assets.open(item.Symbol.plus(".png"))
+            //val d = Drawable.createFromStream(inputStream, null)
+            //holder.tickerImage.setImageDrawable(d)
+            Picasso.with(mContext).load(Image_Base_URL.plus(item.ImageURL)).error(R.drawable.cream).into(holder.tickerImage)
             holder.tickerSymbol.text = "("+item.Symbol+")"
             holder.tickerPrice.text = item.CurrentPrice
             when

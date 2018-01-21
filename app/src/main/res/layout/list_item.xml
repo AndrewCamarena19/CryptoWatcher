@@ -15,7 +15,6 @@
         android:layout_centerVertical="true"
         android:layout_toEndOf="@+id/CoinPlace"
         android:contentDescription="Cream"
-        app:srcCompat="@drawable/cream"
         tools:ignore="HardcodedText" />
 
     <TextView
