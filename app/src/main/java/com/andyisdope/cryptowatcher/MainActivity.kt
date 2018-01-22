@@ -7,7 +7,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import android.support.v4.content.LocalBroadcastManager
-import com.andyisdope.cryptowatcher.Services.MyService
 import android.support.v7.widget.RecyclerView
 import android.preference.PreferenceManager
 import android.content.*
@@ -18,18 +17,10 @@ import android.widget.TabHost
 import android.support.v7.widget.LinearLayoutManager
 import android.content.pm.PackageManager
 import android.os.Build
-import android.app.Activity
 import android.support.v4.app.ActivityCompat
 import com.andyisdope.cryptowatcher.Services.DataService
 import android.content.Intent
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
-import android.support.annotation.NonNull
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.firebase.storage.FileDownloadTask
-import com.google.android.gms.tasks.OnSuccessListener
-
-
+import android.util.Log
 
 
 class MainActivity : AppCompatActivity() {
@@ -41,7 +32,6 @@ class MainActivity : AppCompatActivity() {
 
 
     //var mDataSource: DataSource
-    var sRef: StorageReference = FirebaseStorage.getInstance().reference
     var mItemList: ArrayList<Currency>? = ArrayList()
     var mTokens: ArrayList<Currency>? = ArrayList()
     var mDrawerLayout: DrawerLayout? = null
@@ -54,14 +44,19 @@ class MainActivity : AppCompatActivity() {
     var mItemAdapter: CurrencyAdapter? = null
     var networkOk: Boolean = false
     val READ_STORAGE_PERMISSION_REQUEST_CODE = 1
+    var response: String = ""
+    var index: Int = 0
+    var count: Int = 0
 
     private val mBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            val dataItems = intent
-                    .getParcelableArrayExtra(DataService.MY_SERVICE_PAYLOAD) as Array<Currency>
-            Toast.makeText(this@MainActivity,
-                    "Received " + dataItems.size + " items from service",
-                    Toast.LENGTH_SHORT).show()
+            //val dataItems = intent
+                response = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
+            Toast.makeText(baseContext,
+                    "Received " + 1 + " items from service",
+                    Toast.LENGTH_LONG).show()
+            displayDataItems(null)
+
         }
     }
 
@@ -117,28 +112,15 @@ class MainActivity : AppCompatActivity() {
         //      end of navigation drawer
         val settings = PreferenceManager.getDefaultSharedPreferences(this)
         val grid = false
-
-        val localFile = File.createTempFile("images", "jpg")
-        sRef.getFile(localFile)
-                .addOnSuccessListener(OnSuccessListener<FileDownloadTask.TaskSnapshot> {
-                    // Successfully downloaded data to local file
-                    // ...
-                }).addOnFailureListener(OnFailureListener {
-            // Handle failed download
-            // ...
-        })
-
         initTabs()
         mCoinList = findViewById<RecyclerView>(R.id.CoinList) as RecyclerView
         mTokenList = findViewById<RecyclerView>(R.id.TokenList) as RecyclerView
         mFavourites = findViewById<RecyclerView>(R.id.Favorites) as RecyclerView
 
-        displayDataItems(null)
-
         LocalBroadcastManager.getInstance(applicationContext)
                 .registerReceiver(mBroadcastReceiver,
                         IntentFilter(DataService.MY_SERVICE_MESSAGE))
-
+        requestData("Init")
     }
 
     private fun requestData(path: String) {
@@ -150,12 +132,18 @@ class MainActivity : AppCompatActivity() {
 
     private fun displayDataItems(category: String?) {
         //change data sources
-        //mItemList!!.add(Currency("CAndy", "/media/19633/btc.png", "flow", 1, "Candy", "10000", "100 dong", "15.00", "24Hr"))
-        //mItemList!!.add(Currency("DAndy", "/media/20646/eth_logo.png", "cream", 1, "Dandy", "10000", "100 dong", "-15.00", "24Hr"))
-        //mItemList!!.add(Currency("Andy", "/media/19782/litecoin-logo.png", "soma", 1, "Andy", "10000", "100 dong", "150.00", "24Hr"))
-        //mItemList!!.add(Currency("CAndy", "/media/19684/doge.png", "flow", 1, "Candy", "10000", "100 dong", "15.00", "24Hr"))
-        //mItemList!!.add(Currency("DAndy", "/media/351360/zec.png", "cream", 1, "Dandy", "10000", "100 dong", "-15.00", "24Hr"))
+        mItemList!!.add(Currency("CAndy", "BTC", "flow", 1, "Candy", "10000", "100 dong", "15.00", "24Hr"))
+        mItemList!!.add(Currency("DAndy", "ETH", "cream", 1, "Dandy", "10000", "100 dong", "-15.00", "24Hr"))
+        mItemList!!.add(Currency("Andy", "ltc", "soma", 1, "Andy", "10000", "100 dong", "150.00", "24Hr"))
+        mItemList!!.add(Currency("CAndy", "doge", "flow", 1, "Candy", "10000", "100 dong", "15.00", "24Hr"))
+        mItemList!!.add(Currency("DAndy", "ZEC", "cream", 1, "Dandy", "10000", "100 dong", "-15.00", "24Hr"))
+        //Log.i("FirstEntry", firstString)
 
+        while(count < 3) {
+            index = createCurrency(response, index)
+            response = response.substring(index)
+            count++
+        }
 
 
         mCoinList!!.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
@@ -166,7 +154,7 @@ class MainActivity : AppCompatActivity() {
         mCoinList!!.adapter = mItemAdapter
         mCoinList!!.adapter.notifyDataSetChanged()
 
-        mTokens!!.add(Currency("CAndy", "/media/19684/doge.png", "flow", 1, "Candy", "10000", "100 dong", "15.00", "24Hr"))
+        mTokens!!.add(Currency("CAndy", "XRP", "flow", 1, "Candy", "10000", "100 dong", "15.00", "24Hr"))
         mItemAdapters = CurrencyAdapter(this, mTokens!!)
         mTokenList!!.adapter = mItemAdapters
         mTokenList!!.adapter.notifyDataSetChanged()
@@ -222,5 +210,45 @@ class MainActivity : AppCompatActivity() {
         val inflater = menuInflater
         inflater.inflate(R.menu.actionmenu, menu)
         return true
+    }
+
+    private fun createCurrency(block: String, index: Int): Int
+    {
+        var id = block.substringAfter("<tr id=\"id-")
+        id = id.substring(0, id.indexOf("\""))
+
+        var symbol = block.substringAfter("<span class=\"currency-symbol\"><a href=\"/currencies/$id/\">")
+        symbol = symbol.substring(0, symbol.indexOf("<"))
+
+        var place = block.substringAfter("<td class=\"text-center\">")
+        place = place.substring(0, place.indexOf("<")).replace("\n", "").trim()
+
+        var marketCap = block.substringAfter("class=\"no-wrap market-cap text-right\" data-usd=\"")
+        marketCap = marketCap.substring(0, marketCap.indexOf("\""))
+
+        var currPrice = block.substringAfter("class=\"price\" data-usd=\"")
+        currPrice = currPrice.substring(0, currPrice.indexOf("\""))
+
+        var volume = block.substringAfter("class=\"volume\" data-usd=\"")
+        volume = volume.substring(0, volume.indexOf("\""))
+
+        var hrChange = block.substringAfter("no-wrap percent-1h").substringAfter("data-usd=\"")
+        hrChange = hrChange.substring(0,hrChange.indexOf("\""))
+
+        var twoChange = block.substringAfter("no-wrap percent-24h").substringAfter("data-usd=\"")
+        twoChange = twoChange.substring(0,twoChange.indexOf("\""))
+
+        var sevenChange = block.substringAfter("no-wrap percent-7d").substringAfter("data-usd=\"")
+        sevenChange  = sevenChange .substring(0,sevenChange .indexOf("\""))
+
+        Log.i("Currency: ", id.plus(" $place $marketCap $currPrice"))
+        Log.i("index: ", "".plus(block.indexOf("</tr>")))
+
+
+        var numblockLength = block.indexOf("</tr>")
+
+        return numblockLength
+
+
     }
 }
