@@ -21,7 +21,6 @@ class DataService : IntentService("DataService") {
     override fun onHandleIntent(intent: Intent?) {
         //        Make the web service request
         val webService = DataWebService.retrofit.create(DataWebService::class.java)
-
         when(intent!!.getStringExtra("Path"))
         {
             "something" -> {
@@ -36,17 +35,27 @@ class DataService : IntentService("DataService") {
                 }
 
                 //        Return the data to MainActivity
-                val messageIntent = Intent(MY_SERVICE_MESSAGE)
+                val messageIntent = Intent(COINS)
                 messageIntent.putExtra(MY_SERVICE_PAYLOAD, dataItems)
                 val manager = LocalBroadcastManager.getInstance(applicationContext)
                 manager.sendBroadcast(messageIntent)
             }
 
-            "Init" ->
+            "https://coinmarketcap.com/tokens/views/all/" ->
             {
-                val call = webService.getInitial()
+                val call = webService.getInitial(intent.getStringExtra("Path"))
                 val resp = call.execute().body()
-                val messageIntent = Intent(MY_SERVICE_MESSAGE)
+                val messageIntent = Intent(TOKENS)
+                messageIntent.putExtra(MY_SERVICE_PAYLOAD, resp)
+                val manager = LocalBroadcastManager.getInstance(applicationContext)
+                manager.sendBroadcast(messageIntent)
+            }
+
+            "https://coinmarketcap.com/coins/views/all/" ->
+            {
+                val call = webService.getInitial(intent.getStringExtra("Path"))
+                val resp = call.execute().body()
+                val messageIntent = Intent(COINS)
                 messageIntent.putExtra(MY_SERVICE_PAYLOAD, resp)
                 val manager = LocalBroadcastManager.getInstance(applicationContext)
                 manager.sendBroadcast(messageIntent)
@@ -69,7 +78,8 @@ class DataService : IntentService("DataService") {
     companion object {
 
         val TAG = "DataService"
-        val MY_SERVICE_MESSAGE = "DataMessage"
+        val TOKENS = "TOKENS"
+        val COINS = "COINS"
         val MY_SERVICE_PAYLOAD = "DataPayload"
     }
 
