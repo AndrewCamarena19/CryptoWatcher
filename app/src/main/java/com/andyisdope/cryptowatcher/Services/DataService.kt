@@ -21,23 +21,38 @@ class DataService : IntentService("DataService") {
     override fun onHandleIntent(intent: Intent?) {
         //        Make the web service request
         val webService = DataWebService.retrofit.create(DataWebService::class.java)
-        val call = webService.dataItems(intent!!.getStringExtra("Path"))
 
-        val dataItems: Array<Currency>
+        when(intent!!.getStringExtra("Path"))
+        {
+            "something" -> {
+                val call = webService.dataItems(intent!!.getStringExtra("Path"))
+                val dataItems: Array<Currency>
+                try {
+                    dataItems = call.execute().body()!!
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    Log.i(TAG, "onHandleIntent: " + e.message)
+                    return
+                }
 
-        try {
-            dataItems = call.execute().body()!!
-        } catch (e: IOException) {
-            e.printStackTrace()
-            Log.i(TAG, "onHandleIntent: " + e.message)
-            return
+                //        Return the data to MainActivity
+                val messageIntent = Intent(MY_SERVICE_MESSAGE)
+                messageIntent.putExtra(MY_SERVICE_PAYLOAD, dataItems)
+                val manager = LocalBroadcastManager.getInstance(applicationContext)
+                manager.sendBroadcast(messageIntent)
+            }
+
+            "Init" ->
+            {
+                val call = webService.getInitial()
+                val resp = call.execute().body()
+                val messageIntent = Intent(MY_SERVICE_MESSAGE)
+                messageIntent.putExtra(MY_SERVICE_PAYLOAD, resp)
+                val manager = LocalBroadcastManager.getInstance(applicationContext)
+                manager.sendBroadcast(messageIntent)
+            }
         }
 
-        //        Return the data to MainActivity
-        val messageIntent = Intent(MY_SERVICE_MESSAGE)
-        messageIntent.putExtra(MY_SERVICE_PAYLOAD, dataItems)
-        val manager = LocalBroadcastManager.getInstance(applicationContext)
-        manager.sendBroadcast(messageIntent)
 
     }
 
