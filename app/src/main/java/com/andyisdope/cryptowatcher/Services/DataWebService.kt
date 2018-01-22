@@ -32,6 +32,6 @@ interface DataWebService {
     @GET
     fun dataItems(@Url url: String): Call<Array<Currency>>
 
-    @GET(Init_URL)
-    fun getInitial(): Call<String>
+    @GET
+    fun getInitial(@Url url: String): Call<String>
 }
