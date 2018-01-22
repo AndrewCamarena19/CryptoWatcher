@@ -10,8 +10,6 @@ import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.widget.RecyclerView
 import android.preference.PreferenceManager
 import android.content.*
-import android.support.v4.widget.DrawerLayout
-import android.widget.ListView
 import com.andyisdope.cryptowatch.Currency
 import android.widget.TabHost
 import android.support.v7.widget.LinearLayoutManager
@@ -20,7 +18,9 @@ import android.os.Build
 import android.support.v4.app.ActivityCompat
 import com.andyisdope.cryptowatcher.Services.DataService
 import android.content.Intent
-import android.util.Log
+import com.andyisdope.cryptowatcher.Adapters.CurrencyAdapter
+import com.andyisdope.cryptowatcher.Adapters.TokenAdapter
+import com.andyisdope.cryptowatcher.model.Tokens
 
 
 class MainActivity : AppCompatActivity() {
@@ -32,30 +32,39 @@ class MainActivity : AppCompatActivity() {
 
 
     //var mDataSource: DataSource
-    var mItemList: ArrayList<Currency>? = ArrayList()
-    var mTokens: ArrayList<Currency>? = ArrayList()
-    var mDrawerLayout: DrawerLayout? = null
-    var mDrawerList: ListView? = null
-    var mCategories: Array<String>? = null
+    var mCoins: ArrayList<Currency>? = ArrayList()
+    var mTokens: ArrayList<Tokens>? = ArrayList()
     var mCoinList: RecyclerView? = null
     var mTokenList: RecyclerView? = null
     var mFavourites: RecyclerView? = null
-    var mItemAdapters: CurrencyAdapter? = null
-    var mItemAdapter: CurrencyAdapter? = null
+    var mCoinAdapter: CurrencyAdapter? = null
+    var mTokenAdapter: TokenAdapter? = null
+    var mFavAdapter: CurrencyAdapter? = null
     var networkOk: Boolean = false
     val READ_STORAGE_PERMISSION_REQUEST_CODE = 1
     var response: String = ""
-    var index: Int = 0
-    var count: Int = 0
+    var response2: String = ""
 
     private val mBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             //val dataItems = intent
-                response = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
+            response = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
             Toast.makeText(baseContext,
-                    "Received " + 1 + " items from service",
-                    Toast.LENGTH_LONG).show()
-            displayDataItems(null)
+                    "Received Coins",
+                    Toast.LENGTH_SHORT).show()
+            displayCoinItems()
+
+        }
+    }
+
+    private val mBroadcastReceiver2 = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            //val dataItems = intent
+            response2 = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
+            Toast.makeText(baseContext,
+                    "Received Tokens",
+                    Toast.LENGTH_SHORT).show()
+            displayTokenItems()
 
         }
     }
@@ -104,9 +113,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        if(!checkPermissionForReadExtertalStorage())
+        if (!checkPermissionForReadExtertalStorage())
             requestPermissionForReadExtertalStorage()
-        if(!checkPermissionForWriteExtertalStorage())
+        if (!checkPermissionForWriteExtertalStorage())
             requestPermissionForWriteExtertalStorage()
         //      Code to manage sliding navigation drawer
         //      end of navigation drawer
@@ -119,8 +128,13 @@ class MainActivity : AppCompatActivity() {
 
         LocalBroadcastManager.getInstance(applicationContext)
                 .registerReceiver(mBroadcastReceiver,
-                        IntentFilter(DataService.MY_SERVICE_MESSAGE))
-        requestData("Init")
+                        IntentFilter(DataService.COINS))
+        requestData("https://coinmarketcap.com/coins/views/all/")
+
+        LocalBroadcastManager.getInstance(applicationContext)
+                .registerReceiver(mBroadcastReceiver2,
+                        IntentFilter(DataService.TOKENS))
+        requestData("https://coinmarketcap.com/tokens/views/all/")
     }
 
     private fun requestData(path: String) {
@@ -129,35 +143,34 @@ class MainActivity : AppCompatActivity() {
         startService(intent)
     }
 
+    private fun displayTokenItems() {
+        var blocks = response2.substringAfter("<tbody>").split("</tr>")
+        blocks.take(548)
+                .filter { it.length > 19 }
+                .forEach { mTokens!!.add(createToken(it)) }
 
-    private fun displayDataItems(category: String?) {
-        //change data sources
-        mItemList!!.add(Currency("CAndy", "BTC", "flow", 1, "Candy", "10000", "100 dong", "15.00", "24Hr"))
-        mItemList!!.add(Currency("DAndy", "ETH", "cream", 1, "Dandy", "10000", "100 dong", "-15.00", "24Hr"))
-        mItemList!!.add(Currency("Andy", "ltc", "soma", 1, "Andy", "10000", "100 dong", "150.00", "24Hr"))
-        mItemList!!.add(Currency("CAndy", "doge", "flow", 1, "Candy", "10000", "100 dong", "15.00", "24Hr"))
-        mItemList!!.add(Currency("DAndy", "ZEC", "cream", 1, "Dandy", "10000", "100 dong", "-15.00", "24Hr"))
-        //Log.i("FirstEntry", firstString)
 
-        while(count < 3) {
-            index = createCurrency(response, index)
-            response = response.substring(index)
-            count++
-        }
+        mTokenList!!.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        mTokenAdapter = TokenAdapter(this, mTokens!!)
+        mTokenList!!.adapter = mTokenAdapter
+        mTokenList!!.adapter.notifyDataSetChanged()
+    }
+
+    //mFavourites!!.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+
+
+    private fun displayCoinItems() {
+
+        var blocks = response.substring(64118).split("</tr>")
+        blocks.take(894)
+                .filter { it.length > 19 }
+                .forEach { mCoins!!.add(createCurrency(it)) }
 
 
         mCoinList!!.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        mTokenList!!.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        mFavourites!!.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-
-        mItemAdapter = CurrencyAdapter(this, mItemList!!)
-        mCoinList!!.adapter = mItemAdapter
+        mCoinAdapter = CurrencyAdapter(this, mCoins!!)
+        mCoinList!!.adapter = mCoinAdapter
         mCoinList!!.adapter.notifyDataSetChanged()
-
-        mTokens!!.add(Currency("CAndy", "XRP", "flow", 1, "Candy", "10000", "100 dong", "15.00", "24Hr"))
-        mItemAdapters = CurrencyAdapter(this, mTokens!!)
-        mTokenList!!.adapter = mItemAdapters
-        mTokenList!!.adapter.notifyDataSetChanged()
     }
 
     override fun onPause() {
@@ -175,10 +188,11 @@ class MainActivity : AppCompatActivity() {
 
         LocalBroadcastManager.getInstance(applicationContext)
                 .unregisterReceiver(mBroadcastReceiver)
+        LocalBroadcastManager.getInstance(applicationContext)
+                .unregisterReceiver(mBroadcastReceiver2)
     }
 
-    fun initTabs()
-    {
+    fun initTabs() {
         val tabs = findViewById<TabHost>(R.id.CTlist)
         tabs.setup()
         var spec: TabHost.TabSpec = tabs.newTabSpec("Coin List")
@@ -197,9 +211,16 @@ class MainActivity : AppCompatActivity() {
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        //sorts: alphabet, marketcap, biggest change, price, place
         when (item.itemId) {
             R.id.search -> Toast.makeText(this, "Search selected", Toast.LENGTH_SHORT).show()
-            R.id.sort -> Toast.makeText(this, "Sort selected", Toast.LENGTH_SHORT).show()
+            R.id.sort -> {
+
+
+
+
+                Toast.makeText(this, "Sort selected", Toast.LENGTH_SHORT).show()
+            }
             R.id.currency -> Toast.makeText(this, "Currency selected", Toast.LENGTH_SHORT).show()
             R.id.time -> Toast.makeText(this, "Time selected", Toast.LENGTH_SHORT).show()
         }
@@ -212,8 +233,7 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
-    private fun createCurrency(block: String, index: Int): Int
-    {
+    private fun createCurrency(block: String): Currency {
         var id = block.substringAfter("<tr id=\"id-")
         id = id.substring(0, id.indexOf("\""))
 
@@ -233,22 +253,48 @@ class MainActivity : AppCompatActivity() {
         volume = volume.substring(0, volume.indexOf("\""))
 
         var hrChange = block.substringAfter("no-wrap percent-1h").substringAfter("data-usd=\"")
-        hrChange = hrChange.substring(0,hrChange.indexOf("\""))
+        hrChange = hrChange.substring(0, hrChange.indexOf("\""))
 
         var twoChange = block.substringAfter("no-wrap percent-24h").substringAfter("data-usd=\"")
-        twoChange = twoChange.substring(0,twoChange.indexOf("\""))
+        twoChange = twoChange.substring(0, twoChange.indexOf("\""))
 
         var sevenChange = block.substringAfter("no-wrap percent-7d").substringAfter("data-usd=\"")
-        sevenChange  = sevenChange .substring(0,sevenChange .indexOf("\""))
+        sevenChange = sevenChange.substring(0, sevenChange.indexOf("\""))
 
-        Log.i("Currency: ", id.plus(" $place $marketCap $currPrice"))
-        Log.i("index: ", "".plus(block.indexOf("</tr>")))
+        return Currency(id, symbol, Integer.parseInt(place), marketCap, currPrice, hrChange, "1hr")
+    }
 
+    private fun createToken(block: String): Tokens {
+        var id = block.substringAfter("<tr id=\"id-")
+        id = id.substring(0, id.indexOf("\""))
 
-        var numblockLength = block.indexOf("</tr>")
+        var symbol = block.substringAfter("<span class=\"currency-symbol\"><a href=\"/currencies/$id/\">")
+        symbol = symbol.substring(0, symbol.indexOf("<"))
 
-        return numblockLength
+        var place = block.substringAfter("<td class=\"text-center\">")
+        place = place.substring(0, place.indexOf("<")).replace("\n", "").trim()
 
+        var platform = block.substringAfter("data-platformsymbol=\"")
+        platform = platform.substring(0, platform.indexOf("\""))
 
+        var marketCap = block.substringAfter("class=\"no-wrap market-cap text-right\" data-usd=\"")
+        marketCap = marketCap.substring(0, marketCap.indexOf("\""))
+
+        var currPrice = block.substringAfter("class=\"price\" data-usd=\"")
+        currPrice = currPrice.substring(0, currPrice.indexOf("\""))
+
+        var volume = block.substringAfter("class=\"volume\" data-usd=\"")
+        volume = volume.substring(0, volume.indexOf("\""))
+
+        var hrChange = block.substringAfter("no-wrap percent-1h").substringAfter("data-usd=\"")
+        hrChange = hrChange.substring(0, hrChange.indexOf("\""))
+
+        var twoChange = block.substringAfter("no-wrap percent-24h").substringAfter("data-usd=\"")
+        twoChange = twoChange.substring(0, twoChange.indexOf("\""))
+
+        var sevenChange = block.substringAfter("no-wrap percent-7d").substringAfter("data-usd=\"")
+        sevenChange = sevenChange.substring(0, sevenChange.indexOf("\""))
+
+        return Tokens(id, symbol, Integer.parseInt(place), platform, marketCap, currPrice, hrChange, "1hr")
     }
 }
