@@ -19,7 +19,7 @@
 
     <TextView
         android:id="@+id/tickerName"
-        android:layout_width="100dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/tickerIcon"
@@ -52,7 +52,8 @@
         android:id="@+id/tickerPrice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
+        android:layout_alignBaseline="@+id/Pricelbl"
+        android:layout_alignBottom="@+id/Pricelbl"
         android:layout_toEndOf="@+id/Pricelbl"
         android:text="$1200.00"
         android:textColor="@color/colorText"
@@ -104,6 +105,26 @@
         android:text="1"
         android:textColor="@color/colorText"
         android:textSize="25sp" />
+
+    <TextView
+        android:id="@+id/PfmLbl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/checkFavorite"
+        android:layout_alignBottom="@+id/checkFavorite"
+        android:layout_toStartOf="@+id/Platform"
+        android:textColor="@color/colorText"
+        android:text="Platform: " />
+
+    <TextView
+        android:id="@+id/Platform"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorText"
+        android:layout_alignBaseline="@+id/checkFavorite"
+        android:layout_alignBottom="@+id/checkFavorite"
+        android:layout_toStartOf="@+id/checkFavorite"
+        android:text="TextView" />
 
 
 </RelativeLayout>
