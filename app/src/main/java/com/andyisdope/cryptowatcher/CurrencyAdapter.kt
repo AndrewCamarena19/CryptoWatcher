@@ -25,7 +25,7 @@ import java.io.IOException
 class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayList<Currency>) : RecyclerView.Adapter<CurrencyAdapter.ViewHolder>() {
 
     private val list: ArrayList<HashMap<String, Currency>>? = null
-    private val Image_Base_URL = "https://www.cryptocompare.com"
+    private val Image_Base_URL = "https://raw.githubusercontent.com/poc19/CryptoWatcher/master/Images/"
     private val Data_Base_URL = "https://api.cryptowat.ch"
 
     override fun getItemCount(): Int {
@@ -54,7 +54,13 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
             //val inputStream = mContext.assets.open(item.Symbol.plus(".png"))
             //val d = Drawable.createFromStream(inputStream, null)
             //holder.tickerImage.setImageDrawable(d)
-            Picasso.with(mContext).load(Image_Base_URL.plus(item.ImageURL)).error(R.drawable.cream).into(holder.tickerImage)
+            var url = Image_Base_URL.plus(item.ImageURL.toUpperCase()).plus(".png?raw=true")
+            Log.i("URL", url)
+            //Picasso.with(mContext).load(url).error(R.drawable.cream).into(holder.tickerImage)
+            val builder = Picasso.Builder(mContext)
+            builder.listener { picasso, uri, exception -> exception.printStackTrace()
+            Log.i("Picasso", exception.toString())}
+            builder.build().load(url).into(holder.tickerImage)
             holder.tickerSymbol.text = "("+item.Symbol+")"
             holder.tickerPrice.text = item.CurrentPrice
             when
