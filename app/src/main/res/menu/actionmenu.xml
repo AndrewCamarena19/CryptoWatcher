@@ -17,13 +17,20 @@
     <item
         android:id="@+id/time"
         android:icon="@drawable/timeicon"
-        android:orderInCategory="3"
+        android:orderInCategory="4"
         app:showAsAction="always"
         android:title="" />
 
     <item
         android:id="@+id/currency"
         android:icon="@drawable/currencyicon"
+        android:orderInCategory="5"
+        app:showAsAction="always"
+        android:title="" />
+
+    <item
+        android:id="@+id/order"
+        android:icon="@drawable/ordericon"
         android:orderInCategory="3"
         app:showAsAction="always"
         android:title="" />
