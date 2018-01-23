@@ -20,12 +20,16 @@ import com.andyisdope.cryptowatcher.model.Tokens
 import com.squareup.picasso.Picasso
 
 import java.io.IOException
+import java.text.DecimalFormat
+import java.text.NumberFormat
 
 class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<Tokens>) : RecyclerView.Adapter<TokenAdapter.ViewHolder>() {
 
     private val list: ArrayList<HashMap<String, Tokens>>? = null
     private val Image_Base_URL = "https://raw.githubusercontent.com/poc19/CryptoWatcher/master/images/"
     private val Data_Base_URL = "https://api.cryptowat.ch"
+    var formatterLarge: NumberFormat = DecimalFormat("#,###.00000")
+    var formatterSmall: NumberFormat = DecimalFormat("#0.00000")
 
     override fun getItemCount(): Int {
         return mItems.size
@@ -55,19 +59,75 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
             //holder.tickerImage.setImageDrawable(d)
             var url = Image_Base_URL.plus(item.Symbol.toUpperCase()).plus(".png?raw=true")
             Picasso.with(mContext).load(url).error(R.drawable.cream).into(holder.tickerImage)
-            holder.tickerSymbol.text = "("+item.Symbol+")"
-            holder.tickerPrice.text = item.CurrentPrice
-            when
-            {
-                (item.Change == "?") -> holder.tickerChange.setTextColor(Color.WHITE)
-                item.Change.toDouble() <= 0 -> holder.tickerChange.setTextColor(Color.RED)
-                item.Change.toDouble() > 0 -> holder.tickerChange.setTextColor(Color.GREEN)
+            when (Tokens.TimeFrame) {
+                "Hourly" -> {
+                    when {
+                        (item.HrChange == "-9999") -> {
+                            holder.tickerChange.setTextColor(Color.WHITE)
+                            holder.tickerChange.text = "N/A"
+                        }
+                        item.HrChange.toDouble() <= 0 -> {
+                            holder.tickerChange.setTextColor(Color.RED)
+                            holder.tickerChange.text = "% ${item.HrChange.toDouble()}"
+                        }
+                        item.HrChange.toDouble() > 0 -> {
+                            holder.tickerChange.setTextColor(Color.GREEN)
+                            holder.tickerChange.text = "% ${item.HrChange.toDouble()}"
+                        }
+                    }
+                }
+                "Daily" -> {
+                    when {
+                        (item.TwoChange == "-9999") -> {
+                            holder.tickerChange.setTextColor(Color.WHITE)
+                            holder.tickerChange.text = "N/A"
+                        }
+                        item.TwoChange.toDouble() <= 0 -> {
+                            holder.tickerChange.setTextColor(Color.RED)
+                            holder.tickerChange.text = "% ${item.TwoChange.toDouble()}"
+                        }
+                        item.TwoChange.toDouble() > 0 -> {
+                            holder.tickerChange.setTextColor(Color.GREEN)
+                            holder.tickerChange.text = "% ${item.TwoChange.toDouble()}"
+                        }
+                    }
+                }
+                "Weekly" -> {
+                    when {
+                        (item.SevenChange == "-9999") -> {
+                            holder.tickerChange.setTextColor(Color.WHITE)
+                            holder.tickerChange.text = "N/A"
+                        }
+                        item.SevenChange.toDouble() <= 0 -> {
+                            holder.tickerChange.setTextColor(Color.RED)
+                            holder.tickerChange.text = "% ${item.SevenChange.toDouble()}"
+                        }
+                        item.SevenChange.toDouble() > 0 -> {
+                            holder.tickerChange.setTextColor(Color.GREEN)
+                            holder.tickerChange.text = "% ${item.SevenChange.toDouble()}"
+                        }
+                    }
+                }
             }
-            holder.tickerChange.text = item.Change
-            holder.tickerMarketCap.text = item.MarketCap
+
+
+            holder.tickerSymbol.text = "(" + item.Symbol + ")"
+            holder.tickerPrice.text = "$ ${formatterSmall.format(item.CurrentPrice.toDouble())}"
             holder.tickerPlace.text = "" + item.Place
             holder.tickerName.text = item.Name.toUpperCase()
             holder.Platform.text = item.Platform
+            holder.tickerMarketCap.text =
+                    when (item.MarketCap) {
+                        "-9999" -> "N/A"
+                        else -> {
+                            "$ ${formatterLarge.format(item.MarketCap.toDouble())}"
+                        }
+                    }
+            holder.tickerVolume.text =
+                    when(item.Volume) {
+                        "-9999" -> "N/A"
+                        else -> {"$ ${formatterLarge.format(item.Volume.toDouble())}"}
+                    }
 
         } catch (e: IOException) {
             e.printStackTrace()
@@ -100,6 +160,7 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
         var tickerPlace: TextView
         var tickerName: TextView
         var Platform: TextView
+        var tickerVolume: TextView
 
         init {
 
@@ -109,8 +170,10 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
             tickerChange = mView.findViewById<TextView>(R.id.PriceChange) as TextView
             tickerMarketCap = mView.findViewById<TextView>(R.id.MarketCap) as TextView
             tickerPlace = mView.findViewById<TextView>(R.id.CoinPlace) as TextView
-            tickerName =  mView.findViewById<TextView>(R.id.tickerName) as TextView
+            tickerName = mView.findViewById<TextView>(R.id.tickerName) as TextView
             Platform = mView.findViewById<TextView>(R.id.Platform) as TextView
+            tickerVolume = mView.findViewById<TextView>(R.id.tickerVolume) as TextView
+
         }
     }
 
