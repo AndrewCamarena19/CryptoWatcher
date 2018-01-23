@@ -3,17 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="75dp"
-    android:paddingBottom="5dp"
+    android:layout_height="90dp"
     android:background="@drawable/background_borders"
+    android:paddingBottom="5dp"
     android:paddingTop="5dp">
 
     <ImageView
         android:id="@+id/tickerIcon"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_centerVertical="true"
-        android:layout_toEndOf="@+id/CoinPlace"
+        android:layout_alignBottom="@+id/checkFavorite"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="10dp"
         android:contentDescription="Cream"
         tools:ignore="HardcodedText" />
 
@@ -21,7 +22,8 @@
         android:id="@+id/tickerName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_above="@+id/Pricelbl"
+        android:layout_marginStart="5dp"
         android:layout_toEndOf="@+id/tickerIcon"
         android:text="A menu item"
         android:textColor="@color/TickerNameColor"
@@ -32,7 +34,7 @@
         android:id="@+id/tickerSymbol"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_above="@+id/tickerPrice"
         android:layout_toEndOf="@+id/tickerName"
         android:text="(BTC)"
         android:textColor="@color/TickerNameColor"
@@ -42,7 +44,8 @@
         android:id="@+id/Pricelbl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
+        android:layout_above="@+id/MarketCaplbl"
+        android:layout_marginStart="5dp"
         android:layout_toEndOf="@+id/tickerIcon"
         android:text="Price: "
         android:textColor="@color/colorText"
@@ -60,31 +63,33 @@
         android:textSize="14sp" />
 
     <TextView
-        android:id="@+id/MarketCaplbl"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_toEndOf="@+id/tickerIcon"
-        android:text="MarketCap: "
-        android:textColor="@color/colorText"
-        android:textSize="14sp" />
-
-    <TextView
         android:id="@+id/MarketCap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/MarketCaplbl"
+        android:layout_alignBaseline="@+id/MarketCaplbl"
+        android:layout_alignBottom="@+id/MarketCaplbl"
         android:layout_toEndOf="@+id/MarketCaplbl"
         android:text=" $ 123,456,987,641.00"
         android:textColor="@color/colorText"
         android:textSize="14sp" />
 
-    <CheckBox
-        android:id="@+id/checkFavorite"
+    <TextView
+        android:id="@+id/MarketCaplbl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/tickerIcon"
+        android:layout_marginStart="5dp"
+        android:layout_toEndOf="@+id/tickerIcon"
+        android:text="MarketCap: "
+        android:textColor="@color/colorText"
+        android:textSize="14sp" />
+
+    <CheckBox
+        android:id="@+id/checkFavorite"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/tickerSymbol"
+        android:layout_centerVertical="true"
         android:button="@drawable/star"
         android:checked="false" />
 
@@ -92,7 +97,7 @@
         android:id="@+id/PriceChange"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/tickerName"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:text="TextView" />
 
@@ -100,31 +105,52 @@
         android:id="@+id/CoinPlace"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
+        android:layout_alignStart="@+id/tickerIcon"
+        android:layout_below="@+id/tickerIcon"
+        android:layout_toStartOf="@+id/MarketCaplbl"
         android:text="1"
+        android:textAlignment="center"
         android:textColor="@color/colorText"
-        android:textSize="25sp" />
+        android:textSize="18sp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/PfmLbl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/checkFavorite"
-        android:layout_alignBottom="@+id/checkFavorite"
+        android:layout_alignParentTop="true"
         android:layout_toStartOf="@+id/Platform"
-        android:textColor="@color/colorText"
-        android:text="Platform: " />
+        android:text="Platform: "
+        android:textColor="@color/colorText" />
 
     <TextView
         android:id="@+id/Platform"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/colorText"
-        android:layout_alignBaseline="@+id/checkFavorite"
-        android:layout_alignBottom="@+id/checkFavorite"
-        android:layout_toStartOf="@+id/checkFavorite"
-        android:text="TextView" />
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:text="TextView"
+        android:textColor="@color/colorText" />
+
+    <TextView
+        android:id="@+id/VolumeLbl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tickerIcon"
+        android:layout_marginStart="5dp"
+        android:layout_toEndOf="@+id/tickerIcon"
+        android:text="Volume: "
+        android:textColor="@color/colorText" />
+
+    <TextView
+        android:id="@+id/tickerVolume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/VolumeLbl"
+        android:layout_alignBottom="@+id/VolumeLbl"
+        android:layout_toEndOf="@+id/VolumeLbl"
+        android:text="$123,123,123,123.00"
+        android:textColor="@color/colorText" />
 
 
 </RelativeLayout>
