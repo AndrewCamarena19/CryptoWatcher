@@ -7,11 +7,13 @@ import android.os.Parcelable
  * Created by Andy on 1/18/2018.
  */
 data class Currency(val Name: String, val Symbol: String, val Place: Int,
-                    val MarketCap: String, val CurrentPrice: String, val Change: String, val TimeFrame: String) : Parcelable {
+                    val MarketCap: String, val CurrentPrice: String, val HrChange: String, val TwoChange: String, val SevenChange: String, val Volume: String) : Parcelable {
     constructor(parcel: Parcel) : this(
             parcel.readString(),
             parcel.readString(),
             parcel.readInt(),
+            parcel.readString(),
+            parcel.readString(),
             parcel.readString(),
             parcel.readString(),
             parcel.readString(),
@@ -24,8 +26,10 @@ data class Currency(val Name: String, val Symbol: String, val Place: Int,
         parcel.writeInt(Place)
         parcel.writeString(MarketCap)
         parcel.writeString(CurrentPrice)
-        parcel.writeString(Change)
-        parcel.writeString(TimeFrame)
+        parcel.writeString(HrChange)
+        parcel.writeString(TwoChange)
+        parcel.writeString(SevenChange)
+        parcel.writeString(Volume)
     }
 
     override fun describeContents(): Int {
@@ -33,6 +37,11 @@ data class Currency(val Name: String, val Symbol: String, val Place: Int,
     }
 
     companion object CREATOR : Parcelable.Creator<Currency> {
+
+        var SortMethod: String = ""
+        var TimeFrame: String = ""
+        var Order: String = "Ascending"
+
         override fun createFromParcel(parcel: Parcel): Currency {
             return Currency(parcel)
         }
@@ -41,5 +50,6 @@ data class Currency(val Name: String, val Symbol: String, val Place: Int,
             return arrayOfNulls(size)
         }
     }
+
 
 }

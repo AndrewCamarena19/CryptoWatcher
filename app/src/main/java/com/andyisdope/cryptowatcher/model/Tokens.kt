@@ -7,11 +7,13 @@ import android.os.Parcelable
  * Created by Andy on 1/22/2018.
  */
 class Tokens(val Name: String, val Symbol: String, val Place: Int, val Platform: String,
-             val MarketCap: String, val CurrentPrice: String, val Change: String, val TimeFrame: String) : Parcelable {
+             val MarketCap: String, val CurrentPrice: String, val HrChange: String, val TwoChange: String, val SevenChange: String, val Volume: String) : Parcelable {
     constructor(parcel: Parcel) : this(
             parcel.readString(),
             parcel.readString(),
             parcel.readInt(),
+            parcel.readString(),
+            parcel.readString(),
             parcel.readString(),
             parcel.readString(),
             parcel.readString(),
@@ -26,8 +28,10 @@ class Tokens(val Name: String, val Symbol: String, val Place: Int, val Platform:
         parcel.writeString(Platform)
         parcel.writeString(MarketCap)
         parcel.writeString(CurrentPrice)
-        parcel.writeString(Change)
-        parcel.writeString(TimeFrame)
+        parcel.writeString(HrChange)
+        parcel.writeString(TwoChange)
+        parcel.writeString(SevenChange)
+        parcel.writeString(Volume)
     }
 
     override fun describeContents(): Int {
@@ -35,6 +39,10 @@ class Tokens(val Name: String, val Symbol: String, val Place: Int, val Platform:
     }
 
     companion object CREATOR : Parcelable.Creator<Tokens> {
+        var SortMethod: String = ""
+        var TimeFrame: String = ""
+        var Order: String = "Ascending"
+
         override fun createFromParcel(parcel: Parcel): Tokens {
             return Tokens(parcel)
         }
@@ -43,4 +51,5 @@ class Tokens(val Name: String, val Symbol: String, val Place: Int, val Platform:
             return arrayOfNulls(size)
         }
     }
+
 }
