@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/RefreshLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.andyisdope.cryptowatcher.MainActivity">
@@ -17,10 +18,10 @@
             android:id="@+id/CTlist"
             android:layout_width="400dp"
             android:layout_height="300dp"
-            android:theme="@style/TabStyle"
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true">
+            android:layout_alignParentTop="true"
+            android:theme="@style/TabStyle">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -66,5 +67,4 @@
     </RelativeLayout>
 
 
-
-</android.support.v4.widget.DrawerLayout>
+</android.support.v4.widget.SwipeRefreshLayout>
