@@ -6,12 +6,14 @@ import android.os.Parcelable
 /**
  * Created by Andy on 1/18/2018.
  */
-data class Currency(val Name: String, val Symbol: String, val Place: Int,
+data class Currency(val Name: String, val Symbol: String, val Place: Int, var isFavorite: Boolean, var Num: Double,
                     val MarketCap: String, val CurrentPrice: String, val HrChange: String, val TwoChange: String, val SevenChange: String, val Volume: String) : Parcelable {
     constructor(parcel: Parcel) : this(
             parcel.readString(),
             parcel.readString(),
             parcel.readInt(),
+            parcel.readByte() != 0.toByte(),
+            parcel.readDouble(),
             parcel.readString(),
             parcel.readString(),
             parcel.readString(),
@@ -24,6 +26,8 @@ data class Currency(val Name: String, val Symbol: String, val Place: Int,
         parcel.writeString(Name)
         parcel.writeString(Symbol)
         parcel.writeInt(Place)
+        parcel.writeByte(if (isFavorite) 1 else 0)
+        parcel.writeDouble(Num)
         parcel.writeString(MarketCap)
         parcel.writeString(CurrentPrice)
         parcel.writeString(HrChange)
@@ -38,9 +42,9 @@ data class Currency(val Name: String, val Symbol: String, val Place: Int,
 
     companion object CREATOR : Parcelable.Creator<Currency> {
 
-        var SortMethod: String = ""
-        var TimeFrame: String = ""
-        var Order: String = "Ascending"
+        var SortMethod: String = "Place"
+        var TimeFrame = "Hourly"
+        var Order = "Ascending"
 
         override fun createFromParcel(parcel: Parcel): Currency {
             return Currency(parcel)
