@@ -3,18 +3,20 @@ package com.andyisdope.cryptowatcher.Adapters
 /**
  * Created by Andy on 1/19/2018.
  */
+import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.preference.PreferenceManager
+import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
+import android.text.InputType
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import com.andyisdope.cryptowatch.Currency
 import com.andyisdope.cryptowatcher.R
 import com.squareup.picasso.Picasso
@@ -30,6 +32,10 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
     private val Data_Base_URL = "https://api.cryptowat.ch"
     var formatterLarge: NumberFormat = DecimalFormat("#,###.00000")
     var formatterSmall: NumberFormat = DecimalFormat("#0.00000")
+    val sharedPref = (mContext as Activity).getPreferences(Context.MODE_PRIVATE)
+    val settings = PreferenceManager.getDefaultSharedPreferences(mContext)
+
+
 
 
     override fun getItemCount(): Int {
@@ -40,7 +46,6 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        val settings = PreferenceManager.getDefaultSharedPreferences(mContext)
         prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key -> Log.i("preferences", "onSharedPreferenceChanged: " + key) }
         settings.registerOnSharedPreferenceChangeListener(prefsListener)
 
@@ -49,6 +54,26 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
         val inflater = LayoutInflater.from(mContext)
         val itemView = inflater.inflate(layoutId, parent, false)
         return ViewHolder(itemView)
+    }
+
+    fun createFavoriteDialog() {
+        var builder = AlertDialog.Builder(mContext)
+        var stack = EditText(mContext)
+        stack.inputType = InputType.TYPE_CLASS_NUMBER
+        builder.setMessage("Enter an initial amount of coins to add to portfolio")
+                .setView(stack)
+                .setCancelable(false)
+                .setPositiveButton("Add Coins", { dialog: DialogInterface, id: Int ->
+                    if (stack.text.toString().toDouble() >= 0)
+                        Toast.makeText(mContext, "Added ${stack.text.toString().toDouble()} coins", Toast.LENGTH_SHORT).show()
+                    else {
+                        Toast.makeText(mContext, "Invalid entry", Toast.LENGTH_SHORT).show()
+                        dialog.cancel()
+                    }
+                })
+                .setNegativeButton("Cancel", { dialog: DialogInterface, id: Int -> dialog.cancel() })
+        var alert = builder.create()
+        alert.show()
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -69,11 +94,11 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
                         }
                         item.HrChange.toDouble() <= 0 -> {
                             holder.tickerChange.setTextColor(Color.RED)
-                            holder.tickerChange.text = "% ${item.HrChange.toDouble()}"
+                            holder.tickerChange.text = "${item.HrChange.toDouble()}%"
                         }
                         item.HrChange.toDouble() > 0 -> {
                             holder.tickerChange.setTextColor(Color.GREEN)
-                            holder.tickerChange.text = "% ${item.HrChange.toDouble()}"
+                            holder.tickerChange.text = "+${item.HrChange.toDouble()}%"
                         }
                     }
                 }
@@ -85,11 +110,11 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
                         }
                         item.TwoChange.toDouble() <= 0 -> {
                             holder.tickerChange.setTextColor(Color.RED)
-                            holder.tickerChange.text = "% ${item.TwoChange.toDouble()}"
+                            holder.tickerChange.text = "${item.TwoChange.toDouble()}%"
                         }
                         item.TwoChange.toDouble() > 0 -> {
                             holder.tickerChange.setTextColor(Color.GREEN)
-                            holder.tickerChange.text = "% ${item.TwoChange.toDouble()}"
+                            holder.tickerChange.text = "+${item.TwoChange.toDouble()}%"
                         }
                     }
                 }
@@ -101,16 +126,17 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
                         }
                         item.SevenChange.toDouble() <= 0 -> {
                             holder.tickerChange.setTextColor(Color.RED)
-                            holder.tickerChange.text = "% ${item.SevenChange.toDouble()}"
+                            holder.tickerChange.text = "${item.SevenChange.toDouble()}%"
                         }
                         item.SevenChange.toDouble() > 0 -> {
                             holder.tickerChange.setTextColor(Color.GREEN)
-                            holder.tickerChange.text = "% ${item.SevenChange.toDouble()}"
+                            holder.tickerChange.text = "+${item.SevenChange.toDouble()}%"
                         }
                     }
                 }
             }
 
+            holder.isFavourite.isChecked = item.isFavorite
             holder.tickerSymbol.text = "(" + item.Symbol + ")"
             holder.tickerPrice.text = "$ ${formatterSmall.format(item.CurrentPrice.toDouble())}"
             holder.tickerPlace.text = "" + item.Place
@@ -146,9 +172,23 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
             //mContext.startActivity(intent)
         }
 
+        holder.isFavourite.setOnClickListener({
+            if(holder.isFavourite.isChecked)
+                with(sharedPref.edit()){
+                    putString(item.Name, "${item.Num}")
+                    commit()
+                    Toast.makeText(mContext, "Favorited ${item.Name} refresh to view changes",Toast.LENGTH_SHORT).show()
+                }
+            else
+                with(sharedPref.edit()){
+                    remove(item.Name)
+                    commit()
+                    Toast.makeText(mContext, "Unfavorited ${item.Name} refresh to view changes",Toast.LENGTH_SHORT).show()
+                }
+        })
+
         holder.mView.setOnLongClickListener {
-            Toast.makeText(mContext, "You long clicked " + item.Name,
-                    Toast.LENGTH_SHORT).show()
+            Toast.makeText(mContext, "You long clicked " + item.Name,Toast.LENGTH_SHORT).show()
             false
         }
     }
@@ -164,6 +204,7 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
         var tickerName: TextView
         var Platform: TextView
         var tickerVolume: TextView
+        var isFavourite: CheckBox
 
         init {
 
@@ -176,6 +217,7 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
             tickerName = mView.findViewById<TextView>(R.id.tickerName) as TextView
             Platform = mView.findViewById<TextView>(R.id.Platform) as TextView
             tickerVolume = mView.findViewById<TextView>(R.id.tickerVolume) as TextView
+            isFavourite = mView.findViewById<CheckBox>(R.id.checkFavorite) as CheckBox
 
         }
     }

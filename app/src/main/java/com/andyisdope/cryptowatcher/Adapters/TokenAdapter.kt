@@ -3,6 +3,7 @@ package com.andyisdope.cryptowatcher.Adapters
 /**
  * Created by Andy on 1/19/2018.
  */
+import android.app.Activity
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
@@ -12,6 +13,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -30,6 +32,8 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
     private val Data_Base_URL = "https://api.cryptowat.ch"
     var formatterLarge: NumberFormat = DecimalFormat("#,###.00000")
     var formatterSmall: NumberFormat = DecimalFormat("#0.00000")
+    val sharedPref = (mContext as Activity).getPreferences(Context.MODE_PRIVATE)
+
 
     override fun getItemCount(): Int {
         return mItems.size
@@ -68,11 +72,11 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
                         }
                         item.HrChange.toDouble() <= 0 -> {
                             holder.tickerChange.setTextColor(Color.RED)
-                            holder.tickerChange.text = "% ${item.HrChange.toDouble()}"
+                            holder.tickerChange.text = "${item.HrChange.toDouble()}%"
                         }
                         item.HrChange.toDouble() > 0 -> {
                             holder.tickerChange.setTextColor(Color.GREEN)
-                            holder.tickerChange.text = "% ${item.HrChange.toDouble()}"
+                            holder.tickerChange.text = "+${item.HrChange.toDouble()}%"
                         }
                     }
                 }
@@ -84,11 +88,11 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
                         }
                         item.TwoChange.toDouble() <= 0 -> {
                             holder.tickerChange.setTextColor(Color.RED)
-                            holder.tickerChange.text = "% ${item.TwoChange.toDouble()}"
+                            holder.tickerChange.text = "${item.TwoChange.toDouble()}%"
                         }
                         item.TwoChange.toDouble() > 0 -> {
                             holder.tickerChange.setTextColor(Color.GREEN)
-                            holder.tickerChange.text = "% ${item.TwoChange.toDouble()}"
+                            holder.tickerChange.text = "+${item.TwoChange.toDouble()}%"
                         }
                     }
                 }
@@ -100,17 +104,17 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
                         }
                         item.SevenChange.toDouble() <= 0 -> {
                             holder.tickerChange.setTextColor(Color.RED)
-                            holder.tickerChange.text = "% ${item.SevenChange.toDouble()}"
+                            holder.tickerChange.text = "${item.SevenChange.toDouble()}%"
                         }
                         item.SevenChange.toDouble() > 0 -> {
                             holder.tickerChange.setTextColor(Color.GREEN)
-                            holder.tickerChange.text = "% ${item.SevenChange.toDouble()}"
+                            holder.tickerChange.text = "+${item.SevenChange.toDouble()}%"
                         }
                     }
                 }
             }
 
-
+            holder.isFavourite.isChecked = item.isFavorite
             holder.tickerSymbol.text = "(" + item.Symbol + ")"
             holder.tickerPrice.text = "$ ${formatterSmall.format(item.CurrentPrice.toDouble())}"
             holder.tickerPlace.text = "" + item.Place
@@ -132,6 +136,21 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
         } catch (e: IOException) {
             e.printStackTrace()
         }
+
+        holder.isFavourite.setOnClickListener({
+            if(holder.isFavourite.isChecked)
+                with(sharedPref.edit()){
+                    putString(item.Name, "${item.Num}")
+                    commit()
+                    Toast.makeText(mContext, "Favorited ${item.Name} refresh to view changes",Toast.LENGTH_SHORT).show()
+                }
+            else
+                with(sharedPref.edit()){
+                    remove(item.Name)
+                    commit()
+                    Toast.makeText(mContext, "Unfavorited ${item.Name} refresh to view changes",Toast.LENGTH_SHORT).show()
+                }
+        })
 
         holder.mView.setOnClickListener {
             //create activity for a single ticker with different viewports
@@ -161,6 +180,7 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
         var tickerName: TextView
         var Platform: TextView
         var tickerVolume: TextView
+        var isFavourite: CheckBox
 
         init {
 
@@ -173,7 +193,7 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
             tickerName = mView.findViewById<TextView>(R.id.tickerName) as TextView
             Platform = mView.findViewById<TextView>(R.id.Platform) as TextView
             tickerVolume = mView.findViewById<TextView>(R.id.tickerVolume) as TextView
-
+            isFavourite = mView.findViewById<CheckBox>(R.id.checkFavorite) as CheckBox
         }
     }
 
