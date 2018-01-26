@@ -157,17 +157,17 @@ class MainActivity : AppCompatActivity() {
         LocalBroadcastManager.getInstance(applicationContext)
                 .registerReceiver(mBroadcastReceiver,
                         IntentFilter(DataService.COINS))
-        requestData("https://coinmarketcap.com/coins/views/all/")
+        requestData("Coins")
 
         LocalBroadcastManager.getInstance(applicationContext)
                 .registerReceiver(mBroadcastReceiver2,
                         IntentFilter(DataService.TOKENS))
-        requestData("https://coinmarketcap.com/tokens/views/all/")
+        requestData("Tokens")
 
 
         Refresh!!.setOnRefreshListener {
-            requestData("https://coinmarketcap.com/coins/views/all/")
-            requestData("https://coinmarketcap.com/tokens/views/all/")
+            requestData("Coins")
+            requestData("Tokens")
         }
     }
 
