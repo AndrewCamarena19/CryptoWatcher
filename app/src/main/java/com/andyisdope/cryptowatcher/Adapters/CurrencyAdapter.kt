@@ -6,6 +6,7 @@ package com.andyisdope.cryptowatcher.Adapters
 import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.preference.PreferenceManager
@@ -18,6 +19,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.andyisdope.cryptowatch.Currency
+import com.andyisdope.cryptowatcher.CurrencyDetail
 import com.andyisdope.cryptowatcher.R
 import com.squareup.picasso.Picasso
 
@@ -188,7 +190,8 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
         })
 
         holder.mView.setOnLongClickListener {
-            Toast.makeText(mContext, "You long clicked " + item.Name,Toast.LENGTH_SHORT).show()
+            var intent: Intent = Intent(mContext, CurrencyDetail::class.java)
+            mContext.startActivity(intent)
             false
         }
     }
