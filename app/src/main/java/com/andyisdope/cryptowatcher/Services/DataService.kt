@@ -41,21 +41,30 @@ class DataService : IntentService("DataService") {
                 manager.sendBroadcast(messageIntent)
             }
 
-            "https://coinmarketcap.com/tokens/views/all/" ->
+            "Tokens" ->
             {
-                val call = webService.getInitial(intent.getStringExtra("Path"))
+                val call = webService.getInitial("https://coinmarketcap.com/tokens/views/all/")
                 val resp = call.execute().body()
                 val messageIntent = Intent(TOKENS)
                 messageIntent.putExtra(MY_SERVICE_PAYLOAD, resp)
                 val manager = LocalBroadcastManager.getInstance(applicationContext)
                 manager.sendBroadcast(messageIntent)
             }
+            "Coins"->
+            {
+                val call = webService.getInitial("https://coinmarketcap.com/coins/views/all/" )
+                val resp = call.execute().body()
+                val messageIntent = Intent(COINS)
+                messageIntent.putExtra(MY_SERVICE_PAYLOAD, resp)
+                val manager = LocalBroadcastManager.getInstance(applicationContext)
+                manager.sendBroadcast(messageIntent)
+            }
 
-            "https://coinmarketcap.com/coins/views/all/" ->
+            else ->
             {
                 val call = webService.getInitial(intent.getStringExtra("Path"))
                 val resp = call.execute().body()
-                val messageIntent = Intent(COINS)
+                val messageIntent = Intent(Currency)
                 messageIntent.putExtra(MY_SERVICE_PAYLOAD, resp)
                 val manager = LocalBroadcastManager.getInstance(applicationContext)
                 manager.sendBroadcast(messageIntent)
@@ -80,6 +89,7 @@ class DataService : IntentService("DataService") {
         val TAG = "DataService"
         val TOKENS = "TOKENS"
         val COINS = "COINS"
+        val Currency = "Currency"
         val MY_SERVICE_PAYLOAD = "DataPayload"
     }
 
