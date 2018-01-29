@@ -86,7 +86,8 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
             //val d = Drawable.createFromStream(inputStream, null)
             //holder.tickerImage.setImageDrawable(d)
             var url = Image_Base_URL.plus(item.Symbol.toUpperCase()).plus(".png?raw=true")
-            Picasso.with(mContext).load(url).error(R.drawable.cream).into(holder.tickerImage)
+            Picasso.with(mContext).load(url)
+                    .error(R.drawable.cream).into(holder.tickerImage)
             when (Currency.TimeFrame) {
                 "Hourly" -> {
                     when {
@@ -140,7 +141,7 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
 
             holder.isFavourite.isChecked = item.isFavorite
             holder.tickerSymbol.text = "(" + item.Symbol + ")"
-            holder.tickerPrice.text = "$ ${formatterSmall.format(item.CurrentPrice.toDouble())}"
+            holder.tickerPrice.text = "$ ${formatterLarge.format(item.CurrentPrice.toDouble())}"
             holder.tickerPlace.text = "" + item.Place
             holder.tickerName.text = item.Name.toUpperCase()
             holder.Platform.text = item.Symbol
@@ -191,6 +192,7 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
 
         holder.mView.setOnLongClickListener {
             var intent: Intent = Intent(mContext, CurrencyDetail::class.java)
+            intent.putExtra("Currency", item.Name)
             mContext.startActivity(intent)
             false
         }
