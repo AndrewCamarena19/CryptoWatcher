@@ -5,6 +5,7 @@ package com.andyisdope.cryptowatcher.Adapters
  */
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.preference.PreferenceManager
@@ -17,6 +18,7 @@ import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import com.andyisdope.cryptowatcher.CurrencyDetail
 import com.andyisdope.cryptowatcher.R
 import com.andyisdope.cryptowatcher.model.Tokens
 import com.squareup.picasso.Picasso
@@ -116,7 +118,7 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
 
             holder.isFavourite.isChecked = item.isFavorite
             holder.tickerSymbol.text = "(" + item.Symbol + ")"
-            holder.tickerPrice.text = "$ ${formatterSmall.format(item.CurrentPrice.toDouble())}"
+            holder.tickerPrice.text = "$ ${formatterLarge.format(item.CurrentPrice.toDouble())}"
             holder.tickerPlace.text = "" + item.Place
             holder.tickerName.text = item.Name.toUpperCase()
             holder.Platform.text = item.Platform
@@ -163,8 +165,9 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
         }
 
         holder.mView.setOnLongClickListener {
-            Toast.makeText(mContext, "You long clicked " + item.Name,
-                    Toast.LENGTH_SHORT).show()
+            var intent: Intent = Intent(mContext, CurrencyDetail::class.java)
+            intent.putExtra("Currency", item.Name)
+            mContext.startActivity(intent)
             false
         }
     }
