@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">CryptoWatcher</string>
     <string name="searchiconaction">searchIconAction</string>
+    <string name="togglebutton">ToggleButton</string>
+    <string name="_30">30</string>
+    <string name="_90">90</string>
+    <string name="_180">180</string>
+    <string name="year">Year</string>
     <string-array name="Time">
         <item>Hourly</item>
         <item>Daily</item>
