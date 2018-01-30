@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.preference.PreferenceManager
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.text.InputType
@@ -88,6 +89,7 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
             var url = Image_Base_URL.plus(item.Symbol.toUpperCase()).plus(".png?raw=true")
             Picasso.with(mContext).load(url)
                     .error(R.drawable.cream).into(holder.tickerImage)
+            holder.tickerImage.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorPrimaryDark))
             when (Currency.TimeFrame) {
                 "Hourly" -> {
                     when {

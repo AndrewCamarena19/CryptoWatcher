@@ -26,7 +26,8 @@
             android:name=".Services.DataService"
             android:exported="false" />
 
-        <activity android:name=".CurrencyDetail"></activity>
+        <activity android:name=".CurrencyDetail" />
+
     </application>
 
 </manifest>

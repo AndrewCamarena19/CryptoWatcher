@@ -42,16 +42,16 @@ class CurrencyDetail : AppCompatActivity() {
     private var EMA26: ArrayList<Float> = ArrayList()
     private var MACD: ArrayList<Float> = ArrayList()
     private var Histo: ArrayList<Float> = ArrayList()
-    private var mCombined: CombinedChart? = null
-    private var mBar: BarChart? = null
-    private var mCandle: CandleStickChart? = null
-    private var response: String? = ""
-    private var CurrencyDeets: ArrayList<CurrencyDetails>? = ArrayList()
-    private var entry: TextView? = null
-    private var time: TextView? = null
-    private var xValues: ArrayList<String>? = ArrayList()
-    var formatterLarge: NumberFormat = DecimalFormat("#,###.00")
-    private var sigData: LineDataSet? = null
+    private var CurrencyDeets: ArrayList<CurrencyDetails> = ArrayList()
+    private lateinit var response: String
+    private lateinit var entry: TextView
+    private lateinit var time: TextView
+    private lateinit var sigData: LineDataSet
+    private lateinit var mCombined: CombinedChart
+    private lateinit var mBar: BarChart
+    private lateinit var mCandle: CandleStickChart
+    private var xValues: ArrayList<String> = ArrayList()
+    private val formatterLarge: NumberFormat = DecimalFormat("#,###.00")
 
     private val mBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -70,11 +70,12 @@ class CurrencyDetail : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_currency_detail)
-        var c: Calendar = Calendar.getInstance()
-        var df: SimpleDateFormat = SimpleDateFormat("yyyyMMdd")
-        var today: Int = df.format(c.time).toInt()
-        var start: Int = today - 10000
-        var curr: String = intent.getStringExtra("Currency")
+        val c: Calendar = Calendar.getInstance()
+        val df: SimpleDateFormat = SimpleDateFormat("yyyyMMdd")
+        val today: Int = df.format(c.time).toInt()
+        val start: Int = today - 10000
+        val curr: String = intent.getStringExtra("Currency")
+
         title = "${curr.toUpperCase()}"
         entry = findViewById<TextView>(R.id.CurrencyPrice) as TextView
         time = findViewById<TextView>(R.id.PriceTime) as TextView
@@ -120,63 +121,55 @@ class CurrencyDetail : AppCompatActivity() {
 
     private fun initCombined(count: Int) {
         mCombined = findViewById<CombinedChart>(R.id.MACD) as CombinedChart
-        mCombined!!.drawOrder = arrayOf(DrawOrder.BAR, DrawOrder.LINE)!!
-        val keylistener = object : OnChartValueSelectedListener {
-            override fun onValueSelected(e: Entry?, h: Highlight?) {
-                entry!!.text = "MACD: ${formatterLarge.format(MACD!![e!!.x.toInt()].toDouble())}," +
-                        "S: ${formatterLarge.format(Signal!![e.x.toInt()])}," +
-                        "H: ${formatterLarge.format(Histo!![e.x.toInt()])}"
+        mCombined.drawOrder = arrayOf(DrawOrder.BAR, DrawOrder.LINE)
 
-                time!!.text = "${CurrencyDeets!![e!!.x.toInt() + (CurrencyDeets!!.size - 1 - count)].Date}"
+        val keylistener = object : OnChartValueSelectedListener {
+            override fun onValueSelected(e: Entry, h: Highlight) {
+                entry.text = "MACD: ${formatterLarge.format(MACD[e.x.toInt()].toDouble())}," +
+                        "S: ${formatterLarge.format(Signal[e.x.toInt()])}," +
+                        "H: ${formatterLarge.format(Histo[e.x.toInt()])}"
+
+                time.text = "${CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Date}"
             }
 
             override fun onNothingSelected() {
-                entry!!.text = ""
-                time!!.text = ""
+                entry.text = ""
+                time.text = ""
             }
 
         }
 
-        mCombined!!.setOnChartValueSelectedListener(keylistener)
+        mCombined.setOnChartValueSelectedListener(keylistener)
         initCombinedChart(count)
     }
 
     private fun initCombinedChart(count: Int) {
-        //mCandle!!.setMaxVisibleValueCount(365)
+        mCombined.setPinchZoom(false)
+        mCombined.setDrawGridBackground(false)
 
-        // scaling can now only be done on x- and y-axis separately
-        mCombined!!.setPinchZoom(false)
-        mCombined!!.setDrawGridBackground(false)
-
-        var xAxis: XAxis = mCombined!!.xAxis
+        var xAxis: XAxis = mCombined.xAxis
         xAxis.isEnabled = true
         xAxis.textColor = Color.WHITE
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.granularity = 7f // only intervals of 1 day
         xAxis.setValueFormatter({ value, axis ->
-            xValues!![(value % xValues!!.size).toInt()]
+            xValues[(value % xValues.size).toInt()]
         })
 
 
-        var leftAxis: YAxis = mCombined!!.axisRight
-//        leftAxis.setEnabled(false);
-        leftAxis.setLabelCount(7, false)
-        leftAxis.setDrawGridLines(true)
-        leftAxis.setDrawAxisLine(true)
-        leftAxis.textColor = Color.WHITE
+        var rightAxis: YAxis = mCombined.axisRight
+        rightAxis.setLabelCount(7, false)
+        rightAxis.setDrawGridLines(true)
+        rightAxis.setDrawAxisLine(true)
+        rightAxis.textColor = Color.WHITE
 
-        var rightAxis: YAxis = mCombined!!.axisLeft
-        rightAxis.isEnabled = false
-//        rightAxis.setStartAtZero(false);
+        var leftAxis: YAxis = mCombined.axisLeft
+        leftAxis.isEnabled = false
 
-        // setting data
-        //mSeekBarX.setProgress(40)
-        //mSeekBarY.setProgress(100)
-
-        mCombined!!.legend.isEnabled = false
-        mCombined!!.description.isEnabled = false
+        mCombined.legend.isEnabled = false
+        mCombined.description.isEnabled = false
         setCombinedData(count)
-        mCombined!!.setVisibleXRangeMaximum(20f)
+        mCombined.setVisibleXRangeMaximum(20f)
 
     }
 
@@ -189,26 +182,25 @@ class CurrencyDetail : AppCompatActivity() {
 
         data.setData(generateMacD(count))
         data.setData(generateHistogram(count))
-        mCombined!!.xAxis.axisMaximum = data.xMax
-        mCombined!!.data = data
-        mCombined!!.invalidate()
+        mCombined.xAxis.axisMaximum = data.xMax
+        mCombined.data = data
+        mCombined.invalidate()
     }
 
     private fun generateEMA(count: Int, EMA: Int, toAdd: ArrayList<Float>) {
         //{Close - EMA(previous day)} x multiplier + EMA(previous day)
-        var size = CurrencyDeets!!.size - 1
+        var size = CurrencyDeets.size - 1
         var e = 1
         var sum = 0.0f
         while (e <= EMA) {
-            sum += CurrencyDeets!![e + (size - count - EMA)].Close.toFloat()
+            sum += CurrencyDeets[e + (size - count - EMA)].Close.toFloat()
             e++
         }
         var mult = 2 / (EMA + 1).toFloat()
         var i = 0
         toAdd.add(i, sum / EMA)
         while (i <= count) {
-            toAdd.add(i + 1, (CurrencyDeets!![i + (size - count)]!!.Close.toFloat() - toAdd[i]) * mult + toAdd[i])
-            //Log.i("EMA", "${(CurrencyDeets!![i + (size - count)]!!.Date)}: ${toAdd[i]}")
+            toAdd.add(i + 1, (CurrencyDeets[i + (size - count)].Close.toFloat() - toAdd[i]) * mult + toAdd[i])
             i++
         }
 
@@ -237,18 +229,18 @@ class CurrencyDetail : AppCompatActivity() {
 
     private fun generateSignalData(count: Int, EMA: Int, toAdd: ArrayList<Float>) {
         //{Close - EMA(previous day)} x multiplier + EMA(previous day)
-        var size = MACD!!.size - 1
+        var size = MACD.size - 1
         var e = 1
         var sum = 0.0f
         while (e <= EMA) {
-            sum += MACD!![e]
+            sum += MACD[e]
             e++
         }
         var mult = 2 / (EMA + 1).toFloat()
         var i = 0
         toAdd.add(i, sum / EMA)
         while (i <= count) {
-            toAdd.add(i + 1, (MACD!![i + (size - count)]!! - toAdd[i]) * mult + toAdd[i])
+            toAdd.add(i + 1, (MACD[i + (size - count)] - toAdd[i]) * mult + toAdd[i])
             i++
         }
     }
@@ -297,62 +289,62 @@ class CurrencyDetail : AppCompatActivity() {
         }
 
         sigData = LineDataSet(entries, "Line")
-        sigData!!.setColor(Color.RED)
-        sigData!!.setLineWidth(.5f)
-        sigData!!.setMode(LineDataSet.Mode.CUBIC_BEZIER)
-        sigData!!.valueTextSize = 0f
-        sigData!!.setAxisDependency(YAxis.AxisDependency.LEFT)
+        sigData.setColor(Color.RED)
+        sigData.setLineWidth(.5f)
+        sigData.setMode(LineDataSet.Mode.CUBIC_BEZIER)
+        sigData.valueTextSize = 0f
+        sigData.setAxisDependency(YAxis.AxisDependency.LEFT)
 
     }
 
     private fun initCandle(count: Int) {
         mCandle = findViewById<CandleStickChart>(R.id.CurrencyChart) as CandleStickChart
         val keylistener = object : OnChartValueSelectedListener {
-            override fun onValueSelected(e: Entry?, h: Highlight?) {
-                entry!!.text = "O:${formatterLarge.format(CurrencyDeets!![e!!.x.toInt() + (CurrencyDeets!!.size - 1 - count)].Open.toDouble())}," +
-                        " C:${formatterLarge.format(CurrencyDeets!![e.x.toInt() + (CurrencyDeets!!.size - 1 - count)].Close.toDouble())}" +
-                        ", L:${formatterLarge.format(CurrencyDeets!![e.x.toInt() + (CurrencyDeets!!.size - 1 - count)].Low.toDouble())}"
+            override fun onValueSelected(e: Entry, h: Highlight) {
+                entry.text = "O:${formatterLarge.format(CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Open.toDouble())}," +
+                        " C:${formatterLarge.format(CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Close.toDouble())}" +
+                        ", L:${formatterLarge.format(CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Low.toDouble())}"
 
-                time!!.text = "${CurrencyDeets!![e.x.toInt() + (CurrencyDeets!!.size - 1 - count)].Date}"
+                time.text = "${CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Date}"
             }
 
             override fun onNothingSelected() {
-                entry!!.text = ""
-                time!!.text = ""
+                entry.text = ""
+                time.text = ""
             }
 
         }
 
-        mCandle!!.setOnChartValueSelectedListener(keylistener)
+        mCandle.setOnChartValueSelectedListener(keylistener)
         initCandleChart(count)
 
     }
 
     fun initCandleChart(count: Int) {
-        //mCandle!!.setMaxVisibleValueCount(365)
+        //mCandle.setMaxVisibleValueCount(365)
 
         // scaling can now only be done on x- and y-axis separately
-        mCandle!!.setPinchZoom(false)
-        mCandle!!.setDrawGridBackground(false)
+        mCandle.setPinchZoom(false)
+        mCandle.setDrawGridBackground(false)
 
-        var xAxis: XAxis = mCandle!!.xAxis
+        var xAxis: XAxis = mCandle.xAxis
         xAxis.isEnabled = true
         xAxis.textColor = Color.WHITE
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.granularity = 7f // only intervals of 1 day
         xAxis.setValueFormatter({ value, axis ->
-            xValues!![(value % xValues!!.size).toInt()]
+            xValues[(value % xValues.size).toInt()]
         })
 
 
-        var leftAxis: YAxis = mCandle!!.axisRight
+        var leftAxis: YAxis = mCandle.axisRight
 //        leftAxis.setEnabled(false);
         leftAxis.setLabelCount(7, false)
         leftAxis.setDrawGridLines(true)
         leftAxis.setDrawAxisLine(true)
         leftAxis.textColor = Color.WHITE
 
-        var rightAxis: YAxis = mCandle!!.axisLeft
+        var rightAxis: YAxis = mCandle.axisLeft
         rightAxis.isEnabled = false
 //        rightAxis.setStartAtZero(false);
 
@@ -360,10 +352,10 @@ class CurrencyDetail : AppCompatActivity() {
         //mSeekBarX.setProgress(40)
         //mSeekBarY.setProgress(100)
 
-        mCandle!!.legend.isEnabled = false
-        mCandle!!.description.isEnabled = false
+        mCandle.legend.isEnabled = false
+        mCandle.description.isEnabled = false
         setCandleData(count)
-        mCandle!!.setVisibleXRangeMaximum(20f)
+        mCandle.setVisibleXRangeMaximum(20f)
 
     }
 
@@ -371,19 +363,19 @@ class CurrencyDetail : AppCompatActivity() {
 
         //var prog = (mSeekBarX.getProgress() + 1)
 
-        //entry!!.text = "" +
-        //time!!.text = "" + (mSeekBarY.getProgress())
+        //entry.text = "" +
+        //time.text = "" + (mSeekBarY.getProgress())
 
-        mCandle!!.resetTracking()
-        var size: Int = CurrencyDeets!!.size - 1
+        mCandle.resetTracking()
+        var size: Int = CurrencyDeets.size - 1
         var yVals1: ArrayList<CandleEntry> = ArrayList()
         var i = 0
         while (i <= count) {
             yVals1.add(CandleEntry(
-                    i.toFloat(), CurrencyDeets!![i + (size - count)].High.toFloat(),
-                    CurrencyDeets!![i + (size - count)].Low.toFloat(),
-                    CurrencyDeets!![i + (size - count)].Open.toFloat(),
-                    CurrencyDeets!![i + (size - count)].Close.toFloat()
+                    i.toFloat(), CurrencyDeets[i + (size - count)].High.toFloat(),
+                    CurrencyDeets[i + (size - count)].Low.toFloat(),
+                    CurrencyDeets[i + (size - count)].Open.toFloat(),
+                    CurrencyDeets[i + (size - count)].Close.toFloat()
             ))
             i++
         }
@@ -406,87 +398,87 @@ class CurrencyDetail : AppCompatActivity() {
 
         var data = CandleData(set1)
 
-        mCandle!!.data = data
-        mCandle!!.invalidate()
+        mCandle.data = data
+        mCandle.invalidate()
     }
 
     private fun initBar(count: Int) {
         mBar = findViewById<BarChart>(R.id.VolumeChart) as BarChart
         val keylistener = object : OnChartValueSelectedListener {
-            override fun onValueSelected(e: Entry?, h: Highlight?) {
-                entry!!.text = "Volume: ${formatterLarge.format(e!!.y)} M"
-                time!!.text = "${CurrencyDeets!![e.x.toInt() + (CurrencyDeets!!.size - 1 - count)].Date}"
+            override fun onValueSelected(e: Entry, h: Highlight) {
+                entry.text = "Volume: ${formatterLarge.format(e.y)} M"
+                time.text = "${CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Date}"
             }
 
             override fun onNothingSelected() {
-                entry!!.text = ""
-                time!!.text = ""
+                entry.text = ""
+                time.text = ""
             }
 
         }
-        mBar!!.setOnChartValueSelectedListener(keylistener)
+        mBar.setOnChartValueSelectedListener(keylistener)
         initBarChart(count)
     }
 
     fun initBarChart(count: Int) {
         var i = 0
-        var size = CurrencyDeets!!.size - 1
+        var size = CurrencyDeets.size - 1
         while (i <= count) {
-            val value = CurrencyDeets!![i + (size - count)].Date
-            xValues!!.add(value)
+            val value = CurrencyDeets[i + (size - count)].Date
+            xValues.add(value)
             i++
         }
-        //xValues!!.add(parseUnix(it.Date.toLong()))
+        //xValues.add(parseUnix(it.Date.toLong()))
 
-        mBar!!.setDrawBarShadow(false)
-        mBar!!.setDrawValueAboveBar(false)
-        mBar!!.description.isEnabled = false
+        mBar.setDrawBarShadow(false)
+        mBar.setDrawValueAboveBar(false)
+        mBar.description.isEnabled = false
 
         // if more than 60 entries are displayed in the chart, no values will be
         // drawn
-        mBar!!.setMaxVisibleValueCount(365)
+        mBar.setMaxVisibleValueCount(365)
 
         // scaling can now only be done on x- and y-axis separately
-        mBar!!.setPinchZoom(false)
+        mBar.setPinchZoom(false)
 
-        mBar!!.setDrawGridBackground(false)
-        // mBar!!setDrawYLabels(false)
+        mBar.setDrawGridBackground(false)
+        // mBarsetDrawYLabels(false)
 
 
-        var xAxis: XAxis = mBar!!.xAxis
+        var xAxis: XAxis = mBar.xAxis
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.setDrawGridLines(true)
-        mBar!!.xAxis.setDrawLabels(true)
-        mBar!!.xAxis.setDrawAxisLine(true)
+        mBar.xAxis.setDrawLabels(true)
+        mBar.xAxis.setDrawAxisLine(true)
         xAxis.granularity = 7f // only intervals of 1 day
         xAxis.labelCount = 7
         xAxis.setValueFormatter({ value, axis ->
-            xValues!![(value % xValues!!.size).toInt()]
+            xValues[(value % xValues.size).toInt()]
         })
         xAxis.textColor = Color.WHITE
         xAxis.isEnabled = true
 
 
-        //var leftAxis: YAxis = mBar!!.axisLeft
+        //var leftAxis: YAxis = mBar.axisLeft
         //leftAxis.setLabelCount(8, false)
         //leftAxis.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART)
         //leftAxis.spaceTop = 15f
         //leftAxis.axisMinimum = 0f // this replaces setStartAtZero(true)
-//        var leftAxis: YAxis = mBar!!.axisLeft
+//        var leftAxis: YAxis = mBar.axisLeft
 //        leftAxis.setDrawGridLines(false)
 //        leftAxis.setLabelCount(7, false)
 //        leftAxis.spaceTop = 0f
 //        leftAxis.axisMinimum = 0f // this replaces setStartAtZero(true)
 //        leftAxis.textColor = Color.WHITE
 
-        var rightAxis: YAxis = mBar!!.axisRight
+        var rightAxis: YAxis = mBar.axisRight
         rightAxis.setDrawGridLines(true)
         rightAxis.setLabelCount(7, false)
         rightAxis.spaceTop = 0f
         rightAxis.axisMinimum = 0f // this replaces setStartAtZero(true)
         rightAxis.textColor = Color.WHITE
 
-//        var l: Legend = mBar!!.legend
+//        var l: Legend = mBar.legend
 //        l.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
 //        l.horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
 //        l.orientation = Legend.LegendOrientation.HORIZONTAL
@@ -510,31 +502,31 @@ class CurrencyDetail : AppCompatActivity() {
         //mSeekBarY.setOnSeekBarChangeListener(this)
         //mSeekBarX.setOnSeekBarChangeListener(this)
 
-        mBar!!.legend.isEnabled = false
-        mBar!!.axisLeft.isEnabled = false
-        mBar!!.setVisibleXRangeMaximum(20f)
+        mBar.legend.isEnabled = false
+        mBar.axisLeft.isEnabled = false
+        mBar.setVisibleXRangeMaximum(20f)
 
 
     }
 
     private fun setBarData(count: Int) {
 
-        var size: Int = CurrencyDeets!!.size - 1
+        var size: Int = CurrencyDeets.size - 1
         val yVals1 = ArrayList<BarEntry>()
         var i = 0
         while (i <= count) {
-            val value = CurrencyDeets!![i + (size - count)].Volume.toDouble() / 1000000
+            val value = CurrencyDeets[i + (size - count)].Volume.toDouble() / 1000000
             yVals1.add(BarEntry(i.toFloat(), value.toFloat()))
             i++
         }
 
         val set1: BarDataSet
 
-        if (mBar!!.data != null && mBar!!.data.dataSetCount > 0) {
-            set1 = (mBar!!.data.getDataSetByIndex(0)) as BarDataSet
+        if (mBar.data != null && mBar.data.dataSetCount > 0) {
+            set1 = (mBar.data.getDataSetByIndex(0)) as BarDataSet
             set1.values = yVals1
-            mBar!!.data.notifyDataChanged()
-            mBar!!.notifyDataSetChanged()
+            mBar.data.notifyDataChanged()
+            mBar.notifyDataSetChanged()
         } else {
             set1 = BarDataSet(yVals1, null)
 
@@ -549,21 +541,21 @@ class CurrencyDetail : AppCompatActivity() {
             data.setValueTextSize(0f)
             data.barWidth = 0.7f
 
-            mBar!!.data = data
+            mBar.data = data
         }
-        mBar!!.invalidate()
+        mBar.invalidate()
 
 
     }
 
     private fun parseCoinDetails() {
-        var blocks = response!!.substringAfter("<tbody>").split("</tr>")
+        var blocks = response.substringAfter("<tbody>").split("</tr>")
         blocks.take(blocks.size - 1)
                 .forEach {
-                    CurrencyDeets!!.add(createCurrencyDetail(it))
+                    CurrencyDeets.add(createCurrencyDetail(it))
                 }
-        CurrencyDeets!!.sortBy { it.Date }
-        CurrencyDeets!!.forEach {
+        CurrencyDeets.sortBy { it.Date }
+        CurrencyDeets.forEach {
             it.Date = (parseUnix(it.Date.toLong()))
         }
         initAllCharts(45)
@@ -575,7 +567,7 @@ class CurrencyDetail : AppCompatActivity() {
 
         var date = data[0].substringAfter(">").replace("</td>", "")
         var dateFormat: DateFormat = SimpleDateFormat("MMM dd, yyyy")
-        var dateParsed: Date = dateFormat!!.parse(date)
+        var dateParsed: Date = dateFormat.parse(date)
         var unixTime: Long = dateParsed.time
 
         var open = data[1].substringAfter("<td data-format-fiat data-format-value=\"")
