@@ -9,24 +9,25 @@ import android.graphics.Paint
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.content.LocalBroadcastManager
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.view.MotionEvent
+import android.view.View
 import android.widget.*
+import com.andyisdope.cryptowatcher.Adapters.MarketAdapter
 import com.andyisdope.cryptowatcher.Services.DataService
 import com.andyisdope.cryptowatcher.model.CurrencyDetails
+import com.andyisdope.cryptowatcher.model.Market
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.CandleStickChart
 import com.github.mikephil.charting.charts.CombinedChart
 import com.github.mikephil.charting.charts.CombinedChart.DrawOrder
-import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdView
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.NumberFormat
@@ -42,14 +43,28 @@ class CurrencyDetail : AppCompatActivity() {
     private var EMA26: ArrayList<Float> = ArrayList()
     private var MACD: ArrayList<Float> = ArrayList()
     private var Histo: ArrayList<Float> = ArrayList()
+    private var DisplayMarkets: ArrayList<Market> = ArrayList()
     private var CurrencyDeets: ArrayList<CurrencyDetails> = ArrayList()
+    private var MarketDeets: ArrayList<Market> = ArrayList()
+    private var MarketPairs: TreeSet<String> = TreeSet()
+    private var MarketNames: TreeSet<String> = TreeSet()
+    private lateinit var MarketAdapt: MarketAdapter
+    private lateinit var mMarketList: RecyclerView
     private lateinit var response: String
+    private lateinit var marketResponse: String
     private lateinit var entry: TextView
     private lateinit var time: TextView
+    private lateinit var MarketSpinner: Spinner
+    private lateinit var PairSpinner: Spinner
+    private lateinit var CurrencySpinner: Spinner
     private lateinit var sigData: LineDataSet
     private lateinit var mCombined: CombinedChart
     private lateinit var mBar: BarChart
     private lateinit var mCandle: CandleStickChart
+    private lateinit var curr: String
+    private var marketLoaded: Boolean = false
+    private var MarketIndex: Int = 0
+    private var PairIndex: Int = 0
     private var xValues: ArrayList<String> = ArrayList()
     private val formatterLarge: NumberFormat = DecimalFormat("#,###.00")
 
@@ -57,12 +72,17 @@ class CurrencyDetail : AppCompatActivity() {
         override fun onReceive(context: Context, intent: Intent) {
             //val dataItems = intent
             response = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
-            Toast.makeText(baseContext,
-                    "Candlestick\n" +
-                            "24Hr Volume\n" +
-                            "MACD w/ Red Signal",
-                    Toast.LENGTH_LONG).show()
             parseCoinDetails()
+        }
+    }
+
+    private val mBroadcastReceiver2 = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            //val dataItems = intent
+            marketResponse = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
+            Toast.makeText(baseContext, "Select an Exchange or Pair to view", Toast.LENGTH_LONG).show()
+            parseMarketDetails()
+
 
         }
     }
@@ -74,19 +94,67 @@ class CurrencyDetail : AppCompatActivity() {
         val df: SimpleDateFormat = SimpleDateFormat("yyyyMMdd")
         val today: Int = df.format(c.time).toInt()
         val start: Int = today - 10000
-        val curr: String = intent.getStringExtra("Currency")
-
+        curr = intent.getStringExtra("Currency")
+        marketLoaded = false
         title = "${curr.toUpperCase()}"
         entry = findViewById<TextView>(R.id.CurrencyPrice) as TextView
         time = findViewById<TextView>(R.id.PriceTime) as TextView
+
+        mMarketList = findViewById<RecyclerView>(R.id.MarketView) as RecyclerView
+        mMarketList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+
+
+        initSpinners()
         initTabs()
 
         LocalBroadcastManager.getInstance(applicationContext)
                 .registerReceiver(mBroadcastReceiver,
                         IntentFilter(DataService.Currency))
+        LocalBroadcastManager.getInstance(applicationContext)
+                .registerReceiver(mBroadcastReceiver2,
+                        IntentFilter(DataService.MARKET))
 
         requestData("https://coinmarketcap.com/currencies/${curr.toLowerCase()}/historical-data/?start=$start&end=$today")
 
+    }
+
+    private fun initSpinners() {
+        MarketSpinner = findViewById<Spinner>(R.id.MarketSpinner) as Spinner
+        PairSpinner = findViewById<Spinner>(R.id.PairSpinner) as Spinner
+        CurrencySpinner = findViewById<Spinner>(R.id.CurrencySpinner) as Spinner
+
+        MarketSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                DisplayMarkets.clear()
+                var mark = MarketSpinner.getItemAtPosition(p2).toString()
+                MarketDeets.asSequence()
+                        .forEach { if (it.market == mark) DisplayMarkets.add(it) }
+
+                MarketAdapt = MarketAdapter(baseContext, DisplayMarkets)
+                mMarketList.adapter = MarketAdapt
+                mMarketList.adapter.notifyDataSetChanged()
+            }
+        }
+        PairSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(p0: AdapterView<*>?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+                DisplayMarkets.clear()
+                var mark = PairSpinner.getItemAtPosition(p2).toString()
+                MarketDeets.asSequence()
+                        .forEach { if (it.pair == mark) DisplayMarkets.add(it) }
+
+                MarketAdapt = MarketAdapter(baseContext, DisplayMarkets)
+                mMarketList.adapter = MarketAdapt
+                mMarketList.adapter.notifyDataSetChanged()
+            }
+        }
     }
 
     private fun initAllCharts(count: Int) {
@@ -99,18 +167,97 @@ class CurrencyDetail : AppCompatActivity() {
     fun initTabs() {
         val tabs = findViewById<TabHost>(R.id.DetailTab)
         tabs.setup()
-        var spec: TabHost.TabSpec = tabs.newTabSpec("Charts")
-        spec.setContent(R.id.Charts)
-        spec.setIndicator("Charts")
-        tabs.addTab(spec)
-        spec = tabs.newTabSpec("Exchanges")
-        spec.setContent(R.id.Exchanges)
-        spec.setIndicator("Exchanges")
-        tabs.addTab(spec)
-        spec = tabs.newTabSpec("Alerts")
-        spec.setContent(R.id.Alerts)
-        spec.setIndicator("Alerts")
-        tabs.addTab(spec)
+        with(tabs)
+        {
+            var spec: TabHost.TabSpec = tabs.newTabSpec("Charts")
+            spec.setContent(R.id.Charts)
+            spec.setIndicator("Charts")
+            addTab(spec)
+            spec = tabs.newTabSpec("Exchanges")
+            spec.setContent(R.id.Exchanges)
+            spec.setIndicator("Exchanges")
+            addTab(spec)
+            spec = tabs.newTabSpec("Alerts")
+            spec.setContent(R.id.Alerts)
+            spec.setIndicator("Alerts")
+            addTab(spec)
+            setOnTabChangedListener { tabID ->
+                when (tabID) {
+                    "Charts" -> {
+                    }
+                    "Exchanges" -> {
+                        requestMarketData()
+                    }
+                    "Alerts" -> {
+                    }
+                }
+            }
+        }
+    }
+
+    private fun requestMarketData() {
+        if (!marketLoaded) {
+            val intent = Intent(this, DataService::class.java)
+            intent.putExtra("Path", "Market")
+            intent.putExtra("Currency", "https://coinmarketcap.com/currencies/${curr.toLowerCase()}/#markets")
+            startService(intent)
+            marketLoaded = true
+        } else
+            Toast.makeText(baseContext, "Market Loaded", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun parseMarketDetails() {
+        var blocks = marketResponse.substringAfter("<tbody>").split("</tr>")
+        blocks.take(blocks.size - 1)
+                .forEach {
+                    (createMarketDetail(it))
+                }
+        initMarketView()
+    }
+
+    private fun initMarketView() {
+        MarketSpinner.adapter = ArrayAdapter<String>(
+                this, R.layout.spinner_layout, MarketNames.toList()
+        )
+        PairSpinner.adapter = ArrayAdapter<String>(
+                this, R.layout.spinner_layout, MarketPairs.toList()
+        )
+        CurrencySpinner.adapter = ArrayAdapter<String>(
+                this, R.layout.spinner_layout, arrayOf("USD", "ETH", "BTC")
+        )
+    }
+
+    private fun createMarketDetail(block: String) {
+        var data = block.split("</td>")
+        //data index: date,open,high,low,close,volume,marketcap
+
+        var marketName = data[1].substringAfter("\">").replace("</td>", "")
+        marketName = marketName.substring(0, marketName.indexOf("<"))
+
+        var pair = data[2].substringAfter("target=\"_blank\">")
+        pair = pair.substring(0, pair.indexOf("</a"))
+
+        var volUSD = data[3].substringAfter("data-usd=\"")
+        volUSD = volUSD.substring(0, volUSD.indexOf("\""))
+
+        var volBTC = data[3].substringAfter("data-btc=\"")
+        volBTC = volBTC.substring(0, volBTC.indexOf("\""))
+
+        var priceUSD = data[4].substringAfter("data-usd=\"")
+        priceUSD = priceUSD.substring(0, priceUSD.indexOf("\""))
+
+        var priceBTC = data[4].substringAfter("data-btc=\"")
+        priceBTC = priceBTC.substring(0, priceBTC.indexOf("\""))
+
+        var percent = data[5].substringAfter("<span data-format-percentage data-format-value=\"")
+        percent = percent.substring(0, percent.indexOf("\""))
+
+        var update = data[6].substringAfter(">")
+
+        MarketDeets.add(Market(marketName, pair, volBTC.toFloat(), volUSD.toFloat(), priceBTC.toFloat(), priceUSD.toFloat(), percent, update))
+        Log.i("Market", MarketDeets[MarketDeets.size - 1].toString())
+        if (!MarketPairs.contains(pair)) MarketPairs.add(pair.capitalize())
+        if (!MarketNames.contains(marketName)) MarketNames.add(marketName.capitalize())
     }
 
     fun parseUnix(time: Long): String {
@@ -166,8 +313,13 @@ class CurrencyDetail : AppCompatActivity() {
         var leftAxis: YAxis = mCombined.axisLeft
         leftAxis.isEnabled = false
 
-        mCombined.legend.isEnabled = false
-        mCombined.description.isEnabled = false
+        mCombined.legend.isEnabled = true
+        mCombined.legend.textColor = Color.WHITE
+        mCombined.description.isEnabled = true
+        mCombined.description.textColor = Color.YELLOW
+        mCombined.description.textSize = 12f
+        mCombined.description.text = "12,26,9 MACD"
+        mCombined.description.setPosition(850f, 50f)
         setCombinedData(count)
         mCombined.setVisibleXRangeMaximum(20f)
 
@@ -217,8 +369,7 @@ class CurrencyDetail : AppCompatActivity() {
         }
 
         val set1: BarDataSet
-        set1 = BarDataSet(yVals1, null)
-
+        set1 = BarDataSet(yVals1, "Histogram")
         set1.setDrawIcons(false)
         set1.valueTextSize = 0f
         set1.setColors(Color.GRAY)
@@ -256,11 +407,11 @@ class CurrencyDetail : AppCompatActivity() {
         while (i <= count) {
             MACD.add(EMA12[i] - EMA26[i])
             entries.add(Entry(i.toFloat(), (EMA12[i] - EMA26[i])))
-            Log.i("MACD ", "${EMA12[i]} - ${EMA26[i]} = ${EMA12[i] - EMA26[i]}")
+            //Log.i("MACD ", "${EMA12[i]} - ${EMA26[i]} = ${EMA12[i] - EMA26[i]}")
             i++
         }
 
-        var set: LineDataSet = LineDataSet(entries, "Line DataSet")
+        var set: LineDataSet = LineDataSet(entries, "MACD")
         set.setColor(Color.BLUE)
         set.setLineWidth(.5f)
         set.setMode(LineDataSet.Mode.CUBIC_BEZIER)
@@ -288,7 +439,7 @@ class CurrencyDetail : AppCompatActivity() {
             i++
         }
 
-        sigData = LineDataSet(entries, "Line")
+        sigData = LineDataSet(entries, "Signal Line")
         sigData.setColor(Color.RED)
         sigData.setLineWidth(.5f)
         sigData.setMode(LineDataSet.Mode.CUBIC_BEZIER)
@@ -328,32 +479,40 @@ class CurrencyDetail : AppCompatActivity() {
         mCandle.setDrawGridBackground(false)
 
         var xAxis: XAxis = mCandle.xAxis
-        xAxis.isEnabled = true
-        xAxis.textColor = Color.WHITE
-        xAxis.position = XAxis.XAxisPosition.BOTTOM
-        xAxis.granularity = 7f // only intervals of 1 day
-        xAxis.setValueFormatter({ value, axis ->
-            xValues[(value % xValues.size).toInt()]
-        })
+        with(xAxis)
+        {
+            isEnabled = true
+            textColor = Color.WHITE
+            position = XAxis.XAxisPosition.BOTTOM
+            granularity = 7f // only intervals of 1 day
+            setValueFormatter({ value, axis ->
+                xValues[(value % xValues.size).toInt()]
+            })
+        }
 
 
         var leftAxis: YAxis = mCandle.axisRight
-//        leftAxis.setEnabled(false);
-        leftAxis.setLabelCount(7, false)
-        leftAxis.setDrawGridLines(true)
-        leftAxis.setDrawAxisLine(true)
-        leftAxis.textColor = Color.WHITE
+        with(leftAxis)
+        {
+            setLabelCount(7, false)
+            setDrawGridLines(true)
+            setDrawAxisLine(true)
+            textColor = Color.WHITE
+        }
 
         var rightAxis: YAxis = mCandle.axisLeft
         rightAxis.isEnabled = false
-//        rightAxis.setStartAtZero(false);
 
-        // setting data
-        //mSeekBarX.setProgress(40)
-        //mSeekBarY.setProgress(100)
-
-        mCandle.legend.isEnabled = false
-        mCandle.description.isEnabled = false
+        with(mCandle)
+        {
+            legend.isEnabled = false
+            description.isEnabled = true
+            description.text = "45 Day CandleStick"
+            description.textColor = Color.YELLOW
+            description.textSize = 12f
+            description.setPosition(900f,50f)
+            setPinchZoom(false)
+        }
         setCandleData(count)
         mCandle.setVisibleXRangeMaximum(20f)
 
@@ -428,28 +587,27 @@ class CurrencyDetail : AppCompatActivity() {
             xValues.add(value)
             i++
         }
-        //xValues.add(parseUnix(it.Date.toLong()))
 
-        mBar.setDrawBarShadow(false)
-        mBar.setDrawValueAboveBar(false)
-        mBar.description.isEnabled = false
-
-        // if more than 60 entries are displayed in the chart, no values will be
-        // drawn
-        mBar.setMaxVisibleValueCount(365)
-
-        // scaling can now only be done on x- and y-axis separately
-        mBar.setPinchZoom(false)
-
-        mBar.setDrawGridBackground(false)
-        // mBarsetDrawYLabels(false)
-
+        with(mBar)
+        {
+            setDrawBarShadow(false)
+            setDrawValueAboveBar(false)
+            description.isEnabled = true
+            description.text = "24Hr Volume"
+            description.textColor = Color.YELLOW
+            description.textSize = 12f
+            description.setPosition(850f, 50f)
+            setMaxVisibleValueCount(365)
+            setPinchZoom(false)
+            setDrawGridBackground(false)
+            xAxis.setDrawLabels(true)
+            xAxis.setDrawAxisLine(true)
+        }
 
         var xAxis: XAxis = mBar.xAxis
+
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.setDrawGridLines(true)
-        mBar.xAxis.setDrawLabels(true)
-        mBar.xAxis.setDrawAxisLine(true)
         xAxis.granularity = 7f // only intervals of 1 day
         xAxis.labelCount = 7
         xAxis.setValueFormatter({ value, axis ->
@@ -505,7 +663,6 @@ class CurrencyDetail : AppCompatActivity() {
         mBar.legend.isEnabled = false
         mBar.axisLeft.isEnabled = false
         mBar.setVisibleXRangeMaximum(20f)
-
 
     }
 
