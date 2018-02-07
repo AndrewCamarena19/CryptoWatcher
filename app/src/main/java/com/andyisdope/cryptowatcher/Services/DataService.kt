@@ -18,29 +18,11 @@ import java.io.IOException
 
 class DataService : IntentService("DataService") {
 
-    override fun onHandleIntent(intent: Intent?) {
+    override fun onHandleIntent(intent: Intent) {
         //        Make the web service request
         val webService = DataWebService.retrofit.create(DataWebService::class.java)
-        when(intent!!.getStringExtra("Path"))
+        when(intent.getStringExtra("Path"))
         {
-            "something" -> {
-                val call = webService.dataItems(intent!!.getStringExtra("Path"))
-                val dataItems: Array<Currency>
-                try {
-                    dataItems = call.execute().body()!!
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                    Log.i(TAG, "onHandleIntent: " + e.message)
-                    return
-                }
-
-                //        Return the data to MainActivity
-                val messageIntent = Intent(COINS)
-                messageIntent.putExtra(MY_SERVICE_PAYLOAD, dataItems)
-                val manager = LocalBroadcastManager.getInstance(applicationContext)
-                manager.sendBroadcast(messageIntent)
-            }
-
             "Tokens" ->
             {
                 val call = webService.getInitial("https://coinmarketcap.com/tokens/views/all/")
@@ -59,7 +41,15 @@ class DataService : IntentService("DataService") {
                 val manager = LocalBroadcastManager.getInstance(applicationContext)
                 manager.sendBroadcast(messageIntent)
             }
-
+            "Market" ->
+            {
+                val call = webService.getInitial(intent.getStringExtra("Currency"))
+                val resp = call.execute().body()
+                val messageIntent = Intent(MARKET)
+                messageIntent.putExtra(MY_SERVICE_PAYLOAD, resp)
+                val manager = LocalBroadcastManager.getInstance(applicationContext)
+                manager.sendBroadcast(messageIntent)
+            }
             else ->
             {
                 val call = webService.getInitial(intent.getStringExtra("Path"))
@@ -91,6 +81,7 @@ class DataService : IntentService("DataService") {
         val COINS = "COINS"
         val Currency = "Currency"
         val MY_SERVICE_PAYLOAD = "DataPayload"
+        val MARKET = "Market"
     }
 
 }
