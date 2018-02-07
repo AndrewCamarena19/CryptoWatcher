@@ -28,6 +28,47 @@
                 android:layout_height="match_parent">
 
                 <RelativeLayout
+                    android:id="@+id/Exchanges"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <Spinner
+                            android:id="@+id/MarketSpinner"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" />
+
+                        <Spinner
+                            android:id="@+id/PairSpinner"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" />
+
+                        <Spinner
+                            android:id="@+id/CurrencySpinner"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" />
+
+                    </LinearLayout>
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/MarketView"
+                        android:layout_width="match_parent"
+                        android:layout_height="350dp"
+                        android:layout_marginTop="25dp"
+                        android:background="@color/colorPrimaryDark"
+                        android:scrollbars="vertical" />
+
+                </RelativeLayout>
+
+                <RelativeLayout
                     android:id="@+id/Charts"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -78,21 +119,13 @@
                     <com.github.mikephil.charting.charts.CombinedChart
                         android:id="@+id/MACD"
                         android:layout_width="match_parent"
-                        android:layout_height="100dp"
+                        android:layout_height="125dp"
                         android:layout_marginTop="320dp"
                         android:background="@color/colorPrimaryDark">
 
                     </com.github.mikephil.charting.charts.CombinedChart>
 
                 </RelativeLayout>
-
-                <LinearLayout
-                    android:id="@+id/Exchanges"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/Alerts"
