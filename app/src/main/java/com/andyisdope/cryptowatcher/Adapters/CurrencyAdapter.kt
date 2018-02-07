@@ -30,7 +30,7 @@ import java.text.NumberFormat
 
 class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayList<Currency>) : RecyclerView.Adapter<CurrencyAdapter.ViewHolder>() {
 
-    private val list: ArrayList<HashMap<String, Currency>>? = null
+    private lateinit var list: ArrayList<HashMap<String, Currency>>
     private val Image_Base_URL = "https://raw.githubusercontent.com/poc19/CryptoWatcher/master/images/"
     private val Data_Base_URL = "https://api.cryptowat.ch"
     var formatterLarge: NumberFormat = DecimalFormat("#,###.00000")
@@ -45,7 +45,7 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
         return mItems.size
     }
 
-    private var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
+    private lateinit var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
@@ -83,86 +83,87 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
         val item = mItems[position]
 
         try {
-            //val inputStream = mContext.assets.open(item.Symbol.plus(".png"))
-            //val d = Drawable.createFromStream(inputStream, null)
-            //holder.tickerImage.setImageDrawable(d)
-            var url = Image_Base_URL.plus(item.Symbol.toUpperCase()).plus(".png?raw=true")
-            Picasso.with(mContext).load(url)
-                    .error(R.drawable.cream).into(holder.tickerImage)
-            holder.tickerImage.setBackgroundColor(ContextCompat.getColor(mContext, R.color.colorPrimaryDark))
-            when (Currency.TimeFrame) {
-                "Hourly" -> {
-                    when {
-                        (item.HrChange == "-9999") -> {
-                            holder.tickerChange.setTextColor(Color.WHITE)
-                            holder.tickerChange.text = "N/A"
+            with(holder)
+            {
+                //val inputStream = mContext.assets.open(item.Symbol.plus(".png"))
+                //val d = Drawable.createFromStream(inputStream, null)
+                //holder.tickerImage.setImageDrawable(d)
+                var url = Image_Base_URL.plus(item.Symbol.toUpperCase()).plus(".png?raw=true")
+                Picasso.with(mContext).load(url)
+                        .error(R.drawable.cream).into(holder.tickerImage)
+                when (Currency.TimeFrame) {
+                    "Hourly" -> {
+                        when {
+                            (item.HrChange == "-9999") -> {
+                                tickerChange.setTextColor(Color.WHITE)
+                                tickerChange.text = "N/A"
+                            }
+                            item.HrChange.toFloat() <= 0 -> {
+                                tickerChange.setTextColor(Color.RED)
+                                tickerChange.text = "${item.HrChange.toFloat()}%"
+                            }
+                            item.HrChange.toFloat() > 0 -> {
+                                tickerChange.setTextColor(Color.GREEN)
+                                tickerChange.text = "+${item.HrChange.toFloat()}%"
+                            }
                         }
-                        item.HrChange.toDouble() <= 0 -> {
-                            holder.tickerChange.setTextColor(Color.RED)
-                            holder.tickerChange.text = "${item.HrChange.toDouble()}%"
+                    }
+                    "Daily" -> {
+                        when {
+                            (item.TwoChange == "-9999") -> {
+                                tickerChange.setTextColor(Color.WHITE)
+                                tickerChange.text = "N/A"
+                            }
+                            item.TwoChange.toFloat() <= 0 -> {
+                                tickerChange.setTextColor(Color.RED)
+                                tickerChange.text = "${item.TwoChange.toFloat()}%"
+                            }
+                            item.TwoChange.toFloat() > 0 -> {
+                                tickerChange.setTextColor(Color.GREEN)
+                                tickerChange.text = "+${item.TwoChange.toFloat()}%"
+                            }
                         }
-                        item.HrChange.toDouble() > 0 -> {
-                            holder.tickerChange.setTextColor(Color.GREEN)
-                            holder.tickerChange.text = "+${item.HrChange.toDouble()}%"
+                    }
+                    "Weekly" -> {
+                        when {
+                            (item.SevenChange == "-9999") -> {
+                                tickerChange.setTextColor(Color.WHITE)
+                                tickerChange.text = "N/A"
+                            }
+                            item.SevenChange.toFloat() <= 0 -> {
+                                tickerChange.setTextColor(Color.RED)
+                                tickerChange.text = "${item.SevenChange.toFloat()}%"
+                            }
+                            item.SevenChange.toFloat() > 0 -> {
+                                tickerChange.setTextColor(Color.GREEN)
+                                tickerChange.text = "+${item.SevenChange.toFloat()}%"
+                            }
                         }
                     }
                 }
-                "Daily" -> {
-                    when {
-                        (item.TwoChange == "-9999") -> {
-                            holder.tickerChange.setTextColor(Color.WHITE)
-                            holder.tickerChange.text = "N/A"
+
+                isFavourite.isChecked = item.isFavorite
+                tickerSymbol.text = "(" + item.Symbol + ")"
+                tickerPrice.text = "$ ${formatterLarge.format(item.CurrentPrice.toFloat())}"
+                tickerPlace.text = "" + item.Place
+                tickerName.text = item.Name.toUpperCase()
+                Platform.text = item.Symbol
+                tickerMarketCap.text =
+                        when (item.MarketCap) {
+                            "-9999" -> "N/A"
+                            else -> {
+                                "$ ${formatterLarge.format(item.MarketCap.toFloat())}"
+                            }
                         }
-                        item.TwoChange.toDouble() <= 0 -> {
-                            holder.tickerChange.setTextColor(Color.RED)
-                            holder.tickerChange.text = "${item.TwoChange.toDouble()}%"
+                tickerVolume.text =
+                        when (item.Volume) {
+                            "-9999" -> "N/A"
+
+                            else -> {
+                                "$ ${formatterLarge.format(item.Volume.toFloat())}"
+                            }
                         }
-                        item.TwoChange.toDouble() > 0 -> {
-                            holder.tickerChange.setTextColor(Color.GREEN)
-                            holder.tickerChange.text = "+${item.TwoChange.toDouble()}%"
-                        }
-                    }
-                }
-                "Weekly" -> {
-                    when {
-                        (item.SevenChange == "-9999") -> {
-                            holder.tickerChange.setTextColor(Color.WHITE)
-                            holder.tickerChange.text = "N/A"
-                        }
-                        item.SevenChange.toDouble() <= 0 -> {
-                            holder.tickerChange.setTextColor(Color.RED)
-                            holder.tickerChange.text = "${item.SevenChange.toDouble()}%"
-                        }
-                        item.SevenChange.toDouble() > 0 -> {
-                            holder.tickerChange.setTextColor(Color.GREEN)
-                            holder.tickerChange.text = "+${item.SevenChange.toDouble()}%"
-                        }
-                    }
-                }
             }
-
-            holder.isFavourite.isChecked = item.isFavorite
-            holder.tickerSymbol.text = "(" + item.Symbol + ")"
-            holder.tickerPrice.text = "$ ${formatterLarge.format(item.CurrentPrice.toDouble())}"
-            holder.tickerPlace.text = "" + item.Place
-            holder.tickerName.text = item.Name.toUpperCase()
-            holder.Platform.text = item.Symbol
-            holder.tickerMarketCap.text =
-                    when (item.MarketCap) {
-                        "-9999" -> "N/A"
-                        else -> {
-                            "$ ${formatterLarge.format(item.MarketCap.toDouble())}"
-                        }
-                    }
-            holder.tickerVolume.text =
-                    when (item.Volume) {
-                        "-9999" -> "N/A"
-
-                        else -> {
-                            "$ ${formatterLarge.format(item.Volume.toDouble())}"
-                        }
-                    }
-
         } catch (e: IOException) {
             e.printStackTrace()
         }
