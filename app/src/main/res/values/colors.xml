@@ -6,4 +6,5 @@
     <color name="colorAccent">#ffffff</color>
     <color name="TickerNameColor">#d0ff00</color>
     <color name="colorBorder">#838383</color>
+    <color name="PrimaryNew">#123456</color>
 </resources>
