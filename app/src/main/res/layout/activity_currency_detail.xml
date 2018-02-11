@@ -50,12 +50,6 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1" />
 
-                        <Spinner
-                            android:id="@+id/CurrencySpinner"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1" />
-
                     </LinearLayout>
 
                     <android.support.v7.widget.RecyclerView
@@ -65,6 +59,38 @@
                         android:layout_marginTop="25dp"
                         android:background="@color/colorPrimaryDark"
                         android:scrollbars="vertical" />
+
+                    <RadioGroup
+                        android:id="@+id/CurrencyRadio"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@+id/MarketView"
+                        android:orientation="horizontal">
+
+                        <RadioButton
+                            android:id="@+id/RadioUSD"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:checked="true"
+                            android:text="@string/usd" />
+
+                        <RadioButton
+                            android:id="@+id/RadioETH"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/eth" />
+
+                        <RadioButton
+                            android:id="@+id/RadioBTC"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/btc" />
+
+                    </RadioGroup>
 
                 </RelativeLayout>
 
