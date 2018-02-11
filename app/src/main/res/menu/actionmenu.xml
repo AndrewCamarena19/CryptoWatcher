@@ -11,27 +11,19 @@
         android:id="@+id/sort"
         android:icon="@drawable/sorticon"
         android:orderInCategory="2"
-        app:showAsAction="always"
-        android:title="" />
+        android:title="@string/sort_by"
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/time"
         android:icon="@drawable/timeicon"
         android:orderInCategory="4"
-        app:showAsAction="always"
-        android:title="" />
-
-    <item
-        android:id="@+id/currency"
-        android:icon="@drawable/currencyicon"
-        android:orderInCategory="5"
-        app:showAsAction="always"
-        android:title="" />
+        android:title="@string/time_frame"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/order"
         android:icon="@drawable/ordericon"
         android:orderInCategory="3"
-        app:showAsAction="always"
-        android:title="" />
+        android:title="@string/order" />
 </menu>

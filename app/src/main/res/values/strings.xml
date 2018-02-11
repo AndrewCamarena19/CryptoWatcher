@@ -14,4 +14,11 @@
     <string name="appwidget_text">EXAMPLE</string>
     <string name="configure">Configure</string>
     <string name="add_widget">Add widget</string>
+    <string name="usd">USD</string>
+    <string name="eth">ETH</string>
+    <string name="btc">BTC</string>
+    <string name="sort_by">Sort By</string>
+    <string name="time_frame">Time Frame</string>
+    <string name="default_currency">Default Currency</string>
+    <string name="order">Order</string>
 </resources>

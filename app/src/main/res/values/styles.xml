@@ -10,4 +10,14 @@
     <style name="TabStyle" parent="Theme.AppCompat.DayNight.DarkActionBar">
         <item name="android:textColor">@color/TickerNameColor</item>
     </style>
+    <style name="ThemeDialog" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@color/colorPrimaryDark</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:textColor">@color/colorText</item>
+        <item name="colorAccent">#f3f3f3</item>
+        <item name="android:textColorPrimary">#f3f3f3</item>
+    </style>
 </resources>
