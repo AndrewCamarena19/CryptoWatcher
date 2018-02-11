@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/VolumeLbl"
         android:layout_toEndOf="@+id/VolumeLbl"
-        android:textColor="@color/colorText" />
+        android:textColor="@color/TickerNameColor" />
 
     <TextView
         android:id="@+id/PriceLbl"
@@ -53,14 +53,15 @@
         android:layout_alignBaseline="@+id/PriceLbl"
         android:layout_alignBottom="@+id/PriceLbl"
         android:layout_toEndOf="@+id/PriceLbl"
-        android:textColor="@color/colorText" />
+        android:layout_toStartOf="@+id/VolPerLbl"
+        android:textColor="@color/TickerNameColor" />
 
     <TextView
         android:id="@+id/VolPerLbl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/PriceNum"
-        android:layout_toEndOf="@+id/PriceNum"
+        android:layout_below="@+id/VolumeNum"
+        android:layout_toStartOf="@+id/UpdatedLbl"
         android:text="Volume (%): "
         android:textColor="@color/colorText" />
 
@@ -70,7 +71,7 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/VolPerLbl"
         android:layout_toEndOf="@+id/VolPerLbl"
-        android:textColor="@color/colorText" />
+        android:textColor="@color/TickerNameColor" />
 
     <TextView
         android:id="@+id/UpdatedLbl"
@@ -85,6 +86,7 @@
         android:id="@+id/Updated"
         android:layout_width="75dp"
         android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/UpdatedLbl"
         android:textColor="@color/colorText" />
