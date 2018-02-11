@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import com.andyisdope.cryptowatch.Currency
 import com.andyisdope.cryptowatcher.R
 import com.andyisdope.cryptowatcher.model.Market
 import java.text.DecimalFormat
@@ -17,19 +18,32 @@ import java.text.NumberFormat
  */
 class MarketAdapter(private val mContext: Context, private val mItems: ArrayList<Market>) : RecyclerView.Adapter<MarketAdapter.ViewHolder>() {
     var formatterLarge: NumberFormat = DecimalFormat("#,###.00")
-    var formatterSmall: NumberFormat = DecimalFormat("#0.00")
+    var formatterSmall: NumberFormat = DecimalFormat("#0.00000")
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-       val item = mItems[position]
+        val item = mItems[position]
         with(holder)
         {
 
-            MarketName.text = item.market+"     "
-            PairName.text = item.pair+"     "
-            PriceNum.text = "$ ${formatterLarge.format(item.priceUSD)}"
+            MarketName.text = item.market + "     "
+            PairName.text = item.pair + "     "
             Updated.text = item.update
-            VolNum.text = "$ ${formatterLarge.format(item.volUSD)}"
             VolPer.text = "${formatterSmall.format(item.volPer.toFloat())}%"
+
+            when (CurrentCurrency) {
+                "USD" -> {
+                    VolNum.text = "$ ${formatterLarge.format(item.volUSD)}"
+                    PriceNum.text = "$ ${formatterLarge.format(item.priceUSD)}"
+                }
+                "ETH" -> {
+                    VolNum.text = "${formatterLarge.format(item.volUSD/ Currency.ETH)} ETH "
+                    PriceNum.text = "${formatterLarge.format(item.priceUSD/ Currency.ETH)} ETH "
+                }
+                "BTC" -> {
+                    VolNum.text = "${formatterLarge.format(item.volUSD/Currency.BTC)} BTC "
+                    PriceNum.text = "${formatterLarge.format(item.priceUSD/Currency.BTC)} BTC "
+                }
+            }
 
             holder.mView.setOnClickListener {
                 //create activity for a single ticker with different viewports
@@ -76,5 +90,9 @@ class MarketAdapter(private val mContext: Context, private val mItems: ArrayList
             PriceNum = mView.findViewById<TextView>(R.id.PriceNum) as TextView
 
         }
+    }
+
+    companion object {
+        var CurrentCurrency = "USD"
     }
 }
