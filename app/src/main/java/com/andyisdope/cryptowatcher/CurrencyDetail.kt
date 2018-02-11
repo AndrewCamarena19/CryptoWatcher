@@ -56,11 +56,14 @@ class CurrencyDetail : AppCompatActivity() {
     private lateinit var time: TextView
     private lateinit var MarketSpinner: Spinner
     private lateinit var PairSpinner: Spinner
-    private lateinit var CurrencySpinner: Spinner
     private lateinit var sigData: LineDataSet
     private lateinit var mCombined: CombinedChart
     private lateinit var mBar: BarChart
     private lateinit var mCandle: CandleStickChart
+    private lateinit var radioGroup: RadioGroup
+    private lateinit var USD: RadioButton
+    private lateinit var BTC: RadioButton
+    private lateinit var ETH: RadioButton
     private lateinit var curr: String
     private var marketLoaded: Boolean = false
     private var MarketIndex: Int = 0
@@ -80,7 +83,7 @@ class CurrencyDetail : AppCompatActivity() {
         override fun onReceive(context: Context, intent: Intent) {
             //val dataItems = intent
             marketResponse = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
-            Toast.makeText(baseContext, "Select an Exchange or Pair to view", Toast.LENGTH_LONG).show()
+            Toast.makeText(baseContext, "Select an Exchange or Pair to view", Toast.LENGTH_SHORT).show()
             parseMarketDetails()
 
 
@@ -99,13 +102,13 @@ class CurrencyDetail : AppCompatActivity() {
         title = "${curr.toUpperCase()}"
         entry = findViewById<TextView>(R.id.CurrencyPrice) as TextView
         time = findViewById<TextView>(R.id.PriceTime) as TextView
-
         mMarketList = findViewById<RecyclerView>(R.id.MarketView) as RecyclerView
         mMarketList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
 
         initSpinners()
         initTabs()
+        initRadioGroup()
 
         LocalBroadcastManager.getInstance(applicationContext)
                 .registerReceiver(mBroadcastReceiver,
@@ -118,10 +121,40 @@ class CurrencyDetail : AppCompatActivity() {
 
     }
 
+    private fun initRadioGroup() {
+        MarketAdapter.CurrentCurrency = "USD"
+        radioGroup = findViewById<RadioGroup>(R.id.CurrencyRadio) as RadioGroup
+        USD = findViewById<RadioButton>(R.id.RadioUSD) as RadioButton
+        BTC = findViewById<RadioButton>(R.id.RadioBTC) as RadioButton
+        ETH = findViewById<RadioButton>(R.id.RadioETH) as RadioButton
+
+        radioGroup.setOnCheckedChangeListener { radioGroup, i ->
+            when (i) {
+                R.id.RadioUSD -> {
+                    MarketAdapter.CurrentCurrency = "USD"
+                    MarketAdapt = MarketAdapter(baseContext, DisplayMarkets)
+                    mMarketList.adapter = MarketAdapt
+                    mMarketList.adapter.notifyDataSetChanged()
+                }
+                R.id.RadioBTC -> {
+                    MarketAdapter.CurrentCurrency = "BTC"
+                    MarketAdapt = MarketAdapter(baseContext, DisplayMarkets)
+                    mMarketList.adapter = MarketAdapt
+                    mMarketList.adapter.notifyDataSetChanged()
+                }
+                R.id.RadioETH -> {
+                    MarketAdapter.CurrentCurrency = "ETH"
+                    MarketAdapt = MarketAdapter(baseContext, DisplayMarkets)
+                    mMarketList.adapter = MarketAdapt
+                    mMarketList.adapter.notifyDataSetChanged()
+                }
+            }
+        }
+    }
+
     private fun initSpinners() {
         MarketSpinner = findViewById<Spinner>(R.id.MarketSpinner) as Spinner
         PairSpinner = findViewById<Spinner>(R.id.PairSpinner) as Spinner
-        CurrencySpinner = findViewById<Spinner>(R.id.CurrencySpinner) as Spinner
 
         MarketSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -161,7 +194,6 @@ class CurrencyDetail : AppCompatActivity() {
         initBar(count)
         initCandle(count)
         initCombined(count)
-
     }
 
     fun initTabs() {
@@ -222,9 +254,6 @@ class CurrencyDetail : AppCompatActivity() {
         PairSpinner.adapter = ArrayAdapter<String>(
                 this, R.layout.spinner_layout, MarketPairs.toList()
         )
-        CurrencySpinner.adapter = ArrayAdapter<String>(
-                this, R.layout.spinner_layout, arrayOf("USD", "ETH", "BTC")
-        )
     }
 
     private fun createMarketDetail(block: String) {
@@ -260,12 +289,7 @@ class CurrencyDetail : AppCompatActivity() {
         if (!MarketNames.contains(marketName)) MarketNames.add(marketName.capitalize())
     }
 
-    fun parseUnix(time: Long): String {
-        val date = Date(time)
-        val sdf = SimpleDateFormat("MM/dd/yy")
-        return sdf.format(date)
-    }
-
+    //region Combined Chart
     private fun initCombined(count: Int) {
         mCombined = findViewById<CombinedChart>(R.id.MACD) as CombinedChart
         mCombined.drawOrder = arrayOf(DrawOrder.BAR, DrawOrder.LINE)
@@ -447,7 +471,9 @@ class CurrencyDetail : AppCompatActivity() {
         sigData.setAxisDependency(YAxis.AxisDependency.LEFT)
 
     }
+    //endregion
 
+    //region Candlestick Chart
     private fun initCandle(count: Int) {
         mCandle = findViewById<CandleStickChart>(R.id.CurrencyChart) as CandleStickChart
         val keylistener = object : OnChartValueSelectedListener {
@@ -510,7 +536,7 @@ class CurrencyDetail : AppCompatActivity() {
             description.text = "45 Day CandleStick"
             description.textColor = Color.YELLOW
             description.textSize = 12f
-            description.setPosition(900f,50f)
+            description.setPosition(900f, 50f)
             setPinchZoom(false)
         }
         setCandleData(count)
@@ -560,7 +586,9 @@ class CurrencyDetail : AppCompatActivity() {
         mCandle.data = data
         mCandle.invalidate()
     }
+    //endregion
 
+    //region Bar Chart
     private fun initBar(count: Int) {
         mBar = findViewById<BarChart>(R.id.VolumeChart) as BarChart
         val keylistener = object : OnChartValueSelectedListener {
@@ -704,6 +732,7 @@ class CurrencyDetail : AppCompatActivity() {
 
 
     }
+    //endregion
 
     private fun parseCoinDetails() {
         var blocks = response.substringAfter("<tbody>").split("</tr>")
@@ -755,6 +784,12 @@ class CurrencyDetail : AppCompatActivity() {
         startService(intent)
     }
 
+    fun parseUnix(time: Long): String {
+        val date = Date(time)
+        val sdf = SimpleDateFormat("MM/dd/yy")
+        return sdf.format(date)
+    }
+
     override fun onPause() {
         super.onPause()
         //mDataSource.close()
@@ -770,5 +805,7 @@ class CurrencyDetail : AppCompatActivity() {
 
         LocalBroadcastManager.getInstance(applicationContext)
                 .unregisterReceiver(mBroadcastReceiver)
+        LocalBroadcastManager.getInstance(applicationContext)
+                .unregisterReceiver(mBroadcastReceiver2)
     }
 }
