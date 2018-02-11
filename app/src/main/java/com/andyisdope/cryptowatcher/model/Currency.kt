@@ -45,6 +45,8 @@ data class Currency(val Name: String, val Symbol: String, val Place: Int, var is
         var SortMethod: String = "Place"
         var TimeFrame = "Hourly"
         var Order = "Ascending"
+        var ETH = 0f
+        var BTC = 0f
 
         override fun createFromParcel(parcel: Parcel): Currency {
             return Currency(parcel)
