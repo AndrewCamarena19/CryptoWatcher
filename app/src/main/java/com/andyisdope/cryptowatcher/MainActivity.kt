@@ -23,6 +23,8 @@ import com.andyisdope.cryptowatcher.Adapters.TokenAdapter
 import com.andyisdope.cryptowatcher.model.Tokens
 import java.util.*
 import android.content.DialogInterface
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.preference.Preference
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AlertDialog
@@ -37,12 +39,10 @@ import kotlin.Comparator
 class MainActivity : AppCompatActivity() {
 
 
-    private lateinit var Ascending: Comparator<Currency>
     private lateinit var Refresh: SwipeRefreshLayout
     private var mCoins: ArrayList<Currency> = ArrayList()
     private var mTokens: ArrayList<Tokens> = ArrayList()
     private var mFavor: ArrayList<Currency> = ArrayList()
-    private var mHash: HashMap<String, Currency> = HashMap()
     private lateinit var mCoinList: RecyclerView
     private lateinit var mTokenList: RecyclerView
     private lateinit var mFavourites: RecyclerView
@@ -361,7 +361,8 @@ class MainActivity : AppCompatActivity() {
                     }
                     mCoins.add(temp)
                 }
-
+        Currency.ETH = mCoins[1].CurrentPrice.toFloat()
+        Currency.BTC = mCoins[0].CurrentPrice.toFloat()
         mCoinList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
     }
 
@@ -414,18 +415,54 @@ class MainActivity : AppCompatActivity() {
         builder.show()
     }
 
+    private fun createSearchDialog() {
+        var m_Text: String
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this, R.style.ThemeDialog)
+        val input = EditText(this)
+        input.setTextColor(Color.WHITE)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        builder.setMessage("Enter a Coin/Token name or symbol")
+        builder.setView(input)
+        builder.setPositiveButton("Tokens") { dialog, which ->
+            m_Text = input.text.toString()
+
+            mTokens.firstOrNull { (it.Symbol == m_Text.toUpperCase() || it.Name.trim() == m_Text.toLowerCase()) }
+                    ?.let {
+                        var intent: Intent = Intent(this, CurrencyDetail::class.java)
+                        intent.putExtra("Currency", it.Name)
+                        startActivity(intent)
+                    } ?: run {
+                Toast.makeText(this, "Entry not found", Toast.LENGTH_SHORT).show()
+            }
+        }
+        builder.setNegativeButton("Coins") { dialog, which ->
+            m_Text = input.text.toString()
+            mCoins.firstOrNull { (it.Symbol == m_Text.toUpperCase() || it.Name.trim() == m_Text.toLowerCase()) }
+                    ?.let {
+                        var intent: Intent = Intent(this, CurrencyDetail::class.java)
+                        intent.putExtra("Currency", it.Name)
+                        startActivity(intent)
+                    } ?: run {
+                Toast.makeText(this, "Entry not found", Toast.LENGTH_SHORT).show()
+
+            }
+        }
+        builder.setNeutralButton("Cancel") { dialog, which -> dialog.cancel() }
+        var alert: AlertDialog = builder.create()
+        alert.show()
+
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         //sorts: alphabet, marketcap, biggest change, price, place
         when (item.itemId) {
-            R.id.search -> Toast.makeText(this, "Search selected", Toast.LENGTH_SHORT).show()
+            R.id.search -> createSearchDialog()
             R.id.sort -> {
                 createBuilderDialog(SortBy, "Select a criteria to sort in ${Currency.Order} order.")
             }
-            R.id.currency -> {
-            }
             R.id.time -> {
                 val builder = AlertDialog.Builder(this)
-                builder.setTitle("Select an order direction")
+                builder.setTitle("Select a time frame")
                 builder.setItems(TimeFrames, { _, which ->
                     Currency.TimeFrame = TimeFrames[which]
                     Tokens.TimeFrame = TimeFrames[which]
