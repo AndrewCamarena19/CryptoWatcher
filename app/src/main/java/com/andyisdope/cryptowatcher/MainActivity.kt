@@ -125,7 +125,7 @@ class MainActivity : AppCompatActivity() {
             requestPermissionForReadExtertalStorage()
         if (!checkPermissionForWriteExtertalStorage())
             requestPermissionForWriteExtertalStorage()
-        sharedPref = this.getPreferences(Context.MODE_PRIVATE)
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(baseContext)
         initTabs()
 
         Order = arrayOf("Ascending", "Descending")
@@ -496,41 +496,55 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createCurrency(block: String): Currency {
+
         var id = block.substringAfter("<tr id=\"id-")
         id = id.substring(0, id.indexOf("\""))
-        var symbol = block.substringAfter("<span class=\"currency-symbol\"><a href=\"/currencies/$id/\">")
+
+        var data = block.split("</td")
+
+        var place = data[0].substringAfter("<td class=\"text-center\">").trim()
+
+        var symbol = data[1].substringAfter("<span class=\"currency-symbol\"><a href=\"/currencies/$id/\">")
         symbol = symbol.substring(0, symbol.indexOf("<"))
 
-        var place = block.substringAfter("<td class=\"text-center\">")
-        place = place.substring(0, place.indexOf("<")).replace("\n", "").trim()
+        var marketCap = data[3].substringAfter("data-usd=\"")
+        marketCap = marketCap.substring(0, marketCap.indexOf("\""))
+        //if(marketCap.contains("+")) marketCap = marketCap.replace("+", "")
 
-        var marketCap = block.substringAfter("class=\"no-wrap market-cap text-right\" data-usd=\"")
-        marketCap = marketCap.substring(0, marketCap.indexOf("\"")).toUpperCase()
-        // if(marketCap.contains("+")) marketCap = marketCap.replace("+", "")
-
-        var currPrice = block.substringAfter("class=\"price\" data-usd=\"")
-        currPrice = currPrice.substring(0, currPrice.indexOf("\"")).toUpperCase()
+        var currPrice = data[4].substringAfter("data-usd=\"")
+        currPrice = currPrice.substring(0, currPrice.indexOf("\""))
         //if(currPrice.contains("+")) currPrice = currPrice.replace("+", "")
 
-        var volume = block.substringAfter("class=\"volume\" data-usd=\"")
-        volume = volume.substring(0, volume.indexOf("\"")).toUpperCase()
+        var volume = data[6].substringAfter("data-usd=\"")
+        volume = volume.substring(0, volume.indexOf("\""))
         //if(volume.contains("+")) volume = volume.replace("+", "")
 
-        var hrChange = block.substringAfter("no-wrap percent-1h").substringAfter("data-usd=\"")
-        hrChange = hrChange.substring(0, hrChange.indexOf("\""))
+        var hrChange = data[7].substringAfter("text-right\"")
+        hrChange = if (hrChange.length < 5) "?"
+        else {
+            var temp = hrChange.substringAfter("data-percentusd=\"")
+            temp.substring(0, temp.indexOf("\""))
+        }
 
-        var twoChange = block.substringAfter("no-wrap percent-24h").substringAfter("data-usd=\"")
-        twoChange = twoChange.substring(0, twoChange.indexOf("\""))
+        var twoChange = data[8].substringAfter("text-right\"")
+        twoChange = if (twoChange.length < 5) "?"
+        else {
+            var temp = twoChange.substringAfter("data-percentusd=\"")
+            temp.substring(0, temp.indexOf("\""))
+        }
 
-        var sevenChange = block.substringAfter("no-wrap percent-7d").substringAfter("data-usd=\"")
-        sevenChange = sevenChange.substring(0, sevenChange.indexOf("\""))
-
+        var sevenChange = data[9].substringAfter("text-right\"")
+        sevenChange = if (sevenChange.length < 5) "?"
+        else {
+            var temp = sevenChange.substringAfter("data-percentusd=\"")
+            temp.substring(0, temp.indexOf("\""))
+        }
         if (marketCap == "?") marketCap = "-9999"
         if (currPrice == "?") currPrice = "-9999"
         if (hrChange == "?") hrChange = "-9999"
         if (twoChange == "?") twoChange = "-9999"
         if (sevenChange == "?") sevenChange = "-9999"
-        if (volume == "?" || volume == "NONE") volume = "-9999"
+        if (volume == "?" || volume == "NONE" || volume == "None") volume = "-9999"
         return Currency(id, symbol, Integer.parseInt(place), false, 0.0, marketCap, currPrice, hrChange, twoChange, sevenChange, volume)
     }
 
@@ -538,42 +552,55 @@ class MainActivity : AppCompatActivity() {
         var id = block.substringAfter("<tr id=\"id-")
         id = id.substring(0, id.indexOf("\""))
 
-        var symbol = block.substringAfter("<span class=\"currency-symbol\"><a href=\"/currencies/$id/\">")
-        symbol = symbol.substring(0, symbol.indexOf("<"))
-
-        var place = block.substringAfter("<td class=\"text-center\">")
-        place = place.substring(0, place.indexOf("<")).replace("\n", "").trim()
-
         var platform = block.substringAfter("data-platformsymbol=\"")
         platform = platform.substring(0, platform.indexOf("\""))
 
-        var marketCap = block.substringAfter("class=\"no-wrap market-cap text-right\" data-usd=\"")
-        marketCap = marketCap.substring(0, marketCap.indexOf("\"")).toUpperCase()
+        var data = block.split("</td")
+
+        var place = data[0].substringAfter("<td class=\"text-center\">").trim()
+
+        var symbol = data[1].substringAfter("<span class=\"currency-symbol\"><a href=\"/currencies/$id/\">")
+        symbol = symbol.substring(0, symbol.indexOf("<"))
+
+        var marketCap = data[3].substringAfter("data-usd=\"")
+        marketCap = marketCap.substring(0, marketCap.indexOf("\""))
         //if(marketCap.contains("+")) marketCap = marketCap.replace("+", "")
 
-        var currPrice = block.substringAfter("class=\"price\" data-usd=\"")
-        currPrice = currPrice.substring(0, currPrice.indexOf("\"")).toUpperCase()
+        var currPrice = data[4].substringAfter("data-usd=\"")
+        currPrice = currPrice.substring(0, currPrice.indexOf("\""))
         //if(currPrice.contains("+")) currPrice = currPrice.replace("+", "")
 
-        var volume = block.substringAfter("class=\"volume\" data-usd=\"")
-        volume = volume.substring(0, volume.indexOf("\"")).toUpperCase()
+        var volume = data[6].substringAfter("data-usd=\"")
+        volume = volume.substring(0, volume.indexOf("\""))
         //if(volume.contains("+")) volume = volume.replace("+", "")
 
-        var hrChange = block.substringAfter("no-wrap percent-1h").substringAfter("data-usd=\"")
-        hrChange = hrChange.substring(0, hrChange.indexOf("\""))
+        var hrChange = data[7].substringAfter("text-right\"")
+        hrChange = if (hrChange.length < 5) "?"
+        else {
+            var temp = hrChange.substringAfter("data-percentusd=\"")
+            temp.substring(0, temp.indexOf("\""))
+        }
 
-        var twoChange = block.substringAfter("no-wrap percent-24h").substringAfter("data-usd=\"")
-        twoChange = twoChange.substring(0, twoChange.indexOf("\""))
+        var twoChange = data[8].substringAfter("text-right\"")
+        twoChange = if (twoChange.length < 5) "?"
+        else {
+            var temp = twoChange.substringAfter("data-percentusd=\"")
+            temp.substring(0, temp.indexOf("\""))
+        }
 
-        var sevenChange = block.substringAfter("no-wrap percent-7d").substringAfter("data-usd=\"")
-        sevenChange = sevenChange.substring(0, sevenChange.indexOf("\""))
+        var sevenChange = data[9].substringAfter("text-right\"")
+        sevenChange = if (sevenChange.length < 5) "?"
+        else {
+            var temp = sevenChange.substringAfter("data-percentusd=\"")
+            temp.substring(0, temp.indexOf("\""))
+        }
 
         if (marketCap == "?") marketCap = "-9999"
         if (currPrice == "?") currPrice = "-9999"
         if (hrChange == "?") hrChange = "-9999"
         if (twoChange == "?") twoChange = "-9999"
         if (sevenChange == "?") sevenChange = "-9999"
-        if (volume == "?" || volume == "NONE") volume = "-9999"
+        if (volume == "?" || volume == "NONE" || volume == "None") volume = "-9999"
 
         return Tokens(id, symbol, Integer.parseInt(place), platform, false, 0.0, marketCap, currPrice, hrChange, twoChange, sevenChange, volume)
     }

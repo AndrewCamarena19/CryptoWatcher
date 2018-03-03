@@ -191,9 +191,16 @@ class CurrencyDetail : AppCompatActivity() {
     }
 
     private fun initAllCharts(count: Int) {
-        initBar(count)
-        initCandle(count)
-        initCombined(count)
+        if(CurrencyDeets.size > 45) {
+            initBar(count)
+            initCandle(count)
+            initCombined(count)
+        }
+        else {
+            Toast.makeText(baseContext, "Currency has less than 45 days of data", Toast.LENGTH_SHORT).show()
+            initBar(CurrencyDeets.size-1)
+            initCandle(CurrencyDeets.size-1)
+        }
     }
 
     fun initTabs() {
@@ -611,6 +618,7 @@ class CurrencyDetail : AppCompatActivity() {
         var i = 0
         var size = CurrencyDeets.size - 1
         while (i <= count) {
+            Log.i("Date", CurrencyDeets[i + (size - count)].Date)
             val value = CurrencyDeets[i + (size - count)].Date
             xValues.add(value)
             i++
@@ -744,7 +752,10 @@ class CurrencyDetail : AppCompatActivity() {
         CurrencyDeets.forEach {
             it.Date = (parseUnix(it.Date.toLong()))
         }
-        initAllCharts(45)
+        if(blocks.size >= 45)
+            initAllCharts(45)
+        else
+            initAllCharts(blocks.size)
     }
 
     private fun createCurrencyDetail(block: String): CurrencyDetails {
