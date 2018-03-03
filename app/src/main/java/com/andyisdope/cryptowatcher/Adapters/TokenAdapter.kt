@@ -34,14 +34,14 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
     private val Data_Base_URL = "https://api.cryptowat.ch"
     var formatterLarge: NumberFormat = DecimalFormat("#,###.00000")
     var formatterSmall: NumberFormat = DecimalFormat("#0.00000")
-    val sharedPref = (mContext as Activity).getPreferences(Context.MODE_PRIVATE)
+    val sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext)
 
 
     override fun getItemCount(): Int {
         return mItems.size
     }
 
-    private var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
+    private lateinit var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 

@@ -35,7 +35,7 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
     private val Data_Base_URL = "https://api.cryptowat.ch"
     var formatterLarge: NumberFormat = DecimalFormat("#,###.00000")
     var formatterSmall: NumberFormat = DecimalFormat("#0.00000")
-    val sharedPref = (mContext as Activity).getPreferences(Context.MODE_PRIVATE)
+    val sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext)
     val settings = PreferenceManager.getDefaultSharedPreferences(mContext)
 
 
