@@ -66,12 +66,12 @@ class DataService : IntentService("DataService") {
 
     override fun onCreate() {
         super.onCreate()
-        Log.i(TAG, "onCreate")
+        //Log.i(TAG, "onCreate")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.i(TAG, "onDestroy")
+        //Log.i(TAG, "onDestroy")
     }
 
     companion object {
@@ -82,6 +82,7 @@ class DataService : IntentService("DataService") {
         val Currency = "Currency"
         val MY_SERVICE_PAYLOAD = "DataPayload"
         val MARKET = "Market"
+        val WIDGET = "Widget"
     }
 
 }
