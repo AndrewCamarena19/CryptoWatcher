@@ -57,11 +57,11 @@ class CurrencyWidget : AppWidgetProvider() {
         internal fun updateAppWidget(context: Context, appWidgetManager: AppWidgetManager,
                                      appWidgetId: Int) {
 
-            val widgetText = CurrencyWidgetConfigureActivity.loadTitlePref(context, appWidgetId)
+            val widgetText = CurrencyWidgetConfigureActivity.loadTitlePref(context, appWidgetId).split(",")
             Log.i("Here", "In updateAppWidget: $widgetText")
 
-            if (widgetText != "Not Set")
-                CurrencyService.startActionFoo(context, appWidgetId, widgetText)
+            if (widgetText[0] != "Not Set")
+                CurrencyService.startActionFoo(context, appWidgetId, widgetText[0])
             // Instruct the widget manager to update the widget
         }
     }

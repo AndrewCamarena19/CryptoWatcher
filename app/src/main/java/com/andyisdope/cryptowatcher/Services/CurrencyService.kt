@@ -42,7 +42,7 @@ class CurrencyService : IntentService("CurrencyService") {
         var WM: AppWidgetManager = AppWidgetManager.getInstance(this.applicationContext)
         val views = RemoteViews(this.packageName, R.layout.currency_widget)
         var data = parseCurrencyData(param2).split(",")
-        Log.i("Here", data.toString())
+        //Log.i("Here", data.toString() + param1.toString() + param2)
         views.setTextViewText(R.id.appwidget_text, param2)
         CurrencyWidgetConfigureActivity.saveTitlePref(this, param1, param2 + "," + data)
         views.setTextViewText(R.id.WidgetPrice, data[0])
@@ -55,7 +55,7 @@ class CurrencyService : IntentService("CurrencyService") {
         val intentSync = Intent(this.applicationContext, CurrencyWidget::class.java)
         intentSync.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE //You need to specify the action for the intent. Right now that intent is doing nothing for there is no action to be broadcasted.
         intentSync.putExtra("ID", param1)
-        val pendingSync = PendingIntent.getBroadcast(this.applicationContext, 0, intentSync, PendingIntent.FLAG_CANCEL_CURRENT) //You need to specify a proper flag for the intent. Or else the intent will become deleted.
+        val pendingSync = PendingIntent.getBroadcast(this.applicationContext, 0, intentSync, PendingIntent.FLAG_UPDATE_CURRENT) //You need to specify a proper flag for the intent. Or else the intent will become deleted.
         views.setOnClickPendingIntent(R.id.widgetRefresh, pendingSync)
         WM.updateAppWidget(param1, views)
 
