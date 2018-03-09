@@ -28,20 +28,25 @@
 
         <activity android:name=".CurrencyDetail" />
 
-        <receiver android:name=".NewAppWidget">
+        <receiver android:name=".CurrencyWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
 
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/new_app_widget_info" />
+                android:resource="@xml/currency_widget_info" />
         </receiver>
 
+        <activity android:name=".CurrencyWidgetConfigureActivity">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <service
-            android:name=".Services.MyService"
-            android:enabled="true"
-            android:exported="true"></service>
+            android:name=".Services.CurrencyService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

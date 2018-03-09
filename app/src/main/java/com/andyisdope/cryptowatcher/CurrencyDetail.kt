@@ -291,7 +291,7 @@ class CurrencyDetail : AppCompatActivity() {
         var update = data[6].substringAfter(">")
 
         MarketDeets.add(Market(marketName, pair, volBTC.toFloat(), volUSD.toFloat(), priceBTC.toFloat(), priceUSD.toFloat(), percent, update))
-        Log.i("Market", MarketDeets[MarketDeets.size - 1].toString())
+        //Log.i("Market", MarketDeets[MarketDeets.size - 1].toString())
         if (!MarketPairs.contains(pair)) MarketPairs.add(pair.capitalize())
         if (!MarketNames.contains(marketName)) MarketNames.add(marketName.capitalize())
     }
@@ -618,7 +618,7 @@ class CurrencyDetail : AppCompatActivity() {
         var i = 0
         var size = CurrencyDeets.size - 1
         while (i <= count) {
-            Log.i("Date", CurrencyDeets[i + (size - count)].Date)
+            //Log.i("Date", CurrencyDeets[i + (size - count)].Date)
             val value = CurrencyDeets[i + (size - count)].Date
             xValues.add(value)
             i++

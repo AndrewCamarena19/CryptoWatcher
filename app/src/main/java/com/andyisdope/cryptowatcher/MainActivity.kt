@@ -34,12 +34,14 @@ import android.view.View
 import android.widget.EditText
 import java.sql.Time
 import kotlin.Comparator
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
 
 
     private lateinit var Refresh: SwipeRefreshLayout
+    var mSelectedList: ArrayList<String> = ArrayList()
     private var mCoins: ArrayList<Currency> = ArrayList()
     private var mTokens: ArrayList<Tokens> = ArrayList()
     private var mFavor: ArrayList<Currency> = ArrayList()
@@ -125,7 +127,7 @@ class MainActivity : AppCompatActivity() {
             requestPermissionForReadExtertalStorage()
         if (!checkPermissionForWriteExtertalStorage())
             requestPermissionForWriteExtertalStorage()
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(baseContext)
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
         initTabs()
 
         Order = arrayOf("Ascending", "Descending")
@@ -328,6 +330,7 @@ class MainActivity : AppCompatActivity() {
                     if (sharedPref.contains(temp.Name)) {
                         temp.isFavorite = true
                         mFavor.add(toCurrency(temp))
+                        mSelectedList.add(temp.Name)
                     }
                     mTokens.add(temp)
                 }
@@ -335,6 +338,8 @@ class MainActivity : AppCompatActivity() {
         mTokenList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         sortAdapters(Currency.SortMethod)
         displayFavourites()
+        //Log.i("Here", mSelectedList.toString())
+
     }
 
     private fun displayFavourites() {
@@ -349,6 +354,7 @@ class MainActivity : AppCompatActivity() {
     private fun displayCoinItems() {
         mCoins.clear()
         mFavor.clear()
+        mSelectedList.clear()
         var temp: Currency
         var blocks = response.substringAfter("<tbody>").split("</tr>")
         blocks.take(blocks.size - 1)
@@ -358,6 +364,7 @@ class MainActivity : AppCompatActivity() {
                     if (sharedPref.contains(temp.Name)) {
                         temp.isFavorite = true
                         mFavor.add(temp)
+                        mSelectedList.add(temp.Name)
                     }
                     mCoins.add(temp)
                 }
