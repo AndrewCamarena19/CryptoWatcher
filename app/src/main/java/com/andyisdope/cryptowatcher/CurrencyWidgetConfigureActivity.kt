@@ -56,12 +56,13 @@ class CurrencyWidgetConfigureActivity : Activity() {
         val resultValue = Intent()
         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId)
         setResult(Activity.RESULT_OK, resultValue)
+        Toast.makeText(this, "Press Updated time to refresh", Toast.LENGTH_SHORT).show()
         finish()
     }
 
     public override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
-
+        Toast.makeText(this, "Add a currency to favorites to populate list", Toast.LENGTH_SHORT).show()
         // Set the result to CANCELED.  This will cause the widget host to cancel
         // out of the widget placement if the user presses the back button.
         setResult(Activity.RESULT_CANCELED)

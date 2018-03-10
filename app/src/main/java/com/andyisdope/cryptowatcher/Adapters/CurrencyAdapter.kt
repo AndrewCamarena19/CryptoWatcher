@@ -33,8 +33,8 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
     private lateinit var list: ArrayList<HashMap<String, Currency>>
     private val Image_Base_URL = "https://raw.githubusercontent.com/poc19/CryptoWatcher/master/images/"
     private val Data_Base_URL = "https://api.cryptowat.ch"
-    var formatterLarge: NumberFormat = DecimalFormat("#,###.00000")
-    var formatterSmall: NumberFormat = DecimalFormat("#0.00000")
+    var formatterLarge: NumberFormat = DecimalFormat("#,###.00")
+    var formatterSmall: NumberFormat = DecimalFormat("#0.000")
     val sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext)
     val settings = PreferenceManager.getDefaultSharedPreferences(mContext)
 

@@ -13,6 +13,11 @@ import com.andyisdope.cryptowatcher.CurrencyWidget
 import com.andyisdope.cryptowatcher.CurrencyWidgetConfigureActivity
 import com.andyisdope.cryptowatcher.MainActivity
 import com.andyisdope.cryptowatcher.R
+import java.text.DecimalFormat
+import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.*
+
 
 /**
  * An [IntentService] subclass for handling asynchronous task requests in
@@ -23,6 +28,9 @@ import com.andyisdope.cryptowatcher.R
  * helper methods.
  */
 class CurrencyService : IntentService("CurrencyService") {
+    var formatterSmall: NumberFormat = DecimalFormat("#0.000")
+    var formatterLarge: NumberFormat = DecimalFormat("#,###.0000")
+
 
     override fun onHandleIntent(intent: Intent?) {
         if (intent != null) {
@@ -39,24 +47,37 @@ class CurrencyService : IntentService("CurrencyService") {
      * parameters.
      */
     private fun handleActionFoo(param1: Int, param2: String) {
+        val currentTime = Calendar.getInstance().time
+        val date = Date(currentTime.time)
+        val sdf = SimpleDateFormat("HH:mm:ss")
         var WM: AppWidgetManager = AppWidgetManager.getInstance(this.applicationContext)
         val views = RemoteViews(this.packageName, R.layout.currency_widget)
         var data = parseCurrencyData(param2).split(",")
         //Log.i("Here", data.toString() + param1.toString() + param2)
-        views.setTextViewText(R.id.appwidget_text, param2)
+        views.setTextViewText(R.id.appwidget_text, param2.toUpperCase())
+        views.setTextViewText(R.id.widgetLast,"Updated: " + sdf.format(date))
         CurrencyWidgetConfigureActivity.saveTitlePref(this, param1, param2 + "," + data)
-        views.setTextViewText(R.id.WidgetPrice, data[0])
-        views.setTextViewText(R.id.WidgetChange, data[1])
+        views.setTextViewText(R.id.WidgetPrice, "$ " + formatterLarge.format(data[0].toFloat()))
         when
         {
-            (data[1].toDouble() < 0) -> views.setTextColor(R.id.WidgetChange, Color.RED)
-            else  -> views.setTextColor(R.id.WidgetChange, Color.GREEN)
+            (data[1].toFloat() < 0) ->
+            {
+                views.setTextColor(R.id.WidgetChange, Color.RED)
+                views.setTextViewText(R.id.WidgetChange, formatterSmall.format(data[1].toFloat()) + "%")
+
+            }
+            else  ->
+            {
+                views.setTextColor(R.id.WidgetChange, Color.GREEN)
+                views.setTextViewText(R.id.WidgetChange, "+" + formatterSmall.format(data[1].toFloat()) + "%")
+
+            }
         }
         val intentSync = Intent(this.applicationContext, CurrencyWidget::class.java)
         intentSync.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE //You need to specify the action for the intent. Right now that intent is doing nothing for there is no action to be broadcasted.
         intentSync.putExtra("ID", param1)
-        val pendingSync = PendingIntent.getBroadcast(this.applicationContext, 0, intentSync, PendingIntent.FLAG_UPDATE_CURRENT) //You need to specify a proper flag for the intent. Or else the intent will become deleted.
-        views.setOnClickPendingIntent(R.id.widgetRefresh, pendingSync)
+        val pendingSync = PendingIntent.getBroadcast(this.applicationContext, param1, intentSync, PendingIntent.FLAG_UPDATE_CURRENT) //You need to specify a proper flag for the intent. Or else the intent will become deleted.
+        views.setOnClickPendingIntent(R.id.widgetLast, pendingSync)
         WM.updateAppWidget(param1, views)
 
     }
