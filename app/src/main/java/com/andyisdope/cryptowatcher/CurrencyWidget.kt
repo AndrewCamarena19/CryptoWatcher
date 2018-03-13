@@ -1,16 +1,12 @@
 package com.andyisdope.cryptowatcher
 
-import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import android.widget.RemoteViews
 import com.andyisdope.cryptowatcher.Services.CurrencyService
-import android.content.ComponentName
-import android.support.v4.app.NotificationCompat.getExtras
-import android.os.Bundle
+
 
 
 /**

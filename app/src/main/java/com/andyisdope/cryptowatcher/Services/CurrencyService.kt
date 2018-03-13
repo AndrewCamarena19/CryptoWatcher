@@ -1,22 +1,22 @@
 package com.andyisdope.cryptowatcher.Services
 
-import android.app.AppOpsManager
-import android.app.IntentService
-import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.content.Context
 import android.graphics.Color
 import android.util.Log
 import android.widget.RemoteViews
-import com.andyisdope.cryptowatcher.CurrencyWidget
-import com.andyisdope.cryptowatcher.CurrencyWidgetConfigureActivity
-import com.andyisdope.cryptowatcher.MainActivity
-import com.andyisdope.cryptowatcher.R
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import android.os.Build
+import android.support.v4.app.NotificationManagerCompat
+import android.R.attr.name
+import android.app.*
+import android.support.v4.app.NotificationCompat
+import android.app.PendingIntent
+import com.andyisdope.cryptowatcher.*
 
 
 /**
@@ -29,7 +29,7 @@ import java.util.*
  */
 class CurrencyService : IntentService("CurrencyService") {
     var formatterSmall: NumberFormat = DecimalFormat("#0.000")
-    var formatterLarge: NumberFormat = DecimalFormat("#,###.0000")
+    var formatterLarge: NumberFormat = DecimalFormat("#,###.00")
 
 
     override fun onHandleIntent(intent: Intent?) {
@@ -78,8 +78,47 @@ class CurrencyService : IntentService("CurrencyService") {
         intentSync.putExtra("ID", param1)
         val pendingSync = PendingIntent.getBroadcast(this.applicationContext, param1, intentSync, PendingIntent.FLAG_UPDATE_CURRENT) //You need to specify a proper flag for the intent. Or else the intent will become deleted.
         views.setOnClickPendingIntent(R.id.widgetLast, pendingSync)
+        createNotification(param2, data[0], param1)
         WM.updateAppWidget(param1, views)
 
+    }
+
+    private fun createNotification(curr: String, price: String, WidgetID: Int)
+    {
+
+        val intent = Intent(this, CurrencyDetail::class.java)
+        intent.putExtra("Currency", curr)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        val pendingIntent = PendingIntent.getActivity(this, WidgetID, intent, 0)
+
+        val mNotific = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val name = "CryptoWatcher Alert"
+        val desc = "${curr.toUpperCase()} has hit price ${formatterLarge.format(price.toFloat())}"
+        val imp = NotificationManager.IMPORTANCE_HIGH
+        val ChannelID = "my_channel_01"
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val mChannel = NotificationChannel(ChannelID, name,
+                    imp)
+            mChannel.description = desc
+            mChannel.lightColor = Color.CYAN
+            mChannel.canShowBadge()
+            mChannel.setShowBadge(true)
+            mNotific.createNotificationChannel(mChannel)
+        }
+
+        val ncode = 101
+        val n = NotificationCompat.Builder(this, ChannelID)
+                .setContentTitle(name)
+                .setContentText(desc)
+                .setBadgeIconType(NotificationCompat.BADGE_ICON_SMALL)
+                .setNumber(5)
+                .setSmallIcon(R.mipmap.ic_launcher_round)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
+                .build()
+
+        mNotific.notify(ncode, n)
     }
 
     /**
