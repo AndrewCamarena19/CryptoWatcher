@@ -267,8 +267,8 @@ class CurrencyDetail : AppCompatActivity() {
         var data = block.split("</td>")
         //data index: date,open,high,low,close,volume,marketcap
 
-        var marketName = data[1].substringAfter("\">").replace("</td>", "")
-        marketName = marketName.substring(0, marketName.indexOf("<"))
+        var marketName = data[1].substringAfter("data-sort=\"")
+        marketName = marketName.substring(0, marketName.indexOf("\""))
 
         var pair = data[2].substringAfter("target=\"_blank\">")
         pair = pair.substring(0, pair.indexOf("</a"))
