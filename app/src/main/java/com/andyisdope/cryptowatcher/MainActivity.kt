@@ -514,44 +514,44 @@ class MainActivity : AppCompatActivity() {
         var symbol = data[1].substringAfter("<span class=\"currency-symbol\"><a href=\"/currencies/$id/\">")
         symbol = symbol.substring(0, symbol.indexOf("<"))
 
-        var marketCap = data[3].substringAfter("data-usd=\"")
+        var marketCap = data[3].substringAfter("data-sort=\"")
         marketCap = marketCap.substring(0, marketCap.indexOf("\""))
         //if(marketCap.contains("+")) marketCap = marketCap.replace("+", "")
 
-        var currPrice = data[4].substringAfter("data-usd=\"")
+        var currPrice = data[4].substringAfter("data-sort=\"")
         currPrice = currPrice.substring(0, currPrice.indexOf("\""))
         //if(currPrice.contains("+")) currPrice = currPrice.replace("+", "")
 
-        var volume = data[6].substringAfter("data-usd=\"")
+        var volume = data[6].substringAfter("data-sort=\"")
         volume = volume.substring(0, volume.indexOf("\""))
         //if(volume.contains("+")) volume = volume.replace("+", "")
 
         var hrChange = data[7].substringAfter("text-right\"")
         hrChange = if (hrChange.length < 5) "?"
         else {
-            var temp = hrChange.substringAfter("data-percentusd=\"")
+            var temp = hrChange.substringAfter("data-sort=\"")
             temp.substring(0, temp.indexOf("\""))
         }
 
         var twoChange = data[8].substringAfter("text-right\"")
         twoChange = if (twoChange.length < 5) "?"
         else {
-            var temp = twoChange.substringAfter("data-percentusd=\"")
+            var temp = twoChange.substringAfter("data-sort=\"")
             temp.substring(0, temp.indexOf("\""))
         }
 
         var sevenChange = data[9].substringAfter("text-right\"")
         sevenChange = if (sevenChange.length < 5) "?"
         else {
-            var temp = sevenChange.substringAfter("data-percentusd=\"")
+            var temp = sevenChange.substringAfter("data-sort=\"")
             temp.substring(0, temp.indexOf("\""))
         }
-        if (marketCap == "?") marketCap = "-9999"
-        if (currPrice == "?") currPrice = "-9999"
-        if (hrChange == "?") hrChange = "-9999"
-        if (twoChange == "?") twoChange = "-9999"
-        if (sevenChange == "?") sevenChange = "-9999"
-        if (volume == "?" || volume == "NONE" || volume == "None") volume = "-9999"
+        if (marketCap == "0") marketCap = "-9999"
+        if (currPrice == "0") currPrice = "-9999"
+        if (hrChange == "-0.0001") hrChange = "-9999"
+        if (twoChange == "-0.0001") twoChange = "-9999"
+        if (sevenChange == "-0.0001") sevenChange = "-9999"
+        if (volume == "-1" || volume == "NONE" || volume == "None") volume = "-9999"
         return Currency(id, symbol, Integer.parseInt(place), false, 0.0, marketCap, currPrice, hrChange, twoChange, sevenChange, volume)
     }
 
@@ -569,45 +569,45 @@ class MainActivity : AppCompatActivity() {
         var symbol = data[1].substringAfter("<span class=\"currency-symbol\"><a href=\"/currencies/$id/\">")
         symbol = symbol.substring(0, symbol.indexOf("<"))
 
-        var marketCap = data[3].substringAfter("data-usd=\"")
+        var marketCap = data[3].substringAfter("data-sort=\"")
         marketCap = marketCap.substring(0, marketCap.indexOf("\""))
         //if(marketCap.contains("+")) marketCap = marketCap.replace("+", "")
 
-        var currPrice = data[4].substringAfter("data-usd=\"")
+        var currPrice = data[4].substringAfter("data-sort=\"")
         currPrice = currPrice.substring(0, currPrice.indexOf("\""))
         //if(currPrice.contains("+")) currPrice = currPrice.replace("+", "")
 
-        var volume = data[6].substringAfter("data-usd=\"")
+        var volume = data[6].substringAfter("data-sort=\"")
         volume = volume.substring(0, volume.indexOf("\""))
         //if(volume.contains("+")) volume = volume.replace("+", "")
 
         var hrChange = data[7].substringAfter("text-right\"")
         hrChange = if (hrChange.length < 5) "?"
         else {
-            var temp = hrChange.substringAfter("data-percentusd=\"")
+            var temp = hrChange.substringAfter("data-sort=\"")
             temp.substring(0, temp.indexOf("\""))
         }
 
         var twoChange = data[8].substringAfter("text-right\"")
         twoChange = if (twoChange.length < 5) "?"
         else {
-            var temp = twoChange.substringAfter("data-percentusd=\"")
+            var temp = twoChange.substringAfter("data-sort=\"")
             temp.substring(0, temp.indexOf("\""))
         }
 
         var sevenChange = data[9].substringAfter("text-right\"")
         sevenChange = if (sevenChange.length < 5) "?"
         else {
-            var temp = sevenChange.substringAfter("data-percentusd=\"")
+            var temp = sevenChange.substringAfter("data-sort=\"")
             temp.substring(0, temp.indexOf("\""))
         }
 
-        if (marketCap == "?") marketCap = "-9999"
-        if (currPrice == "?") currPrice = "-9999"
-        if (hrChange == "?") hrChange = "-9999"
-        if (twoChange == "?") twoChange = "-9999"
-        if (sevenChange == "?") sevenChange = "-9999"
-        if (volume == "?" || volume == "NONE" || volume == "None") volume = "-9999"
+        if (marketCap == "0") marketCap = "-9999"
+        if (currPrice == "0") currPrice = "-9999"
+        if (hrChange == "-0.0001") hrChange = "-9999"
+        if (twoChange == "-0.0001") twoChange = "-9999"
+        if (sevenChange == "-0.0001") sevenChange = "-9999"
+        if (volume == "-1" || volume == "NONE" || volume == "None") volume = "-9999"
 
         return Tokens(id, symbol, Integer.parseInt(place), platform, false, 0.0, marketCap, currPrice, hrChange, twoChange, sevenChange, volume)
     }
