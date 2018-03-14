@@ -9,11 +9,7 @@ import android.os.Bundle
 import android.preference.PreferenceManager
 import android.util.Log
 import android.view.View
-import android.widget.AdapterView
-import android.widget.EditText
-import android.widget.Spinner
-import android.widget.Toast
-import android.widget.ArrayAdapter
+import android.widget.*
 import com.andyisdope.cryptowatcher.Services.CurrencyService
 
 
@@ -23,6 +19,12 @@ import com.andyisdope.cryptowatcher.Services.CurrencyService
 class CurrencyWidgetConfigureActivity : Activity() {
     private var mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
     private lateinit var mAppWidgetText: Spinner
+    private lateinit var HighPrice: EditText
+    private lateinit var BottomPrice: EditText
+    private lateinit var AbsoluteChange: EditText
+    private lateinit var HighPriceBox: CheckBox
+    private lateinit var BottomPriceBox: CheckBox
+    private lateinit var AbsoluteChangeBox: CheckBox
     private var selected: String = ""
     private lateinit var sharedPref: SharedPreferences
 
@@ -39,44 +41,101 @@ class CurrencyWidgetConfigureActivity : Activity() {
 
         }
     }
+
+    private fun initUI()
+    {
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+
+        HighPrice = findViewById<EditText>(R.id.WidgetHighSet) as EditText
+        BottomPrice = findViewById<EditText>(R.id.WidgetBottomSet) as EditText
+        AbsoluteChange = findViewById<EditText>(R.id.WidgetAbsoluteSet) as EditText
+        mAppWidgetText = findViewById<Spinner>(R.id.appwidget_text) as Spinner
+        findViewById<View>(R.id.add_button).setOnClickListener(mOnClickListener)
+
+        HighPriceBox = findViewById<CheckBox>(R.id.WidgetHighPrice) as CheckBox
+        HighPriceBox.setOnCheckedChangeListener { compoundButton, b ->
+            when(b)
+            {
+                true -> HighPrice.visibility = View.VISIBLE
+                false -> HighPrice.visibility = View.GONE
+            }
+        }
+        BottomPriceBox = findViewById<CheckBox>(R.id.WidgetBottomPrice) as CheckBox
+        BottomPriceBox.setOnCheckedChangeListener { compoundButton, b ->
+            when(b)
+            {
+                true -> BottomPrice.visibility = View.VISIBLE
+                false -> BottomPrice.visibility = View.GONE
+            }
+        }
+        AbsoluteChangeBox = findViewById<CheckBox>(R.id.WidgetAbsoluteChange) as CheckBox
+        AbsoluteChangeBox.setOnCheckedChangeListener { compoundButton, b ->
+            when(b)
+            {
+                true -> AbsoluteChange.visibility = View.VISIBLE
+                false -> AbsoluteChange.visibility = View.GONE
+            }
+        }
+
+
+        var mList = sharedPref.all.keys.toList()
+        var adapters = ArrayAdapter<String>(
+                this, android.R.layout.simple_spinner_item, mList)
+
+        mAppWidgetText.onItemSelectedListener = spinnerOnclick
+        adapters.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        mAppWidgetText.adapter = adapters
+
+    }
     private var mOnClickListener: View.OnClickListener = View.OnClickListener {
         val context = this@CurrencyWidgetConfigureActivity
 
         // When the button is clicked, store the string locally
-        val widgetText = selected
-        saveTitlePref(context, mAppWidgetId, widgetText)
+        val CurrencyName = selected
+
+        //saveTitlePref(context, mAppWidgetId, CurrencyName)
 
         // It is the responsibility of the configuration activity to update the app widget
-        val appWidgetManager = AppWidgetManager.getInstance(context)
-        Log.i("Here", "in config buton")
-        CurrencyService.startActionFoo(context,mAppWidgetId, widgetText)
+        //val appWidgetManager = AppWidgetManager.getInstance(context)
+        //Log.i("Here", "in config buton")
+        var HP = -999.0f
+        var BP = -999.0f
+        var CP = -999.0f
+        if(HighPriceBox.isChecked)
+        {
+            HP = HighPrice.text.toString().toFloat()
+        }
+        if(BottomPriceBox.isChecked)
+        {
+            BP = BottomPrice.text.toString().toFloat()
+        }
+        if(AbsoluteChangeBox.isChecked)
+        {
+            CP = AbsoluteChange.text.toString().toFloat()
+        }
+
+        CurrencyService.startActionFoo(context, mAppWidgetId, "$CurrencyName,$HP,$BP,$CP")
 
 
         // Make sure we pass back the original appWidgetId
         val resultValue = Intent()
         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId)
         setResult(Activity.RESULT_OK, resultValue)
-        Toast.makeText(this, "Press Updated time to refresh", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Press Updated time to refresh \n" +
+                "Each notification will only be used once", Toast.LENGTH_LONG).show()
         finish()
     }
 
     public override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
+        setContentView(R.layout.currency_widget_configure)
+
         Toast.makeText(this, "Add a currency to favorites to populate list", Toast.LENGTH_SHORT).show()
         // Set the result to CANCELED.  This will cause the widget host to cancel
         // out of the widget placement if the user presses the back button.
         setResult(Activity.RESULT_CANCELED)
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
-        var mList = sharedPref.all.keys.toList()
-        //Log.i("Here", sharedPref.all.keys.toString())
-        var adapters = ArrayAdapter<String>(
-                this, android.R.layout.simple_spinner_item, mList)
-        setContentView(R.layout.currency_widget_configure)
-        mAppWidgetText = findViewById<Spinner>(R.id.appwidget_text) as Spinner
-        findViewById<View>(R.id.add_button).setOnClickListener(mOnClickListener)
-        mAppWidgetText.onItemSelectedListener = spinnerOnclick
-        adapters.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mAppWidgetText.adapter = adapters
+        initUI()
+
 
 
 

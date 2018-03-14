@@ -16,7 +16,9 @@ import android.R.attr.name
 import android.app.*
 import android.support.v4.app.NotificationCompat
 import android.app.PendingIntent
+import android.widget.Toast
 import com.andyisdope.cryptowatcher.*
+import java.lang.Math.abs
 
 
 /**
@@ -36,9 +38,12 @@ class CurrencyService : IntentService("CurrencyService") {
         if (intent != null) {
             val action = intent.action
             if (UPDATE == action) {
-                val param1 = intent.getIntExtra(EXTRA_PARAM1, 0)
-                val param2 = intent.getStringExtra(EXTRA_PARAM2)
-                handleActionFoo(param1, param2)
+                val param1 = intent.getIntExtra(WIDGETID, 0)
+                val param2 = intent.getStringExtra(WIDGETTEXT)
+                val param3 = intent.getStringExtra(WIDGETHIGH)
+                val param4 = intent.getStringExtra(WIDGETBOTTOM)
+                val param5 = intent.getStringExtra(WIDGETCHANGE)
+                handleActionFoo(param1, param2, param3.toFloat(), param4.toFloat(), param5.toFloat())
             }
         }
     }
@@ -46,17 +51,15 @@ class CurrencyService : IntentService("CurrencyService") {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private fun handleActionFoo(param1: Int, param2: String) {
+    private fun handleActionFoo(param1: Int, param2: String, High: Float, Bottom: Float, Change: Float) {
         val currentTime = Calendar.getInstance().time
         val date = Date(currentTime.time)
         val sdf = SimpleDateFormat("HH:mm:ss")
         var WM: AppWidgetManager = AppWidgetManager.getInstance(this.applicationContext)
         val views = RemoteViews(this.packageName, R.layout.currency_widget)
         var data = parseCurrencyData(param2).split(",")
-        //Log.i("Here", data.toString() + param1.toString() + param2)
         views.setTextViewText(R.id.appwidget_text, param2.toUpperCase())
         views.setTextViewText(R.id.widgetLast,"Updated: " + sdf.format(date))
-        CurrencyWidgetConfigureActivity.saveTitlePref(this, param1, param2 + "," + data)
         views.setTextViewText(R.id.WidgetPrice, "$ " + formatterLarge.format(data[0].toFloat()))
         when
         {
@@ -78,12 +81,25 @@ class CurrencyService : IntentService("CurrencyService") {
         intentSync.putExtra("ID", param1)
         val pendingSync = PendingIntent.getBroadcast(this.applicationContext, param1, intentSync, PendingIntent.FLAG_UPDATE_CURRENT) //You need to specify a proper flag for the intent. Or else the intent will become deleted.
         views.setOnClickPendingIntent(R.id.widgetLast, pendingSync)
-        createNotification(param2, data[0], param1)
+        CurrencyWidgetConfigureActivity.saveTitlePref(this, param1, "$param2,$data,$High,$Bottom,$Change")
+
+        if(High != -999.0f && data[0].toFloat() > High) {
+            createNotification(param2, data[0], param1, "high")
+            CurrencyWidgetConfigureActivity.saveTitlePref(this, param1, "$param2,$data,-999.0f,$Bottom,$Change")
+        }
+        if(Bottom != -999.0f && data[0].toFloat() < Bottom) {
+            createNotification(param2, data[0], param1, "bottom")
+            CurrencyWidgetConfigureActivity.saveTitlePref(this, param1, "$param2,$data,$High,-999.0f,$Change")
+        }
+        if(Change != -999.0f && abs(data[1].toFloat()) > Change) {
+            createNotification(param2, data[1], param1, "absolute percent change")
+            CurrencyWidgetConfigureActivity.saveTitlePref(this, param1, "$param2,$data,$High,$Bottom,-999.0f")
+        }
         WM.updateAppWidget(param1, views)
 
     }
 
-    private fun createNotification(curr: String, price: String, WidgetID: Int)
+    private fun createNotification(curr: String, Change: String, WidgetID: Int, Alert: String)
     {
 
         val intent = Intent(this, CurrencyDetail::class.java)
@@ -93,7 +109,7 @@ class CurrencyService : IntentService("CurrencyService") {
 
         val mNotific = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val name = "CryptoWatcher Alert"
-        val desc = "${curr.toUpperCase()} has hit price ${formatterLarge.format(price.toFloat())}"
+        val desc = "${curr.toUpperCase()} has hit a $Alert of ${formatterLarge.format(Change.toFloat())}"
         val imp = NotificationManager.IMPORTANCE_HIGH
         val ChannelID = "my_channel_01"
 
@@ -101,7 +117,7 @@ class CurrencyService : IntentService("CurrencyService") {
             val mChannel = NotificationChannel(ChannelID, name,
                     imp)
             mChannel.description = desc
-            mChannel.lightColor = Color.CYAN
+            mChannel.lightColor = Color.GREEN
             mChannel.canShowBadge()
             mChannel.setShowBadge(true)
             mNotific.createNotificationChannel(mChannel)
@@ -117,17 +133,8 @@ class CurrencyService : IntentService("CurrencyService") {
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
                 .build()
-
+        Toast.makeText(this, "Recreate Widget to set new notification", Toast.LENGTH_SHORT).show()
         mNotific.notify(ncode, n)
-    }
-
-    /**
-     * Handle action Baz in the provided background thread with the provided
-     * parameters.
-     */
-    private fun handleActionBaz(param1: String, param2: String) {
-        // TODO: Handle action Baz
-        throw UnsupportedOperationException("Not yet implemented")
     }
 
     companion object {
@@ -137,8 +144,12 @@ class CurrencyService : IntentService("CurrencyService") {
         private val ACTION_BAZ = "com.andyisdope.cryptowatcher.Services.action.BAZ"
 
         // TODO: Rename parameters
-        val EXTRA_PARAM1 = "com.andyisdope.cryptowatcher.Services.extra.PARAM1"
-        val EXTRA_PARAM2 = "com.andyisdope.cryptowatcher.Services.extra.PARAM2"
+        val WIDGETID = "com.andyisdope.cryptowatcher.Services.extra.WidgetID"
+        val WIDGETTEXT = "com.andyisdope.cryptowatcher.Services.extra.WidgetText"
+        val WIDGETHIGH = "com.andyisdope.cryptowatcher.Services.extra.WidgetHigh"
+        val WIDGETBOTTOM = "com.andyisdope.cryptowatcher.Services.extra.WidgetBottom"
+        val WIDGETCHANGE = "com.andyisdope.cryptowatcher.Services.extra.WidgetChange"
+
 
         /**
          * Starts this service to perform action Foo with the given parameters. If
@@ -150,8 +161,13 @@ class CurrencyService : IntentService("CurrencyService") {
         fun startActionFoo(context: Context, param1: Int, param2: String) {
                 val intent = Intent(context, CurrencyService::class.java)
                 intent.action = UPDATE
-                intent.putExtra(EXTRA_PARAM1, param1)
-                intent.putExtra(EXTRA_PARAM2, param2)
+                var extras = param2.split(",")
+                intent.putExtra(WIDGETID, param1)
+                intent.putExtra(WIDGETTEXT, extras[0])
+                Log.i("Here", extras.toString())
+                intent.putExtra(WIDGETHIGH, extras[1])
+                intent.putExtra(WIDGETBOTTOM, extras[2])
+                intent.putExtra(WIDGETCHANGE, extras[3])
                 context.startService(intent)
         }
 
@@ -169,21 +185,6 @@ class CurrencyService : IntentService("CurrencyService") {
             change = change?.substring(0, change.indexOf("\""))
 
             return price+","+change
-        }
-
-        /**
-         * Starts this service to perform action Baz with the given parameters. If
-         * the service is already performing a task this action will be queued.
-         *
-         * @see IntentService
-         */
-        // TODO: Customize helper method
-        fun startActionBaz(context: Context, param1: String, param2: String) {
-            val intent = Intent(context, CurrencyService::class.java)
-            intent.action = ACTION_BAZ
-            intent.putExtra(EXTRA_PARAM1, param1)
-            intent.putExtra(EXTRA_PARAM2, param2)
-            context.startService(intent)
         }
     }
 }

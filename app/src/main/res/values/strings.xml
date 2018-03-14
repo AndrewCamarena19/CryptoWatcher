@@ -21,4 +21,15 @@
     <string name="time_frame">Time Frame</string>
     <string name="default_currency">Default Currency</string>
     <string name="order">Order</string>
+    <string name="price_alert">Price Alert</string>
+    <string name="change_alert">Change Alert</string>
+    <string name="set_rising_price">Set rising price</string>
+    <string name="falling_price">High Price</string>
+    <string name="rising_price">Bottom Price</string>
+    <string name="falling_change">Falling Change</string>
+    <string name="rising_change">Rising Change</string>
+    <string name="set_price_of_bottom_in_us_dollars">Set Price of Bottom in US Dollars</string>
+    <string name="set_price_of_high_in_us_dollars">Set Price of High in US Dollars</string>
+    <string name="set_percent_of_change_absolute_value">Set Percent of change (Absolute value)</string>
+    <string name="absolute_change">Absolute Change</string>
 </resources>

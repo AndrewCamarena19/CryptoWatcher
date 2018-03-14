@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -14,8 +15,73 @@
     <Spinner
         android:id="@+id/appwidget_text"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:inputType="text" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <CheckBox
+            android:id="@+id/WidgetHighPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/falling_price" />
+
+        <CheckBox
+            android:id="@+id/WidgetBottomPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/rising_price" />
+
+        <CheckBox
+            android:id="@+id/WidgetAbsoluteChange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/absolute_change" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/WidgetAbsoluteSet"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="@string/set_percent_of_change_absolute_value"
+            android:inputType="numberDecimal"
+            android:visibility="invisible" />
+
+        <EditText
+            android:id="@+id/WidgetBottomSet"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="@string/set_price_of_bottom_in_us_dollars"
+            android:inputType="numberDecimal"
+            android:visibility="invisible" />
+
+        <EditText
+            android:id="@+id/WidgetHighSet"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="@string/set_price_of_high_in_us_dollars"
+            android:inputType="numberDecimal"
+            android:visibility="invisible" />
+    </LinearLayout>
 
     <Button
         android:id="@+id/add_button"
