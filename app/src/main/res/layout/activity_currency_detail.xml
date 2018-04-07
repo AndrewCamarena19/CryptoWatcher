@@ -9,8 +9,10 @@
     <TabHost
         android:id="@+id/DetailTab"
         android:layout_width="match_parent"
-        android:background="@color/colorPrimary"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/colorPrimary">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -27,38 +29,359 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <RelativeLayout
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/Vault"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorPrimaryDark"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/VaultLogo"
+                        android:layout_width="69dp"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="50dp"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:srcCompat="@drawable/cream" />
+
+                    <TextView
+                        android:id="@+id/VaultName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginTop="20dp"
+                        android:text="TextView"
+                        android:textColor="@color/TickerNameColor"
+                        android:textSize="24sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/VaultLogo"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/NumberCoins"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="50dp"
+                        android:text="TextView"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/VaultLogo" />
+
+                    <TextView
+                        android:id="@+id/CoinsNumberLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="Units Held"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/NumberCoins"
+                        app:layout_constraintStart_toEndOf="@+id/NumberCoins" />
+
+                    <TextView
+                        android:id="@+id/VaultCurrentPrice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="20dp"
+                        android:layout_marginStart="8dp"
+                        android:text="TextView"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/CoinsNumberLabel"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/CoinsNumberLabel" />
+
+                    <View
+                        android:id="@+id/view"
+                        android:layout_width="match_parent"
+                        android:layout_height="5dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="60dp"
+                        android:layout_weight="1"
+                        android:background="@color/colorBorder"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/VaultCurrentPrice" />
+
+                    <TextView
+                        android:id="@+id/VaultBuyCoinsAmount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="50dp"
+                        android:layout_marginTop="24dp"
+                        android:text="TextView"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/view" />
+
+                    <TextView
+                        android:id="@+id/VaultBuyCoinsPrice"
+                        android:layout_width="75dp"
+                        android:layout_height="20dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:hint="@ Price"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/VaultBuyCoinsAmount"
+                        app:layout_constraintEnd_toStartOf="@+id/VaultBuyCoinsBtn"
+                        app:layout_constraintStart_toEndOf="@+id/VaultBuyCoinsAmount" />
+
+                    <Button
+                        android:id="@+id/VaultBuyCoinsBtn"
+                        style="@android:style/Widget.Holo.Button"
+                        android:layout_width="80dp"
+                        android:layout_height="35dp"
+                        android:layout_marginEnd="25dp"
+                        android:text="Buy"
+                        android:textSize="14sp"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/VaultBuyCoinsPrice"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <TextView
+                        android:id="@+id/VaultInvested"
+                        android:layout_width="75dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="30dp"
+                        android:text="TextView"
+                        android:textColor="@color/TickerNameColor"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/CoinsNumberLabel" />
+
+                    <TextView
+                        android:id="@+id/VaultTotal"
+                        android:layout_width="75dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="60dp"
+                        android:text="TextView"
+                        android:textColor="@color/TickerNameColor"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/VaultInvested"
+                        app:layout_constraintStart_toEndOf="@+id/VaultInvested" />
+
+                    <TextView
+                        android:id="@+id/VaultNet"
+                        android:layout_width="75dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:text="TextView"
+                        android:textColor="@color/TickerNameColor"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/VaultTotal"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <TextView
+                        android:id="@+id/VaultSellCoinsAmount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="50dp"
+                        android:layout_marginTop="25dp"
+                        android:text="TextView"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/VaultBuyCoinsAmount" />
+
+                    <TextView
+                        android:id="@+id/VaultSellCoinsPrice"
+                        android:layout_width="75dp"
+                        android:layout_height="20dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:hint="@ Price"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/VaultSellCoinsAmount"
+                        app:layout_constraintEnd_toStartOf="@+id/VaultSellCoinsBtn"
+                        app:layout_constraintStart_toEndOf="@+id/VaultSellCoinsAmount" />
+
+                    <Button
+                        android:id="@+id/VaultSellCoinsBtn"
+                        style="@android:style/Widget.Holo.Button"
+                        android:layout_width="80dp"
+                        android:layout_height="35dp"
+                        android:layout_marginEnd="24dp"
+                        android:text="Sell"
+                        android:textSize="14sp"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/VaultSellCoinsPrice"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <View
+                        android:id="@+id/view2"
+                        android:layout_width="344dp"
+                        android:layout_height="5dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="20dp"
+                        android:layout_weight="1"
+                        android:background="@color/colorBorder"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/VaultSellCoinsBtn" />
+
+                    <TextView
+                        android:id="@+id/VaultTotalAssetsLbl"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="12dp"
+                        android:text="Total Assets in Vaults"
+                        android:textColor="@color/TickerNameColor"
+                        android:textSize="20sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.502"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/view2" />
+
+                    <TextView
+                        android:id="@+id/InvestedLbl"
+                        android:layout_width="75dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:text="Invested"
+                        app:layout_constraintBottom_toTopOf="@+id/VaultInvested"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <TextView
+                        android:id="@+id/VaultCoinLbl"
+                        android:layout_width="75dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="60dp"
+                        android:text="Total"
+                        app:layout_constraintBottom_toTopOf="@+id/VaultTotal"
+                        app:layout_constraintStart_toEndOf="@+id/InvestedLbl" />
+
+                    <TextView
+                        android:id="@+id/VaultNetLbl"
+                        android:layout_width="75dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:text="Net"
+                        app:layout_constraintBottom_toTopOf="@+id/VaultNet"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <TextView
+                        android:id="@+id/textView5"
+                        android:layout_width="75dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:text="Invested"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/VaultTotalAssetsLbl" />
+
+                    <TextView
+                        android:id="@+id/VaultsInvested"
+                        android:layout_width="75dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="TextView"
+                        android:textColor="@color/TickerNameColor"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/textView5" />
+
+                    <TextView
+                        android:id="@+id/VaultsTotalLbl"
+                        android:layout_width="75dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="60dp"
+                        android:text="Total"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/textView5"
+                        app:layout_constraintStart_toEndOf="@+id/textView5" />
+
+                    <TextView
+                        android:id="@+id/VaultsTotal"
+                        android:layout_width="75dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="60dp"
+                        android:text="TextView"
+                        android:textColor="@color/TickerNameColor"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/VaultsInvested"
+                        app:layout_constraintStart_toEndOf="@+id/VaultsInvested" />
+
+                    <TextView
+                        android:id="@+id/VaultsNetLbl"
+                        android:layout_width="75dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="Net"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/VaultsTotalLbl"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <TextView
+                        android:id="@+id/VaultsNet"
+                        android:layout_width="75dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="TextView"
+                        android:textColor="@color/TickerNameColor"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/VaultsTotal"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <TextView
+                        android:id="@+id/textView11"
+                        android:layout_width="75dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="32dp"
+                        android:text="Liquid USD Available: "
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/VaultsInvested" />
+
+                    <TextView
+                        android:id="@+id/textView12"
+                        android:layout_width="100dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="28dp"
+                        android:text="TextView"
+                        android:textColor="@color/TickerNameColor"
+                        app:layout_constraintStart_toEndOf="@+id/textView11"
+                        tools:layout_editor_absoluteY="396dp" />
+
+                    <Button
+                        android:id="@+id/button2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="24dp"
+                        android:text="Add Funds"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/textView12"
+                        app:layout_constraintStart_toEndOf="@+id/textView12" />
+
+                </android.support.constraint.ConstraintLayout>
+
+                <android.support.constraint.ConstraintLayout
                     android:id="@+id/Exchanges"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:orientation="vertical">
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:id="@+id/linearLayout2"
+                        android:layout_width="0dp"
+                        android:layout_height="25dp"
+                        android:orientation="horizontal"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
 
                         <Spinner
                             android:id="@+id/MarketSpinner"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
                             android:layout_weight="1" />
 
                         <Spinner
                             android:id="@+id/PairSpinner"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
                             android:layout_weight="1" />
 
                     </LinearLayout>
 
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/MarketView"
-                        android:layout_width="match_parent"
-                        android:layout_height="350dp"
-                        android:layout_marginTop="25dp"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
                         android:background="@color/colorPrimaryDark"
-                        android:scrollbars="vertical" />
+                        android:scrollbars="vertical"
+                        app:layout_constraintBottom_toTopOf="@+id/CurrencyRadio"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
 
                     <RadioGroup
                         android:id="@+id/CurrencyRadio"
@@ -66,7 +389,9 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentStart="true"
                         android:layout_below="@+id/MarketView"
-                        android:orientation="horizontal">
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal"
+                        app:layout_constraintBottom_toBottomOf="parent">
 
                         <RadioButton
                             android:id="@+id/RadioUSD"
@@ -92,9 +417,9 @@
 
                     </RadioGroup>
 
-                </RelativeLayout>
+                </android.support.constraint.ConstraintLayout>
 
-                <RelativeLayout
+                <android.support.constraint.ConstraintLayout
                     android:id="@+id/Charts"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -103,63 +428,69 @@
 
                     <TextView
                         android:id="@+id/CurrencyPrice"
-                        android:layout_width="304dp"
-                        android:layout_height="20dp"
+                        android:layout_width="0dp"
+                        android:layout_height="30dp"
                         android:layout_alignParentTop="true"
                         android:layout_toEndOf="@+id/PriceTime"
                         android:background="@color/colorPrimaryDark"
                         android:textAlignment="center"
                         android:textColor="@color/colorText"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/PriceTime"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
                         android:id="@+id/PriceTime"
-                        android:layout_width="80dp"
-                        android:layout_height="20dp"
+                        android:layout_width="130dp"
+                        android:layout_height="30dp"
                         android:layout_alignParentStart="true"
                         android:layout_alignParentTop="true"
                         android:background="@color/colorPrimaryDark"
                         android:textAlignment="viewStart"
                         android:textColor="@color/colorText"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toStartOf="@+id/CurrencyPrice"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <com.github.mikephil.charting.charts.CandleStickChart
 
                         android:id="@+id/CurrencyChart"
                         android:layout_width="match_parent"
                         android:layout_height="200dp"
-                        android:layout_marginTop="20dp"
-                        android:background="@color/colorPrimaryDark">
+                        android:background="@color/colorPrimaryDark"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/CurrencyPrice">
 
                     </com.github.mikephil.charting.charts.CandleStickChart>
 
                     <com.github.mikephil.charting.charts.BarChart
                         android:id="@+id/VolumeChart"
                         android:layout_width="match_parent"
-                        android:layout_height="100dp"
-                        android:layout_marginTop="220dp"
-                        android:background="@color/colorPrimaryDark">
+                        android:layout_height="150dp"
+                        android:background="@color/colorPrimaryDark"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/CurrencyChart">
 
                     </com.github.mikephil.charting.charts.BarChart>
 
                     <com.github.mikephil.charting.charts.CombinedChart
                         android:id="@+id/MACD"
-                        android:layout_width="match_parent"
-                        android:layout_height="125dp"
-                        android:layout_marginTop="320dp"
-                        android:background="@color/colorPrimaryDark">
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@color/colorPrimaryDark"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/VolumeChart">
 
                     </com.github.mikephil.charting.charts.CombinedChart>
 
-                </RelativeLayout>
+                </android.support.constraint.ConstraintLayout>
 
-                <LinearLayout
-                    android:id="@+id/Alerts"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                </LinearLayout>
             </FrameLayout>
         </LinearLayout>
     </TabHost>

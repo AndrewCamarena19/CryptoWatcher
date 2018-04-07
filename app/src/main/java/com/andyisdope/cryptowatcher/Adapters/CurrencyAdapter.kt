@@ -37,19 +37,14 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
     var formatterSmall: NumberFormat = DecimalFormat("#,##0.000")
     var formatterTiny: NumberFormat = DecimalFormat("#0.0##E0")
     val sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext)
-    val settings = PreferenceManager.getDefaultSharedPreferences(mContext)
 
 
     override fun getItemCount(): Int {
         return mItems.size
     }
 
-    private lateinit var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key -> Log.i("preferences", "onSharedPreferenceChanged: " + key) }
-        settings.registerOnSharedPreferenceChangeListener(prefsListener)
 
         val layoutId = R.layout.list_item
 

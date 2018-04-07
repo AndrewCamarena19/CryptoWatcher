@@ -4,21 +4,21 @@ import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.content.Context
 import android.graphics.Color
-import android.util.Log
 import android.widget.RemoteViews
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import android.os.Build
-import android.support.v4.app.NotificationManagerCompat
-import android.R.attr.name
 import android.app.*
 import android.support.v4.app.NotificationCompat
 import android.app.PendingIntent
 import android.widget.Toast
 import com.andyisdope.cryptowatcher.*
 import java.lang.Math.abs
+import android.os.PowerManager
+
+
 
 
 /**
@@ -47,6 +47,7 @@ class CurrencyService : IntentService("CurrencyService") {
             }
         }
     }
+
     /**
      * Handle action Foo in the provided background thread with the provided
      * parameters.
@@ -59,18 +60,15 @@ class CurrencyService : IntentService("CurrencyService") {
         val views = RemoteViews(this.packageName, R.layout.currency_widget)
         var data = parseCurrencyData(param2).split(",")
         views.setTextViewText(R.id.appwidget_text, param2.toUpperCase())
-        views.setTextViewText(R.id.widgetLast,"Updated: " + sdf.format(date))
+        views.setTextViewText(R.id.widgetLast, "Updated: " + sdf.format(date))
         views.setTextViewText(R.id.WidgetPrice, "$ " + formatterLarge.format(data[0].toFloat()))
-        when
-        {
-            (data[1].toFloat() < 0) ->
-            {
+        when {
+            (data[1].toFloat() < 0) -> {
                 views.setTextColor(R.id.WidgetChange, Color.RED)
                 views.setTextViewText(R.id.WidgetChange, formatterSmall.format(data[1].toFloat()) + "%")
 
             }
-            else  ->
-            {
+            else -> {
                 views.setTextColor(R.id.WidgetChange, Color.GREEN)
                 views.setTextViewText(R.id.WidgetChange, "+" + formatterSmall.format(data[1].toFloat()) + "%")
 
@@ -83,15 +81,15 @@ class CurrencyService : IntentService("CurrencyService") {
         views.setOnClickPendingIntent(R.id.widgetLast, pendingSync)
         CurrencyWidgetConfigureActivity.saveTitlePref(this, param1, "$param2,$data,$High,$Bottom,$Change")
 
-        if(High != -999.0f && data[0].toFloat() > High) {
+        if (High != -999.0f && data[0].toFloat() > High) {
             createNotification(param2, data[0], param1, "high")
             CurrencyWidgetConfigureActivity.saveTitlePref(this, param1, "$param2,$data,-999.0f,$Bottom,$Change")
         }
-        if(Bottom != -999.0f && data[0].toFloat() < Bottom) {
+        if (Bottom != -999.0f && data[0].toFloat() < Bottom) {
             createNotification(param2, data[0], param1, "bottom")
             CurrencyWidgetConfigureActivity.saveTitlePref(this, param1, "$param2,$data,$High,-999.0f,$Change")
         }
-        if(Change != -999.0f && abs(data[1].toFloat()) > Change) {
+        if (Change != -999.0f && abs(data[1].toFloat()) > Change) {
             createNotification(param2, data[1], param1, "absolute percent change")
             CurrencyWidgetConfigureActivity.saveTitlePref(this, param1, "$param2,$data,$High,$Bottom,-999.0f")
         }
@@ -99,9 +97,7 @@ class CurrencyService : IntentService("CurrencyService") {
 
     }
 
-    private fun createNotification(curr: String, Change: String, WidgetID: Int, Alert: String)
-    {
-
+    private fun createNotification(curr: String, Change: String, WidgetID: Int, Alert: String) {
         val intent = Intent(this, CurrencyDetail::class.java)
         intent.putExtra("Currency", curr)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -132,9 +128,29 @@ class CurrencyService : IntentService("CurrencyService") {
                 .setSmallIcon(R.mipmap.ic_launcher_round)
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setLights(0xccccff, 1000,1000)
                 .build()
+        wakeScreen()
         Toast.makeText(this, "Recreate Widget to set new notification", Toast.LENGTH_SHORT).show()
         mNotific.notify(ncode, n)
+    }
+
+    private fun wakeScreen()
+    {
+        val pm = this.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val isScreenOn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            pm.isInteractive
+        } else {
+            pm.isScreenOn
+        }
+        if (!isScreenOn) {
+            val wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE, "MyLock")
+            wl.acquire(10000)
+            val wl_cpu = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyCpuLock")
+
+            wl_cpu.acquire(10000)
+        }
     }
 
     companion object {
@@ -159,22 +175,21 @@ class CurrencyService : IntentService("CurrencyService") {
          */
         // TODO: Customize helper method
         fun startActionFoo(context: Context, param1: Int, param2: String) {
-                val intent = Intent(context, CurrencyService::class.java)
-                intent.action = UPDATE
-                var extras = param2.split(",")
-                intent.putExtra(WIDGETID, param1)
-                intent.putExtra(WIDGETTEXT, extras[0])
-                Log.i("Here", extras.toString())
-                intent.putExtra(WIDGETHIGH, extras[1])
-                intent.putExtra(WIDGETBOTTOM, extras[2])
-                intent.putExtra(WIDGETCHANGE, extras[3])
-                context.startService(intent)
+            val intent = Intent(context, CurrencyService::class.java)
+            intent.action = UPDATE
+            var extras = param2.split(",")
+            intent.putExtra(WIDGETID, param1)
+            intent.putExtra(WIDGETTEXT, extras[0])
+            //Log.i("Here", extras.toString())
+            intent.putExtra(WIDGETHIGH, extras[1])
+            intent.putExtra(WIDGETBOTTOM, extras[2])
+            intent.putExtra(WIDGETCHANGE, extras[3])
+            context.startService(intent)
         }
 
-        fun parseCurrencyData(curr: String): String
-        {
+        fun parseCurrencyData(curr: String): String {
             val webService = DataWebService.retrofit.create(DataWebService::class.java)
-            val call = webService.getInitial("https://coinmarketcap.com/currencies/$curr/" )
+            val call = webService.getInitial("https://coinmarketcap.com/currencies/$curr/")
             val resp = call.execute().body()
 
             //Log.i("Here", resp)
@@ -184,7 +199,7 @@ class CurrencyService : IntentService("CurrencyService") {
             var change = resp?.substringAfter("(<span data-format-percentage data-format-value=\"")
             change = change?.substring(0, change.indexOf("\""))
 
-            return price+","+change
+            return price + "," + change
         }
     }
 }

@@ -16,8 +16,10 @@ import android.view.View
 import android.widget.*
 import com.andyisdope.cryptowatcher.Adapters.MarketAdapter
 import com.andyisdope.cryptowatcher.Services.DataService
+import com.andyisdope.cryptowatcher.database.TransactionDatabase
 import com.andyisdope.cryptowatcher.model.CurrencyDetails
 import com.andyisdope.cryptowatcher.model.Market
+import com.andyisdope.cryptowatcher.model.Transaction
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.CandleStickChart
 import com.github.mikephil.charting.charts.CombinedChart
@@ -32,12 +34,14 @@ import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
 import kotlin.collections.ArrayList
 
 
 class CurrencyDetail : AppCompatActivity() {
-
+    //TODO: Use Room to generate sqlite tables for vault data use board drawing
     private var Signal: ArrayList<Float> = ArrayList()
     private var EMA12: ArrayList<Float> = ArrayList()
     private var EMA26: ArrayList<Float> = ArrayList()
@@ -70,6 +74,7 @@ class CurrencyDetail : AppCompatActivity() {
     private var PairIndex: Int = 0
     private var xValues: ArrayList<String> = ArrayList()
     private val formatterLarge: NumberFormat = DecimalFormat("#,###.00")
+    private var TransactionDB: TransactionDatabase? = null
 
     private val mBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -191,15 +196,14 @@ class CurrencyDetail : AppCompatActivity() {
     }
 
     private fun initAllCharts(count: Int) {
-        if(CurrencyDeets.size > 45) {
+        if (CurrencyDeets.size > 45) {
             initBar(count)
             initCandle(count)
             initCombined(count)
-        }
-        else {
+        } else {
             Toast.makeText(baseContext, "Currency has less than 45 days of data", Toast.LENGTH_SHORT).show()
-            initBar(CurrencyDeets.size-1)
-            initCandle(CurrencyDeets.size-1)
+            initBar(CurrencyDeets.size - 1)
+            initCandle(CurrencyDeets.size - 1)
         }
     }
 
@@ -216,9 +220,9 @@ class CurrencyDetail : AppCompatActivity() {
             spec.setContent(R.id.Exchanges)
             spec.setIndicator("Exchanges")
             addTab(spec)
-            spec = tabs.newTabSpec("Alerts")
-            spec.setContent(R.id.Alerts)
-            spec.setIndicator("Alerts")
+            spec = tabs.newTabSpec("Vault")
+            spec.setContent(R.id.Vault)
+            spec.setIndicator("Vault")
             addTab(spec)
             setOnTabChangedListener { tabID ->
                 when (tabID) {
@@ -227,12 +231,30 @@ class CurrencyDetail : AppCompatActivity() {
                     "Exchanges" -> {
                         requestMarketData()
                     }
-                    "Alerts" -> {
+                    "Vault" -> {
+                        testDB()
                     }
                 }
             }
         }
     }
+
+    //region Load Coin Vault
+    private fun testDB() {
+        TransactionDB = TransactionDatabase.getInstance(this)
+        TransactionDB?.TransactionDao()?.deleteAll()
+        Log.i("Database", "Deleted Records")
+        var t0: Transaction = Transaction(Calendar.getInstance().time, "Bitcoin", 10f,
+                true, false, 5.0f, (-5.0f * 10f))
+        var t1: Transaction = Transaction(Calendar.getInstance().time, "Bitcoin", -2.2f,
+                false, true, 10.0f, (-2.2f * 10.0f))
+        TransactionDB?.TransactionDao()?.insertAll(t1, t0)
+
+        Log.i("Database", TransactionDB?.TransactionDao()?.getAll().toString())
+    }
+    //endregion
+
+    //region Request MarketData
 
     private fun requestMarketData() {
         if (!marketLoaded) {
@@ -295,6 +317,8 @@ class CurrencyDetail : AppCompatActivity() {
         if (!MarketPairs.contains(pair)) MarketPairs.add(pair.capitalize())
         if (!MarketNames.contains(marketName)) MarketNames.add(marketName.capitalize())
     }
+
+    //endregion
 
     //region Combined Chart
     private fun initCombined(count: Int) {
@@ -742,6 +766,7 @@ class CurrencyDetail : AppCompatActivity() {
     }
     //endregion
 
+    //region Parse and Create Coin Details
     private fun parseCoinDetails() {
         var blocks = response.substringAfter("<tbody>").split("</tr>")
         blocks.take(blocks.size - 1)
@@ -752,7 +777,7 @@ class CurrencyDetail : AppCompatActivity() {
         CurrencyDeets.forEach {
             it.Date = (parseUnix(it.Date.toLong()))
         }
-        if(blocks.size >= 45)
+        if (blocks.size >= 45)
             initAllCharts(45)
         else
             initAllCharts(blocks.size)
@@ -800,6 +825,7 @@ class CurrencyDetail : AppCompatActivity() {
         val sdf = SimpleDateFormat("MM/dd/yy")
         return sdf.format(date)
     }
+    //endregion
 
     override fun onPause() {
         super.onPause()
@@ -812,6 +838,7 @@ class CurrencyDetail : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        TransactionDatabase.destroyInstance()
         super.onDestroy()
 
         LocalBroadcastManager.getInstance(applicationContext)
