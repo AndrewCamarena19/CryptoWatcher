@@ -8,7 +8,7 @@ import android.content.Context
 import com.andyisdope.cryptowatcher.model.Transaction
 
 @Database(entities = [Transaction::class], version = 1)
-@TypeConverters(DateConverter::class)
+//@TypeConverters(DateConverter::class)
 abstract class TransactionDatabase : RoomDatabase() {
 
     abstract fun TransactionDao(): TransactionDAO
@@ -17,12 +17,13 @@ abstract class TransactionDatabase : RoomDatabase() {
         private var Instance: TransactionDatabase? = null
 
         fun getInstance(context: Context): TransactionDatabase? {
-            Instance ?: synchronized(TransactionDatabase::class)
-            {
-                Instance = Room.databaseBuilder(context.applicationContext,
-                        TransactionDatabase::class.java, "trans.db")
-                        .allowMainThreadQueries()
-                        .build()
+            if (Instance == null) {
+                synchronized(TransactionDatabase::class) {
+                    Instance = Room.databaseBuilder(context.applicationContext,
+                            TransactionDatabase::class.java, "weather.db")
+                            .allowMainThreadQueries()
+                            .build()
+                }
             }
             return Instance
         }

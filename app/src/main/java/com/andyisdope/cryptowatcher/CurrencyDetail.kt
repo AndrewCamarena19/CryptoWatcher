@@ -1,9 +1,6 @@
 package com.andyisdope.cryptowatcher
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.graphics.Color
 import android.graphics.Paint
 import android.support.v7.app.AppCompatActivity
@@ -30,6 +27,7 @@ import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
+import kotlinx.android.synthetic.main.activity_currency_detail.*
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.NumberFormat
@@ -42,6 +40,7 @@ import kotlin.collections.ArrayList
 
 class CurrencyDetail : AppCompatActivity() {
     //TODO: Use Room to generate sqlite tables for vault data use board drawing
+    //TODO: Create total invested total Sold for coin test buying too many or selling too many
     private var Signal: ArrayList<Float> = ArrayList()
     private var EMA12: ArrayList<Float> = ArrayList()
     private var EMA26: ArrayList<Float> = ArrayList()
@@ -68,6 +67,8 @@ class CurrencyDetail : AppCompatActivity() {
     private lateinit var USD: RadioButton
     private lateinit var BTC: RadioButton
     private lateinit var ETH: RadioButton
+    private lateinit var Sell: Button
+    private lateinit var Buy: Button
     private lateinit var curr: String
     private var marketLoaded: Boolean = false
     private var MarketIndex: Int = 0
@@ -75,6 +76,19 @@ class CurrencyDetail : AppCompatActivity() {
     private var xValues: ArrayList<String> = ArrayList()
     private val formatterLarge: NumberFormat = DecimalFormat("#,###.00")
     private var TransactionDB: TransactionDatabase? = null
+    private lateinit var VaultPref: SharedPreferences
+    private var LiquidUSD: Float = 0f
+    private lateinit var LiquidText: TextView
+    private lateinit var InvestedTV: TextView
+    private lateinit var UnitsHeldTV: TextView
+    private lateinit var TotalCoinAssetTV: TextView
+    private lateinit var CurrentPriceTV: TextView
+    private lateinit var CurrentNetTV: TextView
+    private var NumberOfCoins: Float = 0f
+    private var Invested: Float = 0f
+    private var CurrentTotal: Float = 0f
+    private var CurrentPrice: Float = 0f
+
 
     private val mBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -103,6 +117,7 @@ class CurrencyDetail : AppCompatActivity() {
         val today: Int = df.format(c.time).toInt()
         val start: Int = today - 10000
         curr = intent.getStringExtra("Currency")
+        CurrentPrice = intent.getStringExtra("Price").toFloat()
         marketLoaded = false
         title = "${curr.toUpperCase()}"
         entry = findViewById<TextView>(R.id.CurrencyPrice) as TextView
@@ -111,9 +126,11 @@ class CurrencyDetail : AppCompatActivity() {
         mMarketList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
 
+
         initSpinners()
         initTabs()
         initRadioGroup()
+
 
         LocalBroadcastManager.getInstance(applicationContext)
                 .registerReceiver(mBroadcastReceiver,
@@ -124,6 +141,94 @@ class CurrencyDetail : AppCompatActivity() {
 
         requestData("https://coinmarketcap.com/currencies/${curr.toLowerCase()}/historical-data/?start=$start&end=$today")
 
+    }
+
+    private fun initVaultData()
+    {
+        Invested = TransactionDB!!.TransactionDao().getAllCoinBuys(curr.toUpperCase())*-1
+        Log.i("Database", TransactionDB!!.TransactionDao().getAllCoinBuys(curr.toUpperCase()).toString())
+        Log.i("Database", TransactionDB!!.TransactionDao().getAllBuys().toString())
+
+        VaultPref = this.getPreferences(Context.MODE_PRIVATE)
+        LiquidUSD = VaultPref.getFloat("USD", 0f)
+        LiquidText = findViewById(R.id.VaultLiquid)
+        LiquidText.text = "$ $LiquidUSD"
+        NumberOfCoins = VaultPref.getFloat(curr,0f)
+
+        TotalCoinAssetTV = findViewById(R.id.VaultTotal)
+        TotalCoinAssetTV.text = "$ ${NumberOfCoins*CurrentPrice}"
+
+        UnitsHeldTV = findViewById(R.id.NumberCoins)
+        UnitsHeldTV.text = "$NumberOfCoins"
+
+        CurrentPriceTV = findViewById(R.id.VaultCurrentPrice)
+        CurrentPriceTV.text = "$ $CurrentPrice"
+
+        CurrentNetTV = findViewById(R.id.VaultNet)
+        CurrentNetTV.text = "$ ${NumberOfCoins*CurrentPrice + Invested}"
+
+
+        InvestedTV = findViewById(R.id.VaultInvested)
+        InvestedTV.text = "$ $Invested"
+
+    }
+
+    private fun initVaultButtons() {
+        VaultPref.registerOnSharedPreferenceChangeListener { sharedPreferences, s ->
+            NumberOfCoins = sharedPreferences.getFloat(curr,0f)
+            findViewById<TextView>(R.id.NumberCoins).text = "$NumberOfCoins"
+            CurrentNetTV.text = "$ ${NumberOfCoins*CurrentPrice - Invested}"
+            TotalCoinAssetTV.text = "$ ${NumberOfCoins*CurrentPrice}"
+            LiquidText.text = sharedPreferences.getFloat("USD", 0f).toString()
+        }
+
+        findViewById<TextView>(R.id.VaultName).text = curr.toUpperCase()
+        Sell = findViewById(R.id.VaultSellCoinsBtn)
+        Buy = findViewById(R.id.VaultBuyCoinsBtn)
+
+        Sell.setOnClickListener {
+            var price = findViewById<EditText>(R.id.VaultSellCoinsPrice).text.toString().toFloat()
+            var amount = findViewById<EditText>(R.id.VaultSellCoinsAmount).text.toString().toFloat()
+
+            if (NumberOfCoins <= 0 || amount > NumberOfCoins) {
+                Toast.makeText(this, "Not enough coins to sell", Toast.LENGTH_SHORT).show()
+            } else {
+                VaultPref.edit().putFloat(curr, NumberOfCoins - amount).commit()
+                VaultPref.edit().putFloat("USD", LiquidUSD + amount*price).commit()
+                var t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), amount,
+                        false, true, price, (price * amount))
+                TransactionDB?.TransactionDao()?.insertAll(t0)
+                Log.i("Database", TransactionDB?.TransactionDao()?.getAll().toString())
+                Toast.makeText(this, "Sold $amount coins @$price for a net of ${price * amount}", Toast.LENGTH_SHORT).show()
+            }
+            findViewById<EditText>(R.id.VaultSellCoinsPrice).setText("")
+            findViewById<EditText>(R.id.VaultSellCoinsAmount).setText("")
+
+
+        }
+
+        Buy.setOnClickListener {
+            var price = findViewById<EditText>(R.id.VaultBuyCoinsPrice).text.toString().toFloat()
+            var amount = findViewById<EditText>(R.id.VaultBuyCoinsAmount).text.toString().toFloat()
+
+            if (amount*price > LiquidUSD ) {
+                Toast.makeText(this, "Not enough in Vault to make purchase", Toast.LENGTH_SHORT).show()
+            } else {
+                VaultPref.edit().putFloat(curr, NumberOfCoins + amount).commit()
+                VaultPref.edit().putFloat("USD", LiquidUSD - amount*price).commit()
+                var t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), amount,
+                        true, false, price, (price * amount) * -1)
+                TransactionDB?.TransactionDao()?.insertAll(t0)
+                Log.i("Database", TransactionDB?.TransactionDao()?.getAll().toString())
+                Invested += price*amount
+                InvestedTV.text = "$ $Invested"
+
+                Toast.makeText(this, "Bought $amount coins @$price for a net of ${price * -amount}", Toast.LENGTH_SHORT).show()
+            }
+            findViewById<EditText>(R.id.VaultBuyCoinsPrice).setText("")
+            findViewById<EditText>(R.id.VaultBuyCoinsAmount).setText("")
+
+        }
     }
 
     private fun initRadioGroup() {
@@ -242,15 +347,11 @@ class CurrencyDetail : AppCompatActivity() {
     //region Load Coin Vault
     private fun testDB() {
         TransactionDB = TransactionDatabase.getInstance(this)
-        TransactionDB?.TransactionDao()?.deleteAll()
-        Log.i("Database", "Deleted Records")
-        var t0: Transaction = Transaction(Calendar.getInstance().time, "Bitcoin", 10f,
-                true, false, 5.0f, (-5.0f * 10f))
-        var t1: Transaction = Transaction(Calendar.getInstance().time, "Bitcoin", -2.2f,
-                false, true, 10.0f, (-2.2f * 10.0f))
-        TransactionDB?.TransactionDao()?.insertAll(t1, t0)
+        //TransactionDB?.TransactionDao()?.deleteAll()
+        initVaultData()
+        initVaultButtons()
+        //Log.i("Database", TransactionDB!!.TransactionDao().getAll().toString())
 
-        Log.i("Database", TransactionDB?.TransactionDao()?.getAll().toString())
     }
     //endregion
 

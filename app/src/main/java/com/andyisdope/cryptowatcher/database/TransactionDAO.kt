@@ -19,26 +19,32 @@ interface TransactionDAO {
     fun deleteAll()
 
     @Query("Select * from Transactions Order By Date")
-    fun getAll(): ArrayList<Transaction>
+    fun getAll(): List<Transaction>
 
     @Query("Select * from Transactions where Buy = 1")
-    fun getAllBuys()
+    fun getAllBuys(): List<Transaction>
+
+    @Query("Select SUM(Net) from Transactions where Buy = 1 AND Coin = :coin")
+    fun getAllCoinBuys(coin: String):Float
+
+    @Query("Select SUM(Net) from Transactions where Sell = 1 AND Coin = :coin")
+    fun getAllCoinSells(coin: String): Float
 
     @Query("Select * from Transactions where Sell = 1")
-    fun getAllSells()
+    fun getAllSells(): List<Transaction>
 
     @Query("Select * from Transactions where Coin = :coin")
-    fun getCoinTransaction(coin: String)
+    fun getCoinTransactions(coin: String): List<Transaction>
 
     @Query("Select SUM(Net) from Transactions")
-    fun getNetAssests()
+    fun getNetAssests(): Float
 
     @Query("Select SUM(Net) from Transactions where Sell = 1")
-    fun getSellSum()
+    fun getSellSum(): Float
 
     @Query("Select SUM(Net) from Transactions where Buy = 1")
-    fun getBuySum()
+    fun getBuySum(): Float
 
     @Query("Select SUM(Amount) from Transactions where Coin = :coin")
-    fun getCurrentCoins(coin: String)
+    fun getCurrentCoins(coin: String): Float
 }

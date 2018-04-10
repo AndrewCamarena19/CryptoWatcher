@@ -7,10 +7,10 @@ import org.jetbrains.annotations.Nullable
 import java.util.*
 
 @Entity(tableName = "Transactions")
-data class Transaction(@PrimaryKey() var Date: Date,
+data class Transaction(@PrimaryKey() var Date: Long,
                   @ColumnInfo(name = "Coin") var Coin: String,
                   @ColumnInfo(name = "Amount") var Amount: Float,
-                  @Nullable @ColumnInfo(name = "Buy") var Buy: Boolean,
-                  @Nullable @ColumnInfo(name = "Sell") var Sell: Boolean,
+                  @ColumnInfo(name = "Buy") var Buy: Boolean,
+                  @ColumnInfo(name = "Sell") var Sell: Boolean,
                   @ColumnInfo(name = "Price") var Price: Float,
                   @ColumnInfo(name = "Net") var Net: Float)
