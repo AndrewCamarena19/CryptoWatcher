@@ -28,7 +28,9 @@ import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.activity_currency_detail.*
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
 import java.text.DateFormat
 import java.text.DecimalFormat
 import java.text.NumberFormat
@@ -145,17 +147,16 @@ class CurrencyDetail : AppCompatActivity() {
 
     }
 
-    private fun initVaultData()
-    {
+    private fun initVaultData() {
         VaultPref = this.getPreferences(Context.MODE_PRIVATE)
         LiquidUSD = VaultPref.getFloat("USD", 0f)
-        NumberOfCoins = VaultPref.getFloat(curr,0f)
-        Invested = NumberOfCoins*CurrentPrice
+        NumberOfCoins = VaultPref.getFloat(curr, 0f)
+        Invested = NumberOfCoins * CurrentPrice
 
         VaultLogo = findViewById(R.id.VaultLogo)
 
         AssetsBoughtTV = findViewById(R.id.VaultAssetsBought)
-        AssetsBoughtTV.text = "$ ${AllBuys*-1}"
+        AssetsBoughtTV.text = "$ ${AllBuys * -1}"
 
         AssetsSoldTV = findViewById(R.id.VaultAssetsSold)
         AssetsSoldTV.text = "$ $AllSells"
@@ -182,12 +183,12 @@ class CurrencyDetail : AppCompatActivity() {
 
     private fun initVaultButtons() {
         VaultPref.registerOnSharedPreferenceChangeListener { sharedPreferences, s ->
-            NumberOfCoins = sharedPreferences.getFloat(curr,0f)
+            NumberOfCoins = sharedPreferences.getFloat(curr, 0f)
             findViewById<TextView>(R.id.NumberCoins).text = "$NumberOfCoins"
             CurrentNetTV.text = "$ ${AllSells + AllBuys}"
             AssetsSoldTV.text = "$ ${AllSells}"
             LiquidText.text = "$ $LiquidUSD"
-            InvestedTV.text = "$ ${NumberOfCoins*CurrentPrice}"
+            InvestedTV.text = "$ ${NumberOfCoins * CurrentPrice}"
         }
 
         findViewById<TextView>(R.id.VaultName).text = curr.toUpperCase()
@@ -195,20 +196,21 @@ class CurrencyDetail : AppCompatActivity() {
         Buy = findViewById(R.id.VaultBuyCoinsBtn)
 
         Sell.setOnClickListener {
-            var price = findViewById<EditText>(R.id.VaultSellCoinsPrice).text.toString().toFloat()
-            var amount = findViewById<EditText>(R.id.VaultSellCoinsAmount).text.toString().toFloat()
+            var price = findViewById<EditText>(R.id.VaultSellCoinsPrice).text.toString().toFloatOrNull()
+            var amount = findViewById<EditText>(R.id.VaultSellCoinsAmount).text.toString().toFloatOrNull()
 
-            if (NumberOfCoins <= 0 || amount > NumberOfCoins) {
+            if (price == null || amount == null) {
+                Toast.makeText(this, "Enter a value for amount and price", Toast.LENGTH_SHORT).show()
+            } else if (NumberOfCoins <= 0 || amount > NumberOfCoins) {
                 Toast.makeText(this, "Not enough coins to sell", Toast.LENGTH_SHORT).show()
             } else {
                 var t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), amount,
                         false, true, price, (price * amount))
                 TransactionDB?.TransactionDao()?.insertAll(t0)
-                Log.i("Database", TransactionDB?.TransactionDao()?.getAll().toString())
                 Toast.makeText(this, "Sold $amount coins @$price for a net of ${price * amount}", Toast.LENGTH_SHORT).show()
-                AllSells += price*amount
+                AllSells += price * amount
                 NumberOfCoins -= amount
-                LiquidUSD += amount*price
+                LiquidUSD += amount * price
                 AssetsSoldTV.text = "$ $AllSells"
                 CurrentNetTV.text = "$ ${AllSells + AllBuys}"
                 VaultPref.edit().putFloat(curr, NumberOfCoins).commit()
@@ -222,20 +224,21 @@ class CurrencyDetail : AppCompatActivity() {
         }
 
         Buy.setOnClickListener {
-            var price = findViewById<EditText>(R.id.VaultBuyCoinsPrice).text.toString().toFloat()
-            var amount = findViewById<EditText>(R.id.VaultBuyCoinsAmount).text.toString().toFloat()
+            var price = findViewById<EditText>(R.id.VaultBuyCoinsPrice).text.toString().toFloatOrNull()
+            var amount = findViewById<EditText>(R.id.VaultBuyCoinsAmount).text.toString().toFloatOrNull()
 
-            if (amount*price > LiquidUSD ) {
-                Toast.makeText(this, "Not enough in Vault to make purchase", Toast.LENGTH_SHORT).show()
+            if (price == null || amount == null) {
+                Toast.makeText(this, "Enter a value for amount and price", Toast.LENGTH_SHORT).show()
+            } else if (price*amount > LiquidUSD) {
+                Toast.makeText(this, "Not enough in vault to buy, add more funds", Toast.LENGTH_SHORT).show()
             } else {
                 var t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), amount,
                         true, false, price, (price * amount) * -1)
                 TransactionDB?.TransactionDao()?.insertAll(t0)
-                Log.i("Database", TransactionDB?.TransactionDao()?.getAll().toString())
-                AllBuys -= price*amount
+                AllBuys -= price * amount
                 NumberOfCoins += amount
-                LiquidUSD -= amount*price
-                AssetsBoughtTV.text = "$ ${AllBuys*-1}"
+                LiquidUSD -= amount * price
+                AssetsBoughtTV.text = "$ ${AllBuys * -1}"
                 CurrentNetTV.text = "$ ${AllSells + AllBuys}"
                 Toast.makeText(this, "Bought $amount coins @$price for a net of ${price * -amount}", Toast.LENGTH_SHORT).show()
                 VaultPref.edit().putFloat(curr, NumberOfCoins).commit()
@@ -364,14 +367,20 @@ class CurrencyDetail : AppCompatActivity() {
     private fun testDB() {
         TransactionDB = TransactionDatabase.getInstance(this)
         //TransactionDB!!.TransactionDao().deleteAll()
-        Runnable {
-            AllBuys = TransactionDB!!.TransactionDao().getAllCoinBuys(curr.toUpperCase())
-            AllSells = TransactionDB!!.TransactionDao().getAllCoinSells(curr.toUpperCase())
-        }.run()
 
-        initVaultData()
-        initVaultButtons()
-
+        async(UI) {
+            val buys = async(CommonPool)
+            {
+                TransactionDB!!.TransactionDao().getAllCoinBuys(curr.toUpperCase())
+            }
+            val sell = async(CommonPool) {
+                TransactionDB!!.TransactionDao().getAllCoinSells(curr.toUpperCase())
+            }
+            AllBuys = buys.await()
+            AllSells = sell.await()
+            initVaultData()
+            initVaultButtons()
+        }
     }
     //endregion
 

@@ -38,7 +38,7 @@
 
                     <ImageView
                         android:id="@+id/VaultLogo"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="60dp"
                         android:layout_marginEnd="10dp"
                         android:layout_marginStart="8dp"
@@ -51,14 +51,15 @@
 
                     <TextView
                         android:id="@+id/VaultName"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="10dp"
                         android:layout_marginTop="20dp"
                         android:text="TextView"
+                        android:textAlignment="viewStart"
                         android:textColor="@color/TickerNameColor"
-                        android:textSize="24sp"
+                        android:textSize="20sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toEndOf="@+id/VaultLogo"
                         app:layout_constraintTop_toTopOf="parent" />
@@ -120,10 +121,11 @@
                     <EditText
                         android:id="@+id/VaultBuyCoinsAmount"
                         android:layout_width="0dp"
-                        android:layout_height="40dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginEnd="40dp"
                         android:layout_marginTop="25dp"
                         android:hint="# to Buy"
+                        android:imeOptions="actionNext"
                         android:inputType="numberDecimal"
                         app:layout_constraintEnd_toStartOf="@+id/VaultBuyCoinsPrice"
                         app:layout_constraintStart_toStartOf="parent"
@@ -132,10 +134,11 @@
                     <EditText
                         android:id="@+id/VaultBuyCoinsPrice"
                         android:layout_width="0dp"
-                        android:layout_height="50dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="8dp"
                         android:hint="Price to Buy"
+                        android:imeOptions="actionDone"
                         android:inputType="numberDecimal"
                         app:layout_constraintBaseline_toBaselineOf="@+id/VaultBuyCoinsAmount"
                         app:layout_constraintEnd_toStartOf="@+id/VaultBuyCoinsBtn"
@@ -194,6 +197,7 @@
 
                     <EditText
                         android:id="@+id/VaultSellCoinsAmount"
+                        android:imeOptions="actionNext"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="40dp"
@@ -207,10 +211,11 @@
                     <EditText
                         android:id="@+id/VaultSellCoinsPrice"
                         android:layout_width="0dp"
-                        android:layout_height="50dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="8dp"
                         android:hint="Price to Sell"
+                        android:imeOptions="actionDone"
                         android:inputType="numberDecimal"
                         app:layout_constraintBaseline_toBaselineOf="@+id/VaultSellCoinsAmount"
                         app:layout_constraintEnd_toStartOf="@+id/VaultSellCoinsBtn"
@@ -366,7 +371,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="28dp"
                         android:layout_marginStart="16dp"
-                        android:text="Liquid USD Available: "
+                        android:text="Liquid USD: "
                         android:textSize="18sp"
                         app:layout_constraintBaseline_toBaselineOf="@+id/VaultLiquid"
                         app:layout_constraintEnd_toStartOf="@+id/VaultLiquid"
@@ -386,6 +391,7 @@
 
                     <Button
                         android:id="@+id/VaultAddFunds"
+                        style="@android:style/Widget.Holo.Button"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
@@ -397,16 +403,16 @@
 
                     <Button
                         android:id="@+id/MainVault"
+                        style="@android:style/Widget.Holo.Button"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:layout_marginEnd="8dp"
-                        android:layout_marginStart="8dp"
                         android:layout_marginTop="8dp"
                         android:text="Go to Main Vault"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/button2"
                         app:layout_constraintTop_toBottomOf="@+id/VaultLiquid" />
 
                     <TextView
@@ -446,6 +452,18 @@
                         app:layout_constraintEnd_toStartOf="@+id/VaultAssetsSold"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/AssetsBought" />
+
+                    <Button
+                        android:id="@+id/button2"
+                        style="@android:style/Widget.Holo.Button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:text="View Transactions"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/MainVault"
+                        app:layout_constraintEnd_toStartOf="@+id/MainVault"
+                        app:layout_constraintStart_toStartOf="parent" />
 
                 </android.support.constraint.ConstraintLayout>
 
