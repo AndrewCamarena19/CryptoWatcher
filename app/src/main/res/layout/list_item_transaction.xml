@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/background_borders"
+    android:id="@+id/relativeLayout">
+
+    <RadioButton
+        android:id="@+id/TransactionItemSell"
+        android:layout_width="30dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:enabled="false"
+        android:textAlignment="center"
+        android:textColor="@color/TickerNameColor"
+        android:textSize="18sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/TransactionItemDate"
+        app:layout_constraintEnd_toStartOf="@+id/TransactionItemPrice"
+        app:layout_constraintStart_toEndOf="@+id/TransactionItemBuy" />
+
+    <TextView
+        android:id="@+id/TransactionItemPrice"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="8dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="14sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/TransactionItemDate"
+        app:layout_constraintEnd_toStartOf="@+id/TransactionItemAmount"
+        app:layout_constraintStart_toEndOf="@+id/TransactionItemSell" />
+
+    <TextView
+        android:id="@+id/TransactionItemAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:text="TextView"
+        android:textAlignment="center"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="14sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/TransactionItemDate"
+        app:layout_constraintEnd_toStartOf="@+id/TransactionItemNet"
+        app:layout_constraintStart_toEndOf="@+id/TransactionItemPrice" />
+
+    <TextView
+        android:id="@+id/TransactionItemNet"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:text="TextView"
+        android:textAlignment="textEnd"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="14sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/TransactionItemDate"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/TransactionItemAmount" />
+
+    <TextView
+        android:id="@+id/TransactionItemDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical"
+        android:text="01/16/16"
+        android:textAlignment="viewStart"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@+id/TransactionItemBuy"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RadioButton
+        android:id="@+id/TransactionItemBuy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:enabled="false"
+        android:textAlignment="center"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="18sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/TransactionItemDate"
+        app:layout_constraintEnd_toStartOf="@+id/TransactionItemSell"
+        app:layout_constraintStart_toEndOf="@+id/TransactionItemDate" />
+
+</android.support.constraint.ConstraintLayout>

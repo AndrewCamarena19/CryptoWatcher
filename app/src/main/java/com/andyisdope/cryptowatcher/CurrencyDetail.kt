@@ -70,6 +70,7 @@ class CurrencyDetail : AppCompatActivity() {
     private lateinit var ETH: RadioButton
     private lateinit var Sell: Button
     private lateinit var Buy: Button
+    private lateinit var ToTransactionHistory: Button
     private lateinit var curr: String
     private var marketLoaded: Boolean = false
     private var MarketIndex: Int = 0
@@ -148,6 +149,13 @@ class CurrencyDetail : AppCompatActivity() {
     }
 
     private fun initVaultData() {
+        ToTransactionHistory = findViewById(R.id.ToTransactionHistory)
+        ToTransactionHistory.setOnClickListener {
+            var intent = Intent(this, TransactionHistory::class.java)
+            intent.putExtra("Coin", curr.toUpperCase())
+            startActivity(intent)
+        }
+
         VaultPref = this.getPreferences(Context.MODE_PRIVATE)
         LiquidUSD = VaultPref.getFloat("USD", 0f)
         NumberOfCoins = VaultPref.getFloat(curr, 0f)

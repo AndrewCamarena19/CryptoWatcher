@@ -7,7 +7,7 @@ import java.util.*
 /**
  * Created by Andy on 1/22/2018.
  */
-class Tokens(val Name: String, val Symbol: String, val Place: Int, val Platform: String, var isFavorite: Boolean, var Num: Double,
+data class Tokens(val Name: String, val Symbol: String, val Place: Int, val Platform: String, var isFavorite: Boolean, var Num: Double,
              val MarketCap: String, val CurrentPrice: String, val HrChange: String, val TwoChange: String, val SevenChange: String, val Volume: String) : Parcelable {
     constructor(parcel: Parcel) : this(
             parcel.readString(),
