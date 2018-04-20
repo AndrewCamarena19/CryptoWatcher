@@ -47,12 +47,12 @@ class TransactionAdapter(private val mContext: Context, private val mItems: Arra
             TransactionAmount.text = "${item.Amount}"
             when (item.Sell) {
                 true -> {
-                    TransactionNet.text = "$ -${item.Net}"
-                    TransactionNet.setTextColor(Color.RED)
+                    TransactionNet.text = "$ ${item.Net}"
+                    TransactionNet.setTextColor(Color.GREEN)
                 }
                 false ->{
                     TransactionNet.text = "$ ${item.Net}"
-                    TransactionNet.setTextColor(Color.GREEN)
+                    TransactionNet.setTextColor(Color.RED)
                 }
             }
         }

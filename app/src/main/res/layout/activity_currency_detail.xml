@@ -38,7 +38,7 @@
 
                     <ImageView
                         android:id="@+id/VaultLogo"
-                        android:layout_width="wrap_content"
+                        android:layout_width="60dp"
                         android:layout_height="60dp"
                         android:layout_marginEnd="10dp"
                         android:layout_marginStart="8dp"
@@ -51,13 +51,14 @@
 
                     <TextView
                         android:id="@+id/VaultName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="10dp"
-                        android:layout_marginTop="20dp"
+                        android:layout_marginTop="10dp"
+                        android:gravity="center_vertical"
                         android:text="TextView"
-                        android:textAlignment="viewStart"
+                        android:textAlignment="center"
                         android:textColor="@color/TickerNameColor"
                         android:textSize="20sp"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -124,8 +125,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="40dp"
                         android:layout_marginTop="25dp"
-                        android:hint="# to Buy"
-                        android:imeOptions="actionNext"
+                        android:hint="# to Buy @ Price"
+                        android:imeOptions="actionDone"
                         android:inputType="numberDecimal"
                         app:layout_constraintEnd_toStartOf="@+id/VaultBuyCoinsPrice"
                         app:layout_constraintStart_toStartOf="parent"
@@ -137,24 +138,12 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="8dp"
-                        android:hint="Price to Buy"
+                        android:hint="USD to Currency"
                         android:imeOptions="actionDone"
                         android:inputType="numberDecimal"
                         app:layout_constraintBaseline_toBaselineOf="@+id/VaultBuyCoinsAmount"
-                        app:layout_constraintEnd_toStartOf="@+id/VaultBuyCoinsBtn"
-                        app:layout_constraintStart_toEndOf="@+id/VaultBuyCoinsAmount" />
-
-                    <Button
-                        android:id="@+id/VaultBuyCoinsBtn"
-                        style="@android:style/Widget.Holo.Button"
-                        android:layout_width="0dp"
-                        android:layout_height="35dp"
-                        android:layout_marginStart="50dp"
-                        android:text="Buy"
-                        android:textSize="14sp"
-                        app:layout_constraintBaseline_toBaselineOf="@+id/VaultBuyCoinsPrice"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/VaultBuyCoinsPrice" />
+                        app:layout_constraintStart_toEndOf="@+id/VaultBuyCoinsAmount" />
 
                     <TextView
                         android:id="@+id/VaultInvested"
@@ -197,12 +186,12 @@
 
                     <EditText
                         android:id="@+id/VaultSellCoinsAmount"
-                        android:imeOptions="actionNext"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="40dp"
                         android:layout_marginTop="25dp"
-                        android:hint="# to Sell"
+                        android:hint="# to Sell @ Price"
+                        android:imeOptions="actionDone"
                         android:inputType="numberDecimal"
                         app:layout_constraintEnd_toStartOf="@+id/VaultSellCoinsPrice"
                         app:layout_constraintStart_toStartOf="parent"
@@ -214,24 +203,12 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="8dp"
-                        android:hint="Price to Sell"
+                        android:hint="Currency to USD"
                         android:imeOptions="actionDone"
                         android:inputType="numberDecimal"
                         app:layout_constraintBaseline_toBaselineOf="@+id/VaultSellCoinsAmount"
-                        app:layout_constraintEnd_toStartOf="@+id/VaultSellCoinsBtn"
-                        app:layout_constraintStart_toEndOf="@+id/VaultSellCoinsAmount" />
-
-                    <Button
-                        android:id="@+id/VaultSellCoinsBtn"
-                        style="@android:style/Widget.Holo.Button"
-                        android:layout_width="0dp"
-                        android:layout_height="35dp"
-                        android:layout_marginStart="50dp"
-                        android:text="Sell"
-                        android:textSize="14sp"
-                        app:layout_constraintBaseline_toBaselineOf="@+id/VaultSellCoinsPrice"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/VaultSellCoinsPrice" />
+                        app:layout_constraintStart_toEndOf="@+id/VaultSellCoinsAmount" />
 
                     <View
                         android:id="@+id/view2"
@@ -239,13 +216,13 @@
                         android:layout_height="5dp"
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="8dp"
-                        android:layout_marginTop="20dp"
+                        android:layout_marginTop="25dp"
                         android:layout_weight="1"
                         android:background="@color/colorBorder"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="0.0"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/VaultSellCoinsBtn" />
+                        app:layout_constraintTop_toBottomOf="@+id/VaultSellCoinsPrice" />
 
                     <TextView
                         android:id="@+id/VaultTotalAssetsLbl"
