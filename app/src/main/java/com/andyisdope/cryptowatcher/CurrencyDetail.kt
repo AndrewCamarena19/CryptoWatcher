@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.preference.PreferenceManager
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -30,6 +31,7 @@ import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.activity_currency_detail.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -193,7 +195,6 @@ class CurrencyDetail : AppCompatActivity() {
 
         MarketSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
             }
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
@@ -209,7 +210,6 @@ class CurrencyDetail : AppCompatActivity() {
         }
         PairSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {
-                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
             }
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
@@ -282,9 +282,7 @@ class CurrencyDetail : AppCompatActivity() {
             intent.putExtra("Coin", curr.toUpperCase())
             startActivity(intent)
         }
-
-        VaultPref = this.getPreferences(Context.MODE_PRIVATE)
-        //VaultPref.edit().putFloat("USD", 1000f).apply()
+        VaultPref = baseContext.getSharedPreferences("Coins", Context.MODE_PRIVATE)
 
         LiquidUSD = VaultPref.getFloat("USD", 0f)
         NumberOfCoins = VaultPref.getFloat(curr, 0f)
@@ -498,7 +496,7 @@ class CurrencyDetail : AppCompatActivity() {
                     .show()
             AllSells += (CurrentPrice * amt)
             NumberOfCoins -= amt
-            LiquidUSD += amt
+            LiquidUSD += (CurrentPrice * amt)
             AssetsSoldTV.text = "$ $AllSells"
             CurrentNetTV.text = "$ ${AllSells + AllBuys}"
             VaultPref.edit().putFloat(curr, NumberOfCoins).apply()

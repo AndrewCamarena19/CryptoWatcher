@@ -18,17 +18,6 @@ import com.andyisdope.cryptowatcher.*
 import java.lang.Math.abs
 import android.os.PowerManager
 
-
-
-
-/**
- * An [IntentService] subclass for handling asynchronous task requests in
- * a service on a separate handler thread.
- *
- *
- * TODO: Customize class - update intent actions, extra parameters and static
- * helper methods.
- */
 class CurrencyService : IntentService("CurrencyService") {
     var formatterSmall: NumberFormat = DecimalFormat("#0.000")
     var formatterLarge: NumberFormat = DecimalFormat("#,###.00")
@@ -154,12 +143,10 @@ class CurrencyService : IntentService("CurrencyService") {
     }
 
     companion object {
-        // TODO: Rename actions, choose action names that describe tasks that this
         // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
         val UPDATE = AppWidgetManager.ACTION_APPWIDGET_UPDATE
         private val ACTION_BAZ = "com.andyisdope.cryptowatcher.Services.action.BAZ"
 
-        // TODO: Rename parameters
         val WIDGETID = "com.andyisdope.cryptowatcher.Services.extra.WidgetID"
         val WIDGETTEXT = "com.andyisdope.cryptowatcher.Services.extra.WidgetText"
         val WIDGETHIGH = "com.andyisdope.cryptowatcher.Services.extra.WidgetHigh"
@@ -173,7 +160,6 @@ class CurrencyService : IntentService("CurrencyService") {
          *
          * @see IntentService
          */
-        // TODO: Customize helper method
         fun startActionFoo(context: Context, param1: Int, param2: String) {
             val intent = Intent(context, CurrencyService::class.java)
             intent.action = UPDATE

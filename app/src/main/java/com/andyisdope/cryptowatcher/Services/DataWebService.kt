@@ -20,13 +20,11 @@ interface DataWebService {
 
         const val Init_URL = "https://coinmarketcap.com/all/views/all/"
 
-        var retrofit
-            get() = Retrofit.Builder()
+        var retrofit = Retrofit.Builder()
                     .baseUrl(Init_URL)
                     //GsonConverterFactory.create()
                     .addConverterFactory(ScalarsConverterFactory.create())
                     .build()
-            set(value) = TODO()
     }
 
     @GET

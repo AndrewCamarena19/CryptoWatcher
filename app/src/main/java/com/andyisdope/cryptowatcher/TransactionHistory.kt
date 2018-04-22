@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.widget.Adapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -17,6 +16,8 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 
+//TODO: parse dates into long for range check
+//TODO: Complete all transactions button
 class TransactionHistory : AppCompatActivity() {
 
     private lateinit var CoinName: TextView
@@ -33,6 +34,8 @@ class TransactionHistory : AppCompatActivity() {
     private lateinit var TransactionDB: TransactionDatabase
     private lateinit var TransactionsFull: ArrayList<Transaction>
     private lateinit var CoinNameString: String
+    private lateinit var BuyList: List<Transaction>
+    private lateinit var SellList: List<Transaction>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,6 +75,17 @@ class TransactionHistory : AppCompatActivity() {
             NetTotal.text = "$ ${selltemp + buytemp}"
             Log.i("Database", TransactionsFull.toString())
 
+            Runnable {
+                SellList = TransactionsFull
+                        .filter { it.Sell }
+                        .sortedBy { it.Date }
+            }.run()
+            Runnable {
+                BuyList = TransactionsFull
+                        .filter { it.Buy }
+                        .sortedBy { it.Date }
+            }.run()
+
 
             mTransAdapter = TransactionAdapter(baseContext, TransactionsFull)
             TransactionList.adapter = mTransAdapter
@@ -96,6 +110,28 @@ class TransactionHistory : AppCompatActivity() {
 
         BuysTotal.setTextColor(Color.RED)
         SellsTotal.setTextColor(Color.GREEN)
+
+        BuyBtn.setOnClickListener {
+            var StartLong = StartDate.text.toString().toLongOrNull() ?: 0
+            var EndLong = EndDate.text.toString().toLongOrNull() ?: Long.MAX_VALUE
+            var range = BuyList
+                    .filter { it.Date in StartLong..(EndLong - 1) }
+
+            mTransAdapter = TransactionAdapter(baseContext, ArrayList(range))
+            TransactionList.adapter = mTransAdapter
+            TransactionList.adapter.notifyDataSetChanged()
+        }
+
+        SellBtn.setOnClickListener {
+            var StartLong = StartDate.text.toString().toLongOrNull() ?: 0
+            var EndLong = EndDate.text.toString().toLongOrNull() ?: Long.MAX_VALUE
+            var range = SellList
+                    .filter { it.Date in StartLong..(EndLong - 1) }
+
+            mTransAdapter = TransactionAdapter(baseContext, ArrayList(range))
+            TransactionList.adapter = mTransAdapter
+            TransactionList.adapter.notifyDataSetChanged()
+        }
 
     }
 

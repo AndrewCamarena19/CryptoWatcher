@@ -36,21 +36,16 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
     var formatterSmall: NumberFormat = DecimalFormat("#,##0.000")
     var formatterTiny: NumberFormat = DecimalFormat("#0.0##E0")
 
-    val sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext)
+    val sharedPref = mContext.getSharedPreferences("Favorites", Context.MODE_PRIVATE)
 
 
     override fun getItemCount(): Int {
         return mItems.size
     }
 
-    private lateinit var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
         val settings = PreferenceManager.getDefaultSharedPreferences(mContext)
-        prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key -> Log.i("preferences", "onSharedPreferenceChanged: " + key) }
-        settings.registerOnSharedPreferenceChangeListener(prefsListener)
-
         val layoutId = R.layout.list_item
 
         val inflater = LayoutInflater.from(mContext)
@@ -152,7 +147,7 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
         holder.isFavourite.setOnClickListener({
             if(holder.isFavourite.isChecked)
                 with(sharedPref.edit()){
-                    putString(item.Name, "${item.Num}")
+                    putString(item.Name, "${item.Symbol}")
                     commit()
                     Toast.makeText(mContext, "Added ${item.Name} refresh to view changes",Toast.LENGTH_SHORT).show()
                 }

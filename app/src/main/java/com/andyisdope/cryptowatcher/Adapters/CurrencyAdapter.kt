@@ -36,7 +36,7 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
     var formatterLarge: NumberFormat = DecimalFormat("#,###.000")
     var formatterSmall: NumberFormat = DecimalFormat("#,##0.000")
     var formatterTiny: NumberFormat = DecimalFormat("#0.0##E0")
-    val sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext)
+    val sharedPref = mContext.getSharedPreferences("Favorites", Context.MODE_PRIVATE)
 
 
     override fun getItemCount(): Int {
@@ -177,7 +177,7 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
         holder.isFavourite.setOnClickListener({
             if (holder.isFavourite.isChecked)
                 with(sharedPref.edit()) {
-                    putString(item.Name, "${item.Num}")
+                    putString(item.Name, "${item.Symbol}")
                     commit()
                     Toast.makeText(mContext, "Favorited ${item.Name} refresh to view changes", Toast.LENGTH_SHORT).show()
                 }

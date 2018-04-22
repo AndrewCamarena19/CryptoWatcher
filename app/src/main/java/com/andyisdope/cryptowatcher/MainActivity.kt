@@ -127,9 +127,9 @@ class MainActivity : AppCompatActivity() {
             requestPermissionForReadExtertalStorage()
         if (!checkPermissionForWriteExtertalStorage())
             requestPermissionForWriteExtertalStorage()
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        sharedPref = baseContext.getSharedPreferences("Favorites", Context.MODE_PRIVATE)
         initTabs()
-
+        Log.i("Prefer", sharedPref.all.toString())
         Order = arrayOf("Ascending", "Descending")
         TimeFrames = arrayOf("Hourly", "Daily", "Weekly")
         SortBy = arrayOf("Place", "Alphabet", "Price", "24Hr Volume", "MarketCap", "Hourly", "Daily", "Weekly")

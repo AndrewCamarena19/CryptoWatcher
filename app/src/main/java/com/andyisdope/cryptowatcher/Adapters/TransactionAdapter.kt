@@ -11,10 +11,17 @@ import android.widget.RadioButton
 import android.widget.TextView
 import com.andyisdope.cryptowatcher.R
 import com.andyisdope.cryptowatcher.model.Transaction
+import java.text.DecimalFormat
+import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.abs
 
 class TransactionAdapter(private val mContext: Context, private val mItems: ArrayList<Transaction>) : RecyclerView.Adapter<TransactionAdapter.ViewHolder>() {
+
+    var formatterLarge: NumberFormat = DecimalFormat("#,###.00")
+    var formatterSmall: NumberFormat = DecimalFormat("#,##0.00")
+    var formatterTiny: NumberFormat = DecimalFormat("#0.0##E0")
 
     fun parseUnix(time: Long): String {
         val date = Date(time)
@@ -43,15 +50,31 @@ class TransactionAdapter(private val mContext: Context, private val mItems: Arra
             TransactionDate.text = parseUnix(item.Date)
             TransactionSell.isChecked = item.Sell
             TransactionBuy.isChecked = item.Buy
-            TransactionPrice.text = "$ ${item.Price}"
-            TransactionAmount.text = "${item.Amount}"
+            TransactionPrice.text = when {
+                item.Price < .01 -> "$ ${formatterTiny.format(item.Price)}"
+                (item.Price < 10.0 && item.Price > .01) -> "$ ${formatterSmall.format(item.Price)}"
+                else -> "$ ${formatterLarge.format(item.Price)}"
+            }
+            TransactionAmount.text = when {
+                item.Amount < .01 -> "${formatterTiny.format(item.Amount)}"
+                (item.Amount < 10.0 && item.Amount > .01) -> "${formatterSmall.format(item.Amount)}"
+                else -> "${formatterLarge.format(item.Amount)}"
+            }
             when (item.Sell) {
                 true -> {
-                    TransactionNet.text = "$ ${item.Net}"
+                    TransactionNet.text = when {
+                        abs(item.Net) < .01 -> "$ ${formatterTiny.format(item.Net)}"
+                        (abs(item.Net) < 10.0 && abs(item.Net) > .01) -> "$ ${formatterSmall.format(item.Net)}"
+                        else -> "$ ${formatterLarge.format(item.Net)}"
+                    }
                     TransactionNet.setTextColor(Color.GREEN)
                 }
-                false ->{
-                    TransactionNet.text = "$ ${item.Net}"
+                false -> {
+                    TransactionNet.text = when {
+                        abs(item.Net) < .01 -> "$ ${formatterTiny.format(item.Net)}"
+                        (abs(item.Net) < 10.0 && abs(item.Net) > .01) -> "$ ${formatterSmall.format(item.Net)}"
+                        else -> "$ ${formatterLarge.format(item.Net)}"
+                    }
                     TransactionNet.setTextColor(Color.RED)
                 }
             }
@@ -68,7 +91,7 @@ class TransactionAdapter(private val mContext: Context, private val mItems: Arra
         var TransactionAmount: TextView
         var TransactionNet: TextView
 
-        init{
+        init {
             TransactionDate = mView.findViewById(R.id.TransactionItemDate)
             TransactionBuy = mView.findViewById(R.id.TransactionItemBuy)
             TransactionSell = mView.findViewById(R.id.TransactionItemSell)
