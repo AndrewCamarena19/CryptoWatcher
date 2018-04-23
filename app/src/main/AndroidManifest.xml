@@ -21,12 +21,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <service
-            android:name=".Services.DataService"
-            android:exported="false" />
-
         <activity android:name=".CurrencyDetail" />
+        <activity android:name=".CurrencyWidgetConfigureActivity">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".TransactionHistory" />
 
         <receiver android:name=".CurrencyWidget">
             <intent-filter>
@@ -38,17 +39,14 @@
                 android:resource="@xml/currency_widget_info" />
         </receiver>
 
-        <activity android:name=".CurrencyWidgetConfigureActivity">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
-            </intent-filter>
-        </activity>
-
         <service
             android:name=".Services.CurrencyService"
             android:exported="false" />
+        <service
+            android:name=".Services.DataService"
+            android:exported="false" />
 
-        <activity android:name=".TransactionHistory"></activity>
+        <activity android:name=".VaultActivity"></activity>
     </application>
 
 </manifest>

@@ -59,6 +59,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var SortBy: Array<String>
     private lateinit var Order: Array<String>
     private lateinit var sharedPref: SharedPreferences
+    private lateinit var PricingPref: SharedPreferences
+    private lateinit var CoinsPref: SharedPreferences
 
 
     private val mBroadcastReceiver = object : BroadcastReceiver() {
@@ -80,54 +82,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun checkPermissionForWriteExtertalStorage(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val result = baseContext.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            return result == PackageManager.PERMISSION_GRANTED
-        }
-        return false
-    }
-
-    @Throws(Exception::class)
-    fun requestPermissionForWriteExtertalStorage() {
-        try {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                    READ_STORAGE_PERMISSION_REQUEST_CODE)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw e
-        }
-
-    }
-
-    fun checkPermissionForReadExtertalStorage(): Boolean {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val result = baseContext.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
-            return result == PackageManager.PERMISSION_GRANTED
-        }
-        return false
-    }
-
-    @Throws(Exception::class)
-    fun requestPermissionForReadExtertalStorage() {
-        try {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
-                    READ_STORAGE_PERMISSION_REQUEST_CODE)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw e
-        }
-
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        if (!checkPermissionForReadExtertalStorage())
-            requestPermissionForReadExtertalStorage()
-        if (!checkPermissionForWriteExtertalStorage())
-            requestPermissionForWriteExtertalStorage()
+
         sharedPref = baseContext.getSharedPreferences("Favorites", Context.MODE_PRIVATE)
+        PricingPref = baseContext.getSharedPreferences("Prices", Context.MODE_PRIVATE)
+        CoinsPref = baseContext.getSharedPreferences("Coins", Context.MODE_PRIVATE)
+
         initTabs()
         Log.i("Prefer", sharedPref.all.toString())
         Order = arrayOf("Ascending", "Descending")
@@ -332,6 +294,9 @@ class MainActivity : AppCompatActivity() {
                         mFavor.add(toCurrency(temp))
                         mSelectedList.add(temp.Name)
                     }
+                    if (CoinsPref.contains(temp.Name)) {
+                        PricingPref.edit().putFloat(temp.Name, temp.CurrentPrice.toFloat()).apply()
+                    }
                     mTokens.add(temp)
                 }
 
@@ -365,6 +330,9 @@ class MainActivity : AppCompatActivity() {
                         temp.isFavorite = true
                         mFavor.add(temp)
                         mSelectedList.add(temp.Name)
+                    }
+                    if (CoinsPref.contains(temp.Name)) {
+                        PricingPref.edit().putFloat(temp.Name, temp.CurrentPrice.toFloat()).apply()
                     }
                     mCoins.add(temp)
                 }

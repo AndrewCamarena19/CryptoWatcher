@@ -17,11 +17,9 @@ import android.widget.Toast
 import com.andyisdope.cryptowatcher.*
 import java.lang.Math.abs
 import android.os.PowerManager
+import com.andyisdope.cryptowatcher.utils.CurrencyFormatter
 
 class CurrencyService : IntentService("CurrencyService") {
-    var formatterSmall: NumberFormat = DecimalFormat("#0.000")
-    var formatterLarge: NumberFormat = DecimalFormat("#,###.00")
-
 
     override fun onHandleIntent(intent: Intent?) {
         if (intent != null) {
@@ -50,16 +48,16 @@ class CurrencyService : IntentService("CurrencyService") {
         var data = parseCurrencyData(param2).split(",")
         views.setTextViewText(R.id.appwidget_text, param2.toUpperCase())
         views.setTextViewText(R.id.widgetLast, "Updated: " + sdf.format(date))
-        views.setTextViewText(R.id.WidgetPrice, "$ " + formatterLarge.format(data[0].toFloat()))
+        views.setTextViewText(R.id.WidgetPrice, "$ " + CurrencyFormatter.formatterLarge.format(data[0].toFloat()))
         when {
             (data[1].toFloat() < 0) -> {
                 views.setTextColor(R.id.WidgetChange, Color.RED)
-                views.setTextViewText(R.id.WidgetChange, formatterSmall.format(data[1].toFloat()) + "%")
+                views.setTextViewText(R.id.WidgetChange, CurrencyFormatter.formatterSmall.format(data[1].toFloat()) + "%")
 
             }
             else -> {
                 views.setTextColor(R.id.WidgetChange, Color.GREEN)
-                views.setTextViewText(R.id.WidgetChange, "+" + formatterSmall.format(data[1].toFloat()) + "%")
+                views.setTextViewText(R.id.WidgetChange, "+" + CurrencyFormatter.formatterSmall.format(data[1].toFloat()) + "%")
 
             }
         }
@@ -94,7 +92,7 @@ class CurrencyService : IntentService("CurrencyService") {
 
         val mNotific = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val name = "CryptoWatcher Alert"
-        val desc = "${curr.toUpperCase()} has hit a $Alert of ${formatterLarge.format(Change.toFloat())}"
+        val desc = "${curr.toUpperCase()} has hit a $Alert of ${CurrencyFormatter.formatterLarge.format(Change.toFloat())}"
         val imp = NotificationManager.IMPORTANCE_HIGH
         val ChannelID = "my_channel_01"
 

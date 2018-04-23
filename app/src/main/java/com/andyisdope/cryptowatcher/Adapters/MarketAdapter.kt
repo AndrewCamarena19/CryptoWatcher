@@ -10,6 +10,7 @@ import android.widget.Toast
 import com.andyisdope.cryptowatch.Currency
 import com.andyisdope.cryptowatcher.R
 import com.andyisdope.cryptowatcher.model.Market
+import com.andyisdope.cryptowatcher.utils.CurrencyFormatter
 import java.text.DecimalFormat
 import java.text.NumberFormat
 
@@ -17,8 +18,6 @@ import java.text.NumberFormat
  * Created by Andy on 2/6/2018.
  */
 class MarketAdapter(private val mContext: Context, private val mItems: ArrayList<Market>) : RecyclerView.Adapter<MarketAdapter.ViewHolder>() {
-    var formatterLarge: NumberFormat = DecimalFormat("#,###.00")
-    var formatterSmall: NumberFormat = DecimalFormat("#0.00000")
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = mItems[position]
@@ -28,20 +27,20 @@ class MarketAdapter(private val mContext: Context, private val mItems: ArrayList
             MarketName.text = item.market + "     "
             PairName.text = item.pair + "     "
             Updated.text = item.update
-            VolPer.text = "${formatterSmall.format(item.volPer.toFloat())}%"
+            VolPer.text = "${CurrencyFormatter.formatterSmall.format(item.volPer.toFloat())}%"
 
             when (CurrentCurrency) {
                 "USD" -> {
-                    VolNum.text = "$ ${formatterLarge.format(item.volUSD)}"
-                    PriceNum.text = "$ ${formatterLarge.format(item.priceUSD)}"
+                    VolNum.text = "$ ${CurrencyFormatter.formatterLarge.format(item.volUSD)}"
+                    PriceNum.text = "$ ${CurrencyFormatter.formatterLarge.format(item.priceUSD)}"
                 }
                 "ETH" -> {
-                    VolNum.text = "${formatterLarge.format(item.volUSD/ Currency.ETH)} ETH "
-                    PriceNum.text = "${formatterLarge.format(item.priceUSD/ Currency.ETH)} ETH "
+                    VolNum.text = "${CurrencyFormatter.formatterLarge.format(item.volUSD/ Currency.ETH)} ETH "
+                    PriceNum.text = "${CurrencyFormatter.formatterLarge.format(item.priceUSD/ Currency.ETH)} ETH "
                 }
                 "BTC" -> {
-                    VolNum.text = "${formatterLarge.format(item.volUSD/Currency.BTC)} BTC "
-                    PriceNum.text = "${formatterLarge.format(item.priceUSD/Currency.BTC)} BTC "
+                    VolNum.text = "${CurrencyFormatter.formatterLarge.format(item.volUSD/Currency.BTC)} BTC "
+                    PriceNum.text = "${CurrencyFormatter.formatterLarge.format(item.priceUSD/Currency.BTC)} BTC "
                 }
             }
 

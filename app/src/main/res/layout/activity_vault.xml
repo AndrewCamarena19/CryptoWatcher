@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark">
+    <TabHost
+        android:id="@+id/VaultTabs"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TabWidget
+                android:id="@android:id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimary" />
+
+            <FrameLayout
+                android:id="@android:id/tabcontent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/VaultCoinShares"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorPrimaryDark"
+                    android:orientation="vertical">
+
+                    <View
+                        android:id="@+id/view"
+                        android:layout_width="match_parent"
+                        android:layout_height="5dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_weight="1"
+                        android:background="@color/colorBorder"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/VaultShareTV">
+
+                    </View>
+
+                    <TextView
+                        android:id="@+id/textView2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:text="Coin Shares"
+                        android:textColor="@color/TickerNameColor"
+                        android:textSize="20sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.github.mikephil.charting.charts.PieChart
+                        android:id="@+id/VaultPieChart"
+                        android:layout_width="0dp"
+                        android:layout_height="300dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/textView2">
+
+                    </com.github.mikephil.charting.charts.PieChart>
+
+                    <TextView
+                        android:id="@+id/VaultShareTV"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:text="Select a slice to view holdings"
+                        android:textAlignment="center"
+                        android:textColor="@color/TickerNameColor"
+                        android:textSize="16sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/VaultPieChart" />
+
+                    <TextView
+                        android:id="@+id/textView10"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:text="Asset"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="18sp"
+                        app:layout_constraintEnd_toStartOf="@+id/textView12"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/view" />
+
+                    <TextView
+                        android:id="@+id/textView12"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:text="Holdings"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="18sp"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/textView10"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/textView10" />
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/VaultSharesRV"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/textView10" />
+
+                </android.support.constraint.ConstraintLayout>
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/VaultAssetShares"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorPrimaryDark"
+                    android:orientation="vertical">
+
+                </android.support.constraint.ConstraintLayout>
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/VaultPortfolioGraph"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorPrimaryDark"
+                    android:orientation="vertical">
+
+                </android.support.constraint.ConstraintLayout>
+            </FrameLayout>
+        </LinearLayout>
+    </TabHost>
+</android.support.constraint.ConstraintLayout>

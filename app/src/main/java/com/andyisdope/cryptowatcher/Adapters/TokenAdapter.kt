@@ -21,6 +21,7 @@ import android.widget.Toast
 import com.andyisdope.cryptowatcher.CurrencyDetail
 import com.andyisdope.cryptowatcher.R
 import com.andyisdope.cryptowatcher.model.Tokens
+import com.andyisdope.cryptowatcher.utils.CurrencyFormatter
 import com.squareup.picasso.Picasso
 
 import java.io.IOException
@@ -32,10 +33,6 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
     private lateinit var list: ArrayList<HashMap<String, Tokens>>
     private val Image_Base_URL = "https://raw.githubusercontent.com/poc19/CryptoWatcher/master/images/"
     private val Data_Base_URL = "https://api.cryptowat.ch"
-    var formatterLarge: NumberFormat = DecimalFormat("#,###.000")
-    var formatterSmall: NumberFormat = DecimalFormat("#,##0.000")
-    var formatterTiny: NumberFormat = DecimalFormat("#0.0##E0")
-
     val sharedPref = mContext.getSharedPreferences("Favorites", Context.MODE_PRIVATE)
 
 
@@ -74,11 +71,11 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
                             }
                             item.HrChange.toFloat() <= 0 -> {
                                 tickerChange.setTextColor(Color.RED)
-                                tickerChange.text = "${formatterSmall.format(item.HrChange.toFloat())}%"
+                                tickerChange.text = "${CurrencyFormatter.formatterSmall.format(item.HrChange.toFloat())}%"
                             }
                             item.HrChange.toFloat() > 0 -> {
                                 tickerChange.setTextColor(Color.GREEN)
-                                tickerChange.text = "+${formatterSmall.format(item.HrChange.toFloat())}%"
+                                tickerChange.text = "+${CurrencyFormatter.formatterSmall.format(item.HrChange.toFloat())}%"
                             }
                         }
                     }
@@ -90,11 +87,11 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
                             }
                             item.TwoChange.toFloat() <= 0 -> {
                                 tickerChange.setTextColor(Color.RED)
-                                tickerChange.text = "${formatterSmall.format(item.TwoChange.toFloat())}%"
+                                tickerChange.text = "${CurrencyFormatter.formatterSmall.format(item.TwoChange.toFloat())}%"
                             }
                             item.TwoChange.toFloat() > 0 -> {
                                 tickerChange.setTextColor(Color.GREEN)
-                                tickerChange.text = "+${formatterSmall.format(item.TwoChange.toFloat())}%"
+                                tickerChange.text = "+${CurrencyFormatter.formatterSmall.format(item.TwoChange.toFloat())}%"
                             }
                         }
                     }
@@ -106,11 +103,11 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
                             }
                             item.SevenChange.toFloat() <= 0 -> {
                                 tickerChange.setTextColor(Color.RED)
-                                tickerChange.text = "${formatterSmall.format(item.SevenChange.toFloat())}%"
+                                tickerChange.text = "${CurrencyFormatter.formatterSmall.format(item.SevenChange.toFloat())}%"
                             }
                             item.SevenChange.toFloat() > 0 -> {
                                 tickerChange.setTextColor(Color.GREEN)
-                                tickerChange.text = "+${formatterSmall.format(item.SevenChange.toFloat())}%"
+                                tickerChange.text = "+${CurrencyFormatter.formatterSmall.format(item.SevenChange.toFloat())}%"
                             }
                         }
                     }
@@ -120,9 +117,9 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
                 tickerSymbol.text = "(" + item.Symbol + ")"
                 tickerPrice.text = when {
                     item.CurrentPrice == "-9999" -> "N/A"
-                    item.CurrentPrice.toFloat() < .01 -> "$ ${formatterTiny.format(item.CurrentPrice.toFloat())}"
-                    (item.CurrentPrice.toFloat() < 10.0 && item.CurrentPrice.toFloat() > .01) -> "$ ${formatterSmall.format(item.CurrentPrice.toFloat())}"
-                    else -> "$ ${formatterLarge.format(item.CurrentPrice.toFloat())}"
+                    item.CurrentPrice.toFloat() < .01 -> "$ ${CurrencyFormatter.formatterTiny.format(item.CurrentPrice.toFloat())}"
+                    (item.CurrentPrice.toFloat() < 10.0 && item.CurrentPrice.toFloat() > .01) -> "$ ${CurrencyFormatter.formatterSmall.format(item.CurrentPrice.toFloat())}"
+                    else -> "$ ${CurrencyFormatter.formatterLarge.format(item.CurrentPrice.toFloat())}"
                 }
                 tickerPlace.text = "" + item.Place
                 tickerName.text = item.Name.toUpperCase()
@@ -130,14 +127,14 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
                 tickerMarketCap.text =
                         when {
                             (item.MarketCap == "-9999") -> "N/A"
-                            (item.MarketCap.toFloat() < 1000000.0) -> formatterLarge.format(item.MarketCap.toFloat())
-                            else -> formatterSmall.format(item.MarketCap.toFloat() / 1000000) + " M"
+                            (item.MarketCap.toFloat() < 1000000.0) -> CurrencyFormatter.formatterLarge.format(item.MarketCap.toFloat())
+                            else -> CurrencyFormatter.formatterSmall.format(item.MarketCap.toFloat() / 1000000) + " M"
                         }
                 tickerVolume.text =
                         when {
                             (item.Volume == "-9999") -> "N/A"
-                            (item.Volume.toFloat() < 1000000.0) -> formatterLarge.format(item.Volume.toFloat())
-                            else -> formatterSmall.format(item.Volume.toFloat() / 1000000) + " M"
+                            (item.Volume.toFloat() < 1000000.0) -> CurrencyFormatter.formatterLarge.format(item.Volume.toFloat())
+                            else -> CurrencyFormatter.formatterSmall.format(item.Volume.toFloat() / 1000000) + " M"
                         }
             }
         } catch (e: IOException) {

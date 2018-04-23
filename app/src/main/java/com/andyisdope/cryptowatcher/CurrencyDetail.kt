@@ -5,11 +5,9 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.preference.PreferenceManager
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -20,6 +18,7 @@ import com.andyisdope.cryptowatcher.database.TransactionDatabase
 import com.andyisdope.cryptowatcher.model.CurrencyDetails
 import com.andyisdope.cryptowatcher.model.Market
 import com.andyisdope.cryptowatcher.model.Transaction
+import com.andyisdope.cryptowatcher.utils.CurrencyFormatter
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.CandleStickChart
 import com.github.mikephil.charting.charts.CombinedChart
@@ -36,8 +35,6 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import java.text.DateFormat
-import java.text.DecimalFormat
-import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -73,12 +70,12 @@ class CurrencyDetail : AppCompatActivity() {
     private lateinit var BTC: RadioButton
     private lateinit var ETH: RadioButton
     private lateinit var ToTransactionHistory: Button
+    private lateinit var ToMainVault: Button
     private lateinit var curr: String
     private var marketLoaded: Boolean = false
     private var MarketIndex: Int = 0
     private var PairIndex: Int = 0
     private var xValues: ArrayList<String> = ArrayList()
-    private val formatterLarge: NumberFormat = DecimalFormat("#,###.00")
     private var TransactionDB: TransactionDatabase? = null
     private lateinit var VaultPref: SharedPreferences
     private var LiquidUSD: Float = 0f
@@ -276,6 +273,11 @@ class CurrencyDetail : AppCompatActivity() {
     //region Load Coin Vault
 
     private fun initVaultData() {
+        ToMainVault = findViewById(R.id.MainVaultBtn)
+        ToMainVault.setOnClickListener{
+            var intent = Intent(this, VaultActivity::class.java)
+            startActivity(intent)
+        }
         ToTransactionHistory = findViewById(R.id.ToTransactionHistory)
         ToTransactionHistory.setOnClickListener {
             var intent = Intent(this, TransactionHistory::class.java)
@@ -446,6 +448,8 @@ class CurrencyDetail : AppCompatActivity() {
             VaultPref.edit().putFloat("USD", LiquidUSD).apply()
             completed = false
         }
+        if(NumberOfCoins == 0f)
+            VaultPref.edit().remove(curr).apply()
         AmountToUSD.setText("")
         return completed
     }
@@ -465,6 +469,7 @@ class CurrencyDetail : AppCompatActivity() {
             AllBuys -= amt
             NumberOfCoins += numCoins
             LiquidUSD -= amt
+            if(LiquidUSD < .0001) LiquidUSD = 0f
             AssetsBoughtTV.text = "$ ${AllBuys * -1}"
             CurrentNetTV.text = "$ ${AllSells + AllBuys}"
             Toast.makeText(this, "Exchanged $amt USD to $numCoins $curr", Toast.LENGTH_SHORT)
@@ -503,6 +508,8 @@ class CurrencyDetail : AppCompatActivity() {
             VaultPref.edit().putFloat("USD", LiquidUSD).apply()
             completed = false
         }
+        if(NumberOfCoins == 0f)
+            VaultPref.edit().remove(curr).apply()
         AmountToSell.setText("")
         return completed
     }
@@ -521,6 +528,7 @@ class CurrencyDetail : AppCompatActivity() {
             AllBuys -= CurrentPrice * amt
             NumberOfCoins += amt
             LiquidUSD -= amt * CurrentPrice
+            if(LiquidUSD < .0001) LiquidUSD = 0f
             AssetsBoughtTV.text = "$ ${AllBuys * -1}"
             CurrentNetTV.text = "$ ${AllSells + AllBuys}"
             Toast.makeText(this, "Bought $amt coins @$CurrentPrice for a net of ${CurrentPrice * -amt}", Toast.LENGTH_LONG)
@@ -632,9 +640,9 @@ class CurrencyDetail : AppCompatActivity() {
 
         val keylistener = object : OnChartValueSelectedListener {
             override fun onValueSelected(e: Entry, h: Highlight) {
-                entry.text = "MACD: ${formatterLarge.format(MACD[e.x.toInt()].toDouble())}," +
-                        "S: ${formatterLarge.format(Signal[e.x.toInt()])}," +
-                        "H: ${formatterLarge.format(Histo[e.x.toInt()])}"
+                entry.text = "MACD: ${CurrencyFormatter.formatterLarge.format(MACD[e.x.toInt()].toDouble())}," +
+                        "S: ${CurrencyFormatter.formatterLarge.format(Signal[e.x.toInt()])}," +
+                        "H: ${CurrencyFormatter.formatterLarge.format(Histo[e.x.toInt()])}"
 
                 time.text = "${CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Date}"
             }
@@ -814,9 +822,9 @@ class CurrencyDetail : AppCompatActivity() {
         mCandle = findViewById<CandleStickChart>(R.id.CurrencyChart) as CandleStickChart
         val keylistener = object : OnChartValueSelectedListener {
             override fun onValueSelected(e: Entry, h: Highlight) {
-                entry.text = "O:${formatterLarge.format(CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Open.toDouble())}," +
-                        " C:${formatterLarge.format(CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Close.toDouble())}" +
-                        ", L:${formatterLarge.format(CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Low.toDouble())}"
+                entry.text = "O:${CurrencyFormatter.formatterLarge.format(CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Open.toDouble())}," +
+                        " C:${CurrencyFormatter.formatterLarge.format(CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Close.toDouble())}" +
+                        ", L:${CurrencyFormatter.formatterLarge.format(CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Low.toDouble())}"
 
                 time.text = "${CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Date}"
             }
@@ -929,7 +937,7 @@ class CurrencyDetail : AppCompatActivity() {
         mBar = findViewById<BarChart>(R.id.VolumeChart) as BarChart
         val keylistener = object : OnChartValueSelectedListener {
             override fun onValueSelected(e: Entry, h: Highlight) {
-                entry.text = "Volume: ${formatterLarge.format(e.y)} M"
+                entry.text = "Volume: ${CurrencyFormatter.formatterLarge.format(e.y)} M"
                 time.text = "${CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Date}"
             }
 
