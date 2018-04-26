@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.widget.ShareActionProvider
 import android.widget.TabHost
 import android.widget.TextView
 import com.andyisdope.cryptowatcher.Adapters.AssetAdapter
@@ -29,17 +28,24 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 
 class VaultActivity : AppCompatActivity() {
     //TODO: create service to retrieve and store pricing data at 11:59pm for asset graph
-    //TODO: change preference to save symbol instead of full name 
+    //TODO: change preference to save symbol instead of full name
 
 
     private lateinit var CoinShares: PieChart
+    private lateinit var AssetShares: PieChart
     private lateinit var VaultShareTV: TextView
+    private lateinit var VaultAssetTV: TextView
     private lateinit var VaultSharesRV: RecyclerView
+    private lateinit var VaultAssetsRV: RecyclerView
     private var entries = ArrayList<PieEntry>()
+    private var PriceEntries = ArrayList<PieEntry>()
     private lateinit var CoinHoldings: SharedPreferences
+    private lateinit var CoinPrices: SharedPreferences
     private var CoinData: ArrayList<Asset> = ArrayList()
+    private var PriceData: ArrayList<Asset> = ArrayList()
     private lateinit var mAdapter: AssetAdapter
     private val colors = ArrayList<Int>()
+    private var isLoaded = false
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,18 +79,151 @@ class VaultActivity : AppCompatActivity() {
                     "Portfolio" -> {
                     }
                     "Assets" -> {
+                        if(!isLoaded) {
+                            initAssetShares()
+                            isLoaded = true
+                        }
                     }
                 }
             }
         }
     }
 
-    private fun initRecycler() {
-        VaultSharesRV = findViewById(R.id.VaultSharesRV)
-        VaultSharesRV.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        mAdapter = AssetAdapter(baseContext, CoinData)
-        VaultSharesRV.adapter = mAdapter
-        VaultSharesRV.adapter.notifyDataSetChanged()
+    private fun initAssetShares() {
+        CoinPrices = getSharedPreferences("Prices", Context.MODE_PRIVATE)
+        Log.i("Prices", CoinPrices.all.toString())
+        AssetShares = findViewById<PieChart>(R.id.VaultPieChartAssets) as PieChart
+        AssetShares.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+            override fun onNothingSelected() {
+                VaultAssetTV.text = "Select a Slice"
+            }
+
+            override fun onValueSelected(e: Entry?, h: Highlight?) {
+                if (e == null)
+                    return
+                VaultAssetTV.text = "$ ${e.y} of ${PriceEntries[h!!.x.toInt()].label} in Vault"
+            }
+        })
+        VaultAssetTV = findViewById(R.id.VaultAssetTV)
+        setAssetData()
+    }
+
+    private fun setAssetData() {
+        AssetShares.setUsePercentValues(true)
+        AssetShares.description.isEnabled = false
+        AssetShares.setExtraOffsets(0f, 0f, 50f, 0f)
+        AssetShares.dragDecelerationFrictionCoef = 0.95f
+
+
+        AssetShares.isDrawHoleEnabled = true
+        AssetShares.setHoleColor(Color.WHITE)
+
+        //AssetShares.setTransparentCircleColor(Color.WHITE)
+        //AssetShares.setTransparentCircleAlpha(110)
+
+        AssetShares.holeRadius = 30f
+        AssetShares.transparentCircleRadius = 0f
+
+        AssetShares.setDrawCenterText(true)
+
+        AssetShares.rotationAngle = 0f
+        // enable rotation of the chart by touch
+        AssetShares.isRotationEnabled = true
+        AssetShares.isHighlightPerTapEnabled = true
+
+        // AssetShares.setUnit(" €")
+        // AssetShares.setDrawUnitsInChart(true)
+
+        // add a selection listener
+        //AssetShares.setOnChartValueSelectedListener(this)
+
+        setDataAssets()
+
+        AssetShares.animateY(1400, Easing.EasingOption.EaseInOutQuad)
+        // AssetShares.spin(2000, 0, 360)
+
+        //mSeekBarX.setOnSeekBarChangeListener(this)
+        //mSeekBarY.setOnSeekBarChangeListener(this)
+
+        var l = AssetShares.legend
+        l.verticalAlignment = Legend.LegendVerticalAlignment.TOP
+        l.horizontalAlignment = Legend.LegendHorizontalAlignment.RIGHT
+        l.orientation = Legend.LegendOrientation.VERTICAL
+        l.setDrawInside(true)
+        l.xEntrySpace = 0f
+        l.yEntrySpace = 0f
+        l.yOffset = 0f
+        l.textColor = Color.WHITE
+
+        // entry label styling
+        //CoinShares.setEntryLabelColor(Color.WHITE)
+        AssetShares.setEntryLabelTextSize(0f)
+    }
+
+    private fun setDataAssets() {
+
+        var coindata = CoinPrices.all
+        var coinAmt = CoinHoldings.all
+        // NOTE: The order of the entries when being added to the entries array determines their position around the center of
+        // the chart.
+        coindata.entries.forEach {
+            if(it.value != "USD") {
+                var pricetemp: Float = coinAmt[it.key].toString().toFloat() * it.value.toString().toFloat()
+                PriceData.add(Asset(it.key.toUpperCase(), pricetemp))
+                PriceEntries.add(PieEntry(pricetemp, it.key.toUpperCase()))
+            }
+        }
+        PriceData.add(Asset("USD", coinAmt["USD"].toString().toFloat()))
+        PriceEntries.add(PieEntry(coinAmt["USD"].toString().toFloat(), "USD"))
+
+        val dataSet = PieDataSet(PriceEntries, "")
+
+        dataSet.setDrawIcons(false)
+
+        dataSet.sliceSpace = 4f
+        dataSet.iconsOffset = MPPointF(0f, 40f)
+        dataSet.selectionShift = 10f
+
+        for (c in ColorTemplate.JOYFUL_COLORS)
+            colors.add(c)
+
+        for (c in ColorTemplate.COLORFUL_COLORS)
+            colors.add(c)
+
+        for (c in ColorTemplate.LIBERTY_COLORS)
+            colors.add(c)
+
+        for (c in ColorTemplate.PASTEL_COLORS)
+            colors.add(c)
+        // add a lot of colors
+
+        for (c in ColorTemplate.VORDIPLOM_COLORS)
+            colors.add(c)
+
+        colors.add(ColorTemplate.getHoloBlue())
+        dataSet.colors = colors
+        //=dataSet.setSelectionShift(0f);
+
+        val data = PieData(dataSet)
+        data.setValueFormatter(PercentFormatter())
+        data.setValueTextSize(12f)
+        data.setValueTextColor(Color.BLACK)
+        AssetShares.data = data
+
+        // undo all highlights
+        AssetShares.highlightValues(null)
+
+        AssetShares.invalidate()
+        initAssetRecycler()
+    }
+
+    private fun initAssetRecycler() {
+        VaultAssetsRV = findViewById(R.id.VaultAssetDistribution)
+        VaultAssetsRV.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        PriceData.sortBy { it.assetHolding }
+        mAdapter = AssetAdapter(baseContext, PriceData)
+        VaultAssetsRV.adapter = mAdapter
+        VaultAssetsRV.adapter.notifyDataSetChanged()
     }
 
     private fun initCoinShares() {
@@ -160,6 +299,7 @@ class VaultActivity : AppCompatActivity() {
     private fun setData() {
 
         var coindata = CoinHoldings.all
+        Log.i("Prices", coindata.toString())
 
         // NOTE: The order of the entries when being added to the entries array determines their position around the center of
         // the chart.
@@ -209,5 +349,13 @@ class VaultActivity : AppCompatActivity() {
 
         CoinShares.invalidate()
         initRecycler()
+    }
+
+    private fun initRecycler() {
+        VaultSharesRV = findViewById(R.id.VaultSharesRV)
+        VaultSharesRV.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        mAdapter = AssetAdapter(baseContext, CoinData)
+        VaultSharesRV.adapter = mAdapter
+        VaultSharesRV.adapter.notifyDataSetChanged()
     }
 }

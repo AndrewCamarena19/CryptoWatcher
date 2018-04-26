@@ -41,7 +41,6 @@ class TransactionAdapter(private val mContext: Context, private val mItems: Arra
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = mItems[position]
-        Log.i("Database", item.toString())
         with(holder)
         {
             TransactionDate.text = parseUnix(item.Date)

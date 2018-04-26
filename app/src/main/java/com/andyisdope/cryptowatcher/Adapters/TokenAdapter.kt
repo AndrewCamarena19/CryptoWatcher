@@ -169,6 +169,7 @@ class TokenAdapter(private val mContext: Context, private val mItems: ArrayList<
         holder.mView.setOnLongClickListener {
             var intent: Intent = Intent(mContext, CurrencyDetail::class.java)
             intent.putExtra("Currency", item.Name)
+            intent.putExtra("Symbol", item.Symbol)
             intent.putExtra("Price", item.CurrentPrice)
             intent.putExtra("Image", Image_Base_URL.plus(item.Symbol.toUpperCase()).plus(".png?raw=true"))
             mContext.startActivity(intent)

@@ -1,6 +1,8 @@
 package com.andyisdope.cryptowatcher
 
 import android.Manifest
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
@@ -38,6 +40,7 @@ import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var mAdView: AdView
 
 
     private lateinit var Refresh: SwipeRefreshLayout
@@ -86,10 +89,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        mAdView = findViewById(R.id.adView)
+        mAdView.loadAd(AdRequest.Builder().build())
+
         sharedPref = baseContext.getSharedPreferences("Favorites", Context.MODE_PRIVATE)
         PricingPref = baseContext.getSharedPreferences("Prices", Context.MODE_PRIVATE)
         CoinsPref = baseContext.getSharedPreferences("Coins", Context.MODE_PRIVATE)
-
         initTabs()
         Log.i("Prefer", sharedPref.all.toString())
         Order = arrayOf("Ascending", "Descending")
@@ -294,8 +299,8 @@ class MainActivity : AppCompatActivity() {
                         mFavor.add(toCurrency(temp))
                         mSelectedList.add(temp.Name)
                     }
-                    if (CoinsPref.contains(temp.Name)) {
-                        PricingPref.edit().putFloat(temp.Name, temp.CurrentPrice.toFloat()).apply()
+                    if (CoinsPref.contains(temp.Symbol)) {
+                        PricingPref.edit().putFloat(temp.Symbol, temp.CurrentPrice.toFloat()).apply()
                     }
                     mTokens.add(temp)
                 }
@@ -331,8 +336,8 @@ class MainActivity : AppCompatActivity() {
                         mFavor.add(temp)
                         mSelectedList.add(temp.Name)
                     }
-                    if (CoinsPref.contains(temp.Name)) {
-                        PricingPref.edit().putFloat(temp.Name, temp.CurrentPrice.toFloat()).apply()
+                    if (CoinsPref.contains(temp.Symbol)) {
+                        PricingPref.edit().putFloat(temp.Symbol, temp.CurrentPrice.toFloat()).apply()
                     }
                     mCoins.add(temp)
                 }

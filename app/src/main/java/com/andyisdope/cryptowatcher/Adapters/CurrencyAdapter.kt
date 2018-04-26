@@ -190,6 +190,7 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
         holder.mView.setOnLongClickListener {
             var intent = Intent(mContext, CurrencyDetail::class.java)
             intent.putExtra("Currency", item.Name)
+            intent.putExtra("Symbol", item.Symbol)
             intent.putExtra("Price", item.CurrentPrice)
             intent.putExtra("Image", Image_Base_URL.plus(item.Symbol.toUpperCase()).plus(".png?raw=true"))
             mContext.startActivity(intent)

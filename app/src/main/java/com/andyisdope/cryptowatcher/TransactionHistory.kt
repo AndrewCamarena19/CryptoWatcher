@@ -9,12 +9,14 @@ import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import com.andyisdope.cryptowatcher.Adapters.TransactionAdapter
 import com.andyisdope.cryptowatcher.database.TransactionDatabase
 import com.andyisdope.cryptowatcher.model.Transaction
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import java.util.*
 
 //TODO: parse dates into long for range check
 //TODO: Complete all transactions button
@@ -112,14 +114,17 @@ class TransactionHistory : AppCompatActivity() {
         SellsTotal.setTextColor(Color.GREEN)
 
         BuyBtn.setOnClickListener {
-            var StartLong = StartDate.text.toString().toLongOrNull() ?: 0
-            var EndLong = EndDate.text.toString().toLongOrNull() ?: Long.MAX_VALUE
-            var range = BuyList
-                    .filter { it.Date in StartLong..(EndLong - 1) }
+            var preParseStart = StartDate.text.toString()
+            if(preParseStart.contains("^\\d{1,2}\\/\\d{1,2}\\/\\d{4}\$")) {
+                var StartLong = Date(preParseStart).time
+                var EndLong = EndDate.text.toString().toLongOrNull() ?: Long.MAX_VALUE
+                var range = BuyList
+                        .filter { it.Date in StartLong..(EndLong - 1) }
 
-            mTransAdapter = TransactionAdapter(baseContext, ArrayList(range))
-            TransactionList.adapter = mTransAdapter
-            TransactionList.adapter.notifyDataSetChanged()
+                mTransAdapter = TransactionAdapter(baseContext, ArrayList(range))
+                TransactionList.adapter = mTransAdapter
+                TransactionList.adapter.notifyDataSetChanged()
+            }
         }
 
         SellBtn.setOnClickListener {

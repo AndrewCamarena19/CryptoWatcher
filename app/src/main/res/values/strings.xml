@@ -17,6 +17,7 @@
     <string name="usd">USD</string>
     <string name="eth">ETH</string>
     <string name="btc">BTC</string>
+    <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
     <string name="sort_by">Sort By</string>
     <string name="time_frame">Time Frame</string>
     <string name="default_currency">Default Currency</string>
