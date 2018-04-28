@@ -4,7 +4,6 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import com.andyisdope.cryptowatcher.Services.CurrencyService
 
 
@@ -14,10 +13,10 @@ import com.andyisdope.cryptowatcher.Services.CurrencyService
  * App Widget Configuration implemented in [CurrencyWidgetConfigureActivity]
  */
 class CurrencyWidget : AppWidgetProvider() {
+    //TODO: replace with jobscheduler
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         // There may be multiple widgets active, so update all of them
-        Log.i("Here", "In onUpdate")
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
@@ -31,7 +30,6 @@ class CurrencyWidget : AppWidgetProvider() {
     }
 
     override fun onEnabled(context: Context) {
-        Log.i("Here", "First widget")
     }
 
     override fun onDisabled(context: Context) {
@@ -42,7 +40,6 @@ class CurrencyWidget : AppWidgetProvider() {
         super.onReceive(context, intent)
         var widgetID =  intent.getIntExtra("ID", 0)
         if (widgetID != 0) {
-            Log.i("Here", intent.toString())
             updateAppWidget(context, AppWidgetManager.getInstance(context), widgetID)
         }
     }
@@ -56,8 +53,7 @@ class CurrencyWidget : AppWidgetProvider() {
             val widgetText = CurrencyWidgetConfigureActivity.loadTitlePref(context, appWidgetId).split(",")
 
             if (widgetText[0] != "Not Set") {
-                Log.i("Here", "In updateAppWidget: ${widgetText[3]} $appWidgetId")
-                CurrencyService.startActionFoo(context, appWidgetId, widgetText[0]+","+widgetText[3]+","+widgetText[4]+","+widgetText[5])
+                CurrencyService.enqueueWork(context, appWidgetId, widgetText[0]+","+widgetText[3]+","+widgetText[4]+","+widgetText[5])
             }
             // Instruct the widget manager to update the widget
         }

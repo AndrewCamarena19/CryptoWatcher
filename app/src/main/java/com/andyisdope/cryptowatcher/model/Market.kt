@@ -6,14 +6,14 @@ import android.os.Parcelable
 /**
  * Created by Andy on 2/6/2018.
  */
-data class Market(val market: String, var pair: String, val volBTC: Float, val volUSD: Float, val priceBTC: Float, val priceUSD: Float, val volPer: String, val update: String) : Parcelable {
+data class Market(val market: String, var pair: String, val volBTC: Double, val volUSD: Double, val priceBTC: Double, val priceUSD: Double, val volPer: String, val update: String) : Parcelable {
     constructor(parcel: Parcel) : this(
             parcel.readString(),
             parcel.readString(),
-            parcel.readFloat(),
-            parcel.readFloat(),
-            parcel.readFloat(),
-            parcel.readFloat(),
+            parcel.readDouble(),
+            parcel.readDouble(),
+            parcel.readDouble(),
+            parcel.readDouble(),
             parcel.readString(),
             parcel.readString()) {
     }
@@ -21,10 +21,10 @@ data class Market(val market: String, var pair: String, val volBTC: Float, val v
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(market)
         parcel.writeString(pair)
-        parcel.writeFloat(volBTC)
-        parcel.writeFloat(volUSD)
-        parcel.writeFloat(priceBTC)
-        parcel.writeFloat(priceUSD)
+        parcel.writeDouble(volBTC)
+        parcel.writeDouble(volUSD)
+        parcel.writeDouble(priceBTC)
+        parcel.writeDouble(priceUSD)
         parcel.writeString(volPer)
         parcel.writeString(update)
     }

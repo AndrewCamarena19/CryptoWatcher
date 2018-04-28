@@ -1,48 +1,33 @@
 package com.andyisdope.cryptowatcher
 
-import android.Manifest
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdView;
-import android.support.v7.app.AppCompatActivity
-import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import android.widget.Toast
-import android.support.v4.content.LocalBroadcastManager
-import android.support.v7.widget.RecyclerView
-import android.preference.PreferenceManager
 import android.content.*
-import com.andyisdope.cryptowatch.Currency
-import android.widget.TabHost
-import android.support.v7.widget.LinearLayoutManager
-import android.content.pm.PackageManager
-import android.os.Build
-import android.support.v4.app.ActivityCompat
-import com.andyisdope.cryptowatcher.Services.DataService
-import android.content.Intent
-import com.andyisdope.cryptowatcher.Adapters.CurrencyAdapter
-import com.andyisdope.cryptowatcher.Adapters.TokenAdapter
-import com.andyisdope.cryptowatcher.model.Tokens
-import java.util.*
-import android.content.DialogInterface
 import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.preference.Preference
+import android.os.Bundle
+import android.support.v4.content.LocalBroadcastManager
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AlertDialog
+import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.text.InputType
 import android.util.Log
-import android.view.View
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.EditText
-import java.sql.Time
-import kotlin.Comparator
-import kotlin.collections.ArrayList
+import android.widget.TabHost
+import android.widget.Toast
+import com.andyisdope.cryptowatcher.model.Currency
+import com.andyisdope.cryptowatcher.Adapters.CurrencyAdapter
+import com.andyisdope.cryptowatcher.Adapters.TokenAdapter
+import com.andyisdope.cryptowatcher.Services.DataService
+import com.andyisdope.cryptowatcher.model.Tokens
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdView
 
 
 class MainActivity : AppCompatActivity() {
+
     private lateinit var mAdView: AdView
-
-
     private lateinit var Refresh: SwipeRefreshLayout
     var mSelectedList: ArrayList<String> = ArrayList()
     private var mCoins: ArrayList<Currency> = ArrayList()
@@ -55,7 +40,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mTokenAdapter: TokenAdapter
     private lateinit var mFavAdapter: CurrencyAdapter
     private var networkOk: Boolean = false
-    val READ_STORAGE_PERMISSION_REQUEST_CODE = 1
     private var response: String = ""
     private var response2: String = ""
     private lateinit var TimeFrames: Array<String>
@@ -65,25 +49,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var PricingPref: SharedPreferences
     private lateinit var CoinsPref: SharedPreferences
 
-
-    private val mBroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            //val dataItems = intent
-            response = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
-            displayCoinItems()
-
-        }
-    }
-
-    private val mBroadcastReceiver2 = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            //val dataItems = intent
-            response2 = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
-            displayTokenItems()
-            Refresh.isRefreshing = false
-
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -132,6 +97,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //region Broadcasts and Data methods
+    private val mBroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            //val dataItems = intent
+            response = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
+            displayCoinItems()
+
+        }
+    }
+
+    private val mBroadcastReceiver2 = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            //val dataItems = intent
+            response2 = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
+            displayTokenItems()
+            Refresh.isRefreshing = false
+
+        }
+    }
+
     private fun requestData(path: String) {
         val intent = Intent(this, DataService::class.java)
         intent.putExtra("Path", path)
@@ -145,15 +130,15 @@ class MainActivity : AppCompatActivity() {
             "Hourly" -> {
                 when (Currency.Order) {
                     "Ascending" -> {
-                        mCoins.sortBy { it.HrChange.toFloat() }
-                        mTokens.sortBy { it.HrChange.toFloat() }
-                        mFavor.sortBy { it.HrChange.toFloat() }
+                        mCoins.sortBy { it.HrChange.toDouble() }
+                        mTokens.sortBy { it.HrChange.toDouble() }
+                        mFavor.sortBy { it.HrChange.toDouble() }
 
                     }
                     "Descending" -> {
-                        mCoins.sortByDescending { it.HrChange.toFloat() }
-                        mTokens.sortByDescending { it.HrChange.toFloat() }
-                        mFavor.sortByDescending { it.HrChange.toFloat() }
+                        mCoins.sortByDescending { it.HrChange.toDouble() }
+                        mTokens.sortByDescending { it.HrChange.toDouble() }
+                        mFavor.sortByDescending { it.HrChange.toDouble() }
 
                     }
                 }
@@ -161,29 +146,29 @@ class MainActivity : AppCompatActivity() {
             "Daily" -> {
                 when (Currency.Order) {
                     "Ascending" -> {
-                        mCoins.sortBy { it.TwoChange.toFloat() }
-                        mTokens.sortBy { it.TwoChange.toFloat() }
-                        mFavor.sortBy { it.TwoChange.toFloat() }
+                        mCoins.sortBy { it.TwoChange.toDouble() }
+                        mTokens.sortBy { it.TwoChange.toDouble() }
+                        mFavor.sortBy { it.TwoChange.toDouble() }
                     }
                     "Descending" -> {
-                        mCoins.sortByDescending { it.TwoChange.toFloat() }
-                        mTokens.sortByDescending { it.TwoChange.toFloat() }
-                        mFavor.sortByDescending { it.TwoChange.toFloat() }
+                        mCoins.sortByDescending { it.TwoChange.toDouble() }
+                        mTokens.sortByDescending { it.TwoChange.toDouble() }
+                        mFavor.sortByDescending { it.TwoChange.toDouble() }
                     }
                 }
             }
             "Weekly" -> {
                 when (Currency.Order) {
                     "Ascending" -> {
-                        mCoins.sortBy { it.SevenChange.toFloat() }
-                        mTokens.sortBy { it.SevenChange.toFloat() }
-                        mFavor.sortBy { it.SevenChange.toFloat() }
+                        mCoins.sortBy { it.SevenChange.toDouble() }
+                        mTokens.sortBy { it.SevenChange.toDouble() }
+                        mFavor.sortBy { it.SevenChange.toDouble() }
 
                     }
                     "Descending" -> {
-                        mCoins.sortByDescending { it.SevenChange.toFloat() }
-                        mTokens.sortByDescending { it.SevenChange.toFloat() }
-                        mFavor.sortByDescending { it.SevenChange.toFloat() }
+                        mCoins.sortByDescending { it.SevenChange.toDouble() }
+                        mTokens.sortByDescending { it.SevenChange.toDouble() }
+                        mFavor.sortByDescending { it.SevenChange.toDouble() }
 
                     }
                 }
@@ -191,15 +176,15 @@ class MainActivity : AppCompatActivity() {
             "Price" -> {
                 when (Currency.Order) {
                     "Ascending" -> {
-                        mCoins.sortBy { it.CurrentPrice.toFloat() }
-                        mTokens.sortBy { it.CurrentPrice.toFloat() }
-                        mFavor.sortBy { it.CurrentPrice.toFloat() }
+                        mCoins.sortBy { it.CurrentPrice.toDouble() }
+                        mTokens.sortBy { it.CurrentPrice.toDouble() }
+                        mFavor.sortBy { it.CurrentPrice.toDouble() }
 
                     }
                     "Descending" -> {
-                        mCoins.sortByDescending { it.CurrentPrice.toFloat() }
-                        mTokens.sortByDescending { it.CurrentPrice.toFloat() }
-                        mFavor.sortByDescending { it.CurrentPrice.toFloat() }
+                        mCoins.sortByDescending { it.CurrentPrice.toDouble() }
+                        mTokens.sortByDescending { it.CurrentPrice.toDouble() }
+                        mFavor.sortByDescending { it.CurrentPrice.toDouble() }
 
                     }
                 }
@@ -223,15 +208,15 @@ class MainActivity : AppCompatActivity() {
             "24Hr Volume" -> {
                 when (Currency.Order) {
                     "Ascending" -> {
-                        mCoins.sortBy { it.Volume.toFloat() }
-                        mTokens.sortBy { it.Volume.toFloat() }
-                        mFavor.sortBy { it.Volume.toFloat() }
+                        mCoins.sortBy { it.Volume.toDouble() }
+                        mTokens.sortBy { it.Volume.toDouble() }
+                        mFavor.sortBy { it.Volume.toDouble() }
 
                     }
                     "Descending" -> {
-                        mCoins.sortByDescending { it.Volume.toFloat() }
-                        mTokens.sortByDescending { it.Volume.toFloat() }
-                        mFavor.sortByDescending { it.Volume.toFloat() }
+                        mCoins.sortByDescending { it.Volume.toDouble() }
+                        mTokens.sortByDescending { it.Volume.toDouble() }
+                        mFavor.sortByDescending { it.Volume.toDouble() }
 
                     }
                 }
@@ -239,15 +224,15 @@ class MainActivity : AppCompatActivity() {
             "MarketCap" -> {
                 when (Currency.Order) {
                     "Ascending" -> {
-                        mCoins.sortBy { it.MarketCap.toFloat() }
-                        mTokens.sortBy { it.MarketCap.toFloat() }
-                        mFavor.sortBy { it.MarketCap.toFloat() }
+                        mCoins.sortBy { it.MarketCap.toDouble() }
+                        mTokens.sortBy { it.MarketCap.toDouble() }
+                        mFavor.sortBy { it.MarketCap.toDouble() }
 
                     }
                     "Descending" -> {
-                        mCoins.sortByDescending { it.MarketCap.toFloat() }
-                        mTokens.sortByDescending { it.MarketCap.toFloat() }
-                        mFavor.sortByDescending { it.MarketCap.toFloat() }
+                        mCoins.sortByDescending { it.MarketCap.toDouble() }
+                        mTokens.sortByDescending { it.MarketCap.toDouble() }
+                        mFavor.sortByDescending { it.MarketCap.toDouble() }
 
                     }
                 }
@@ -285,86 +270,9 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(baseContext, "Sorting ${Currency.SortMethod} in ${Currency.Order} order.", Toast.LENGTH_SHORT).show()
 
     }
+    //endregion
 
-    private fun displayTokenItems() {
-        mTokens.clear()
-        var temp: Tokens
-        var blocks = response2.substringAfter("<tbody>").split("</tr>")
-        blocks.take(blocks.size - 1)
-                .filter { it.length > 19 }
-                .forEach {
-                    temp = (createToken(it))
-                    if (sharedPref.contains(temp.Name)) {
-                        temp.isFavorite = true
-                        mFavor.add(toCurrency(temp))
-                        mSelectedList.add(temp.Name)
-                    }
-                    if (CoinsPref.contains(temp.Symbol)) {
-                        PricingPref.edit().putFloat(temp.Symbol, temp.CurrentPrice.toFloat()).apply()
-                    }
-                    mTokens.add(temp)
-                }
-
-        mTokenList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        sortAdapters(Currency.SortMethod)
-        displayFavourites()
-        //Log.i("Here", mSelectedList.toString())
-
-    }
-
-    private fun displayFavourites() {
-        mFavourites.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-
-        mFavAdapter = CurrencyAdapter(this, mFavor)
-        mFavourites.adapter = mFavAdapter
-        mFavourites.adapter.notifyDataSetChanged()
-
-    }
-
-    private fun displayCoinItems() {
-        mCoins.clear()
-        mFavor.clear()
-        mSelectedList.clear()
-        var temp: Currency
-        var blocks = response.substringAfter("<tbody>").split("</tr>")
-        blocks.take(blocks.size - 1)
-                .filter { it.length > 19 }
-                .forEach {
-                    temp = (createCurrency(it))
-                    if (sharedPref.contains(temp.Name)) {
-                        temp.isFavorite = true
-                        mFavor.add(temp)
-                        mSelectedList.add(temp.Name)
-                    }
-                    if (CoinsPref.contains(temp.Symbol)) {
-                        PricingPref.edit().putFloat(temp.Symbol, temp.CurrentPrice.toFloat()).apply()
-                    }
-                    mCoins.add(temp)
-                }
-        Currency.ETH = mCoins[1].CurrentPrice.toFloat()
-        Currency.BTC = mCoins[0].CurrentPrice.toFloat()
-        mCoinList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        //mDataSource.close()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        //mDataSource.open()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        LocalBroadcastManager.getInstance(applicationContext)
-                .unregisterReceiver(mBroadcastReceiver)
-        LocalBroadcastManager.getInstance(applicationContext)
-                .unregisterReceiver(mBroadcastReceiver2)
-    }
-
+    //region UI and Dialog methods
     fun initTabs() {
         val tabs = findViewById<TabHost>(R.id.CTlist)
         tabs.setup()
@@ -380,10 +288,6 @@ class MainActivity : AppCompatActivity() {
         spec.setContent(R.id.Favorites)
         spec.setIndicator("Favorites")
         tabs.addTab(spec)
-    }
-
-    private fun toCurrency(Toke: Tokens): Currency {
-        return Currency(Toke.Name, Toke.Symbol, Toke.Place, Toke.isFavorite, Toke.Num, Toke.MarketCap, Toke.CurrentPrice, Toke.HrChange, Toke.TwoChange, Toke.SevenChange, Toke.Volume)
     }
 
     fun createBuilderDialog(array: Array<String>, title: String) {
@@ -474,6 +378,33 @@ class MainActivity : AppCompatActivity() {
         inflater.inflate(R.menu.actionmenu, menu)
         return true
     }
+    //endregion
+
+    //region Lifecycle methods
+    override fun onPause() {
+        super.onPause()
+        //mDataSource.close()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        //mDataSource.open()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        LocalBroadcastManager.getInstance(applicationContext)
+                .unregisterReceiver(mBroadcastReceiver)
+        LocalBroadcastManager.getInstance(applicationContext)
+                .unregisterReceiver(mBroadcastReceiver2)
+    }
+    //endregion
+
+    //region Currency Methods
+    private fun toCurrency(Toke: Tokens): Currency {
+        return Currency(Toke.Name, Toke.Symbol, Toke.Place, Toke.isFavorite, Toke.Num, Toke.MarketCap, Toke.CurrentPrice, Toke.HrChange, Toke.TwoChange, Toke.SevenChange, Toke.Volume)
+    }
 
     private fun createCurrency(block: String): Currency {
 
@@ -528,6 +459,33 @@ class MainActivity : AppCompatActivity() {
         return Currency(id, symbol, Integer.parseInt(place), false, 0.0, marketCap, currPrice, hrChange, twoChange, sevenChange, volume)
     }
 
+    private fun displayCoinItems() {
+        mCoins.clear()
+        mFavor.clear()
+        mSelectedList.clear()
+        var temp: Currency
+        var blocks = response.substringAfter("<tbody>").split("</tr>")
+        blocks.take(blocks.size - 1)
+                .filter { it.length > 19 }
+                .forEach {
+                    temp = (createCurrency(it))
+                    if (sharedPref.contains(temp.Name)) {
+                        temp.isFavorite = true
+                        mFavor.add(temp)
+                        mSelectedList.add(temp.Name)
+                    }
+                    if (CoinsPref.contains(temp.Symbol)) {
+                        PricingPref.edit().putString(temp.Symbol, temp.CurrentPrice).apply()
+                    }
+                    mCoins.add(temp)
+                }
+        Currency.ETH = mCoins[1].CurrentPrice.toDouble()
+        Currency.BTC = mCoins[0].CurrentPrice.toDouble()
+        mCoinList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+    }
+    //endregion
+
+    //region Token and Favorites methods
     private fun createToken(block: String): Tokens {
         var id = block.substringAfter("<tr id=\"id-")
         id = id.substring(0, id.indexOf("\""))
@@ -584,4 +542,40 @@ class MainActivity : AppCompatActivity() {
 
         return Tokens(id, symbol, Integer.parseInt(place), platform, false, 0.0, marketCap, currPrice, hrChange, twoChange, sevenChange, volume)
     }
+
+    private fun displayTokenItems() {
+        mTokens.clear()
+        var temp: Tokens
+        var blocks = response2.substringAfter("<tbody>").split("</tr>")
+        blocks.take(blocks.size - 1)
+                .filter { it.length > 19 }
+                .forEach {
+                    temp = (createToken(it))
+                    if (sharedPref.contains(temp.Name)) {
+                        temp.isFavorite = true
+                        mFavor.add(toCurrency(temp))
+                        mSelectedList.add(temp.Name)
+                    }
+                    if (CoinsPref.contains(temp.Symbol)) {
+                        PricingPref.edit().putString(temp.Symbol, temp.CurrentPrice).apply()
+                    }
+                    mTokens.add(temp)
+                }
+
+        mTokenList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        sortAdapters(Currency.SortMethod)
+        displayFavourites()
+        //Log.i("Here", mSelectedList.toString())
+
+    }
+
+    private fun displayFavourites() {
+        mFavourites.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+
+        mFavAdapter = CurrencyAdapter(this, mFavor)
+        mFavourites.adapter = mFavAdapter
+        mFavourites.adapter.notifyDataSetChanged()
+
+    }
+    //endregion
 }

@@ -2,7 +2,6 @@ package com.andyisdope.cryptowatcher.model
 
 import android.os.Parcel
 import android.os.Parcelable
-import com.andyisdope.cryptowatcher.CurrencyDetail
 
 /**
  * Created by Andy on 1/25/2018.

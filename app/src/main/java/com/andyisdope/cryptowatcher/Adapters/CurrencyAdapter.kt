@@ -3,31 +3,24 @@ package com.andyisdope.cryptowatcher.Adapters
 /**
  * Created by Andy on 1/19/2018.
  */
-import android.app.Activity
+
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Color
-import android.preference.PreferenceManager
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.widget.RecyclerView
 import android.text.InputType
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import com.andyisdope.cryptowatch.Currency
+import com.andyisdope.cryptowatcher.model.Currency
 import com.andyisdope.cryptowatcher.CurrencyDetail
 import com.andyisdope.cryptowatcher.R
 import com.andyisdope.cryptowatcher.utils.CurrencyFormatter
 import com.squareup.picasso.Picasso
-
 import java.io.IOException
-import java.text.DecimalFormat
-import java.text.NumberFormat
 
 class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayList<Currency>) : RecyclerView.Adapter<CurrencyAdapter.ViewHolder>() {
 
@@ -90,13 +83,13 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
                                 tickerChange.setTextColor(Color.WHITE)
                                 tickerChange.text = "N/A"
                             }
-                            item.HrChange.toFloat() <= 0 -> {
+                            item.HrChange.toDouble() <= 0 -> {
                                 tickerChange.setTextColor(Color.RED)
-                                tickerChange.text = "${CurrencyFormatter.formatterSmall.format(item.HrChange.toFloat())}%"
+                                tickerChange.text = "${CurrencyFormatter.formatterSmall.format(item.HrChange.toDouble())}%"
                             }
-                            item.HrChange.toFloat() > 0 -> {
+                            item.HrChange.toDouble() > 0 -> {
                                 tickerChange.setTextColor(Color.GREEN)
-                                tickerChange.text = "+${CurrencyFormatter.formatterSmall.format(item.HrChange.toFloat())}%"
+                                tickerChange.text = "+${CurrencyFormatter.formatterSmall.format(item.HrChange.toDouble())}%"
                             }
                         }
                     }
@@ -106,13 +99,13 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
                                 tickerChange.setTextColor(Color.WHITE)
                                 tickerChange.text = "N/A"
                             }
-                            item.TwoChange.toFloat() <= 0 -> {
+                            item.TwoChange.toDouble() <= 0 -> {
                                 tickerChange.setTextColor(Color.RED)
-                                tickerChange.text = "${CurrencyFormatter.formatterSmall.format(item.TwoChange.toFloat())}%"
+                                tickerChange.text = "${CurrencyFormatter.formatterSmall.format(item.TwoChange.toDouble())}%"
                             }
-                            item.TwoChange.toFloat() > 0 -> {
+                            item.TwoChange.toDouble() > 0 -> {
                                 tickerChange.setTextColor(Color.GREEN)
-                                tickerChange.text = "+${CurrencyFormatter.formatterSmall.format(item.TwoChange.toFloat())}%"
+                                tickerChange.text = "+${CurrencyFormatter.formatterSmall.format(item.TwoChange.toDouble())}%"
                             }
                         }
                     }
@@ -122,13 +115,13 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
                                 tickerChange.setTextColor(Color.WHITE)
                                 tickerChange.text = "N/A"
                             }
-                            item.SevenChange.toFloat() <= 0 -> {
+                            item.SevenChange.toDouble() <= 0 -> {
                                 tickerChange.setTextColor(Color.RED)
-                                tickerChange.text = "${CurrencyFormatter.formatterSmall.format(item.SevenChange.toFloat())}%"
+                                tickerChange.text = "${CurrencyFormatter.formatterSmall.format(item.SevenChange.toDouble())}%"
                             }
-                            item.SevenChange.toFloat() > 0 -> {
+                            item.SevenChange.toDouble() > 0 -> {
                                 tickerChange.setTextColor(Color.GREEN)
-                                tickerChange.text = "+${CurrencyFormatter.formatterSmall.format(item.SevenChange.toFloat())}%"
+                                tickerChange.text = "+${CurrencyFormatter.formatterSmall.format(item.SevenChange.toDouble())}%"
                             }
                         }
                     }
@@ -138,9 +131,9 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
                 tickerSymbol.text = "(" + item.Symbol + ")"
                 tickerPrice.text = when {
                     item.CurrentPrice == "-9999" -> "N/A"
-                    item.CurrentPrice.toFloat() < .01 -> "$ ${CurrencyFormatter.formatterTiny.format(item.CurrentPrice.toFloat())}"
-                    (item.CurrentPrice.toFloat() < 10.0 && item.CurrentPrice.toFloat() > .01) -> "$ ${CurrencyFormatter.formatterSmall.format(item.CurrentPrice.toFloat())}"
-                    else -> "$ ${CurrencyFormatter.formatterLarge.format(item.CurrentPrice.toFloat())}"
+                    item.CurrentPrice.toDouble() < .01 -> "$ ${CurrencyFormatter.formatterTiny.format(item.CurrentPrice.toDouble())}"
+                    (item.CurrentPrice.toDouble() < 10.0 && item.CurrentPrice.toDouble() > .01) -> "$ ${CurrencyFormatter.formatterSmall.format(item.CurrentPrice.toDouble())}"
+                    else -> "$ ${CurrencyFormatter.formatterLarge.format(item.CurrentPrice.toDouble())}"
                 }
                 tickerPlace.text = "" + item.Place
                 tickerName.text = item.Name.toUpperCase()
@@ -148,14 +141,14 @@ class CurrencyAdapter(private val mContext: Context, private val mItems: ArrayLi
                 tickerMarketCap.text =
                         when {
                             (item.MarketCap == "-9999") -> "N/A"
-                            (item.MarketCap.toFloat() < 1000000.0) -> CurrencyFormatter.formatterLarge.format(item.MarketCap.toFloat())
-                            else -> CurrencyFormatter.formatterSmall.format(item.MarketCap.toFloat() / 1000000) + " M"
+                            (item.MarketCap.toDouble() < 1000000.0) -> CurrencyFormatter.formatterLarge.format(item.MarketCap.toDouble())
+                            else -> CurrencyFormatter.formatterSmall.format(item.MarketCap.toDouble() / 1000000) + " M"
                         }
                 tickerVolume.text =
                         when {
                             (item.Volume == "-9999") -> "N/A"
-                            (item.Volume.toFloat() < 1000000.0) -> CurrencyFormatter.formatterLarge.format(item.Volume.toFloat())
-                            else -> CurrencyFormatter.formatterSmall.format(item.Volume.toFloat() / 1000000) + " M"
+                            (item.Volume.toDouble() < 1000000.0) -> CurrencyFormatter.formatterLarge.format(item.Volume.toDouble())
+                            else -> CurrencyFormatter.formatterSmall.format(item.Volume.toDouble() / 1000000) + " M"
                         }
             }
         } catch (e: IOException) {

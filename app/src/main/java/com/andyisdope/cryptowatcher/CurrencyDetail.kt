@@ -3,12 +3,11 @@ package com.andyisdope.cryptowatcher
 import android.content.*
 import android.graphics.Color
 import android.graphics.Paint
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.content.LocalBroadcastManager
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -27,11 +26,10 @@ import com.github.mikephil.charting.charts.CombinedChart.DrawOrder
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.*
-import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.activity_currency_detail.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -78,7 +76,7 @@ class CurrencyDetail : AppCompatActivity() {
     private var xValues: ArrayList<String> = ArrayList()
     private var TransactionDB: TransactionDatabase? = null
     private lateinit var VaultPref: SharedPreferences
-    private var LiquidUSD: Float = 0f
+    private var LiquidUSD: Double = 0.0
     private lateinit var LiquidText: TextView
     private lateinit var InvestedTV: TextView
     private lateinit var UnitsHeldTV: TextView
@@ -92,34 +90,11 @@ class CurrencyDetail : AppCompatActivity() {
     private lateinit var AmountToSell: EditText
     private lateinit var AddFunds: EditText
     private lateinit var AmountToCurrency: EditText
-    private var NumberOfCoins: Float = 0f
-    private var Invested: Float = 0f
-    private var AllBuys: Float = 0f
-    private var AllSells: Float = 0f
-    private var CurrentPrice: Float = 0f
-
-
-    private val mBroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            //val dataItems = intent
-            response = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
-            parseCoinDetails()
-        }
-    }
-
-    private val mBroadcastReceiver2 = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            //val dataItems = intent
-            marketResponse = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
-            (Toast.makeText(baseContext, "Select an Exchange or Pair to view", Toast.LENGTH_SHORT))
-                    .apply { setGravity(Gravity.CENTER, 0, 0) }
-                    .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
-                    .show()
-            parseMarketDetails()
-
-
-        }
-    }
+    private var NumberOfCoins: Double = 0.0
+    private var Invested: Double = 0.0
+    private var AllBuys: Double = 0.0
+    private var AllSells: Double = 0.0
+    private var CurrentPrice: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -130,7 +105,7 @@ class CurrencyDetail : AppCompatActivity() {
         val start: Int = today - 10000
         curr = intent.getStringExtra("Currency")
         currSymbol = intent.getStringExtra("Symbol")
-        CurrentPrice = intent.getStringExtra("Price").toFloat()
+        CurrentPrice = intent.getStringExtra("Price").toDouble()
         marketLoaded = false
         title = "${curr.toUpperCase()}"
         entry = findViewById<TextView>(R.id.CurrencyPrice) as TextView
@@ -155,6 +130,30 @@ class CurrencyDetail : AppCompatActivity() {
         requestData("https://coinmarketcap.com/currencies/${curr.toLowerCase()}/historical-data/?start=$start&end=$today")
 
     }
+
+    //region Broadcast Receivers
+    private val mBroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            //val dataItems = intent
+            response = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
+            parseCoinDetails()
+        }
+    }
+
+    private val mBroadcastReceiver2 = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            //val dataItems = intent
+            marketResponse = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
+            (Toast.makeText(baseContext, "Select an Exchange or Pair to view", Toast.LENGTH_SHORT))
+                    .apply { setGravity(Gravity.CENTER, 0, 0) }
+                    .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
+                    .show()
+            parseMarketDetails()
+
+
+        }
+    }
+    //endregion
 
     //region Market and Chart Views
     private fun initRadioGroup() {
@@ -288,8 +287,8 @@ class CurrencyDetail : AppCompatActivity() {
         }
         VaultPref = baseContext.getSharedPreferences("Coins", Context.MODE_PRIVATE)
 
-        LiquidUSD = VaultPref.getFloat("USD", 1000f)
-        NumberOfCoins = VaultPref.getFloat(currSymbol, 0f)
+        LiquidUSD = VaultPref.getString("USD", "0.0").toDouble()
+        NumberOfCoins = VaultPref.getString(currSymbol, "0.0").toDouble()
         Invested = NumberOfCoins * CurrentPrice
 
         VaultLogo = findViewById(R.id.VaultLogo)
@@ -301,7 +300,7 @@ class CurrencyDetail : AppCompatActivity() {
         AssetsSoldTV.text = "$ $AllSells"
 
         UnitsHeldTV = findViewById(R.id.NumberCoins)
-        UnitsHeldTV.text = "$NumberOfCoins"
+        UnitsHeldTV.text = "${CurrencyFormatter.formatterView.format(NumberOfCoins)}"
 
         CurrentPriceTV = findViewById(R.id.VaultCurrentPrice)
         CurrentPriceTV.text = "$ $CurrentPrice"
@@ -310,7 +309,7 @@ class CurrencyDetail : AppCompatActivity() {
         CurrentNetTV.text = "$ ${AllSells + AllBuys}"
 
         InvestedTV = findViewById(R.id.VaultInvested)
-        InvestedTV.text = "$ $Invested"
+        InvestedTV.text = "$ ${CurrencyFormatter.formatterView.format(Invested)}"
 
         LiquidText = findViewById(R.id.VaultLiquid)
         LiquidText.text = "$ $LiquidUSD"
@@ -330,7 +329,7 @@ class CurrencyDetail : AppCompatActivity() {
 
     private fun initVaultButtons() {
         VaultPref.registerOnSharedPreferenceChangeListener { sharedPreferences, s ->
-            NumberOfCoins = sharedPreferences.getFloat(currSymbol, 0f)
+            NumberOfCoins = sharedPreferences.getString(currSymbol, "0").toDouble()
             findViewById<TextView>(R.id.NumberCoins).text = "$NumberOfCoins"
             CurrentNetTV.text = "$ ${AllSells + AllBuys}"
             AssetsSoldTV.text = "$ ${AllSells}"
@@ -341,12 +340,13 @@ class CurrencyDetail : AppCompatActivity() {
         findViewById<TextView>(R.id.VaultName).text = curr.toUpperCase()
 
         AddFunds.setOnEditorActionListener { textView, i, keyEvent ->
-            var amt = textView.text.toString().toFloatOrNull()
+            var amt = textView.text.toString().toDoubleOrNull()
             var completed = true
             if (amt != null) {
                 if (i == EditorInfo.IME_ACTION_DONE && amt > 0) {
                     LiquidUSD += amt
-                    VaultPref.edit().putFloat("USD", LiquidUSD).apply()
+                    LiquidText.text = "$ $amt"
+                    VaultPref.edit().putString("USD", LiquidUSD.toString()).apply()
                     completed = false
                     Toast.makeText(this, "Added $ $amt to Liquid Funds", Toast.LENGTH_LONG).show()
 
@@ -361,10 +361,10 @@ class CurrencyDetail : AppCompatActivity() {
 
         AmountToBuy.setOnEditorActionListener { textView, i, _ ->
             var completed = false
-            var amt = textView.text.toString().toFloatOrNull()
+            var amt = textView.text.toString().toDoubleOrNull()
             if (amt != null) {
                 if (i == EditorInfo.IME_ACTION_DONE && amt > 0) {
-                    completed = buyCoins(textView.text.toString().toFloat())
+                    completed = buyCoins(textView.text.toString().toDouble())
                 }
                 completed
             } else {
@@ -376,10 +376,10 @@ class CurrencyDetail : AppCompatActivity() {
 
         AmountToUSD.setOnEditorActionListener { tv, i, _ ->
             var completed = false
-            var amt = tv.text.toString().toFloatOrNull()
+            var amt = tv.text.toString().toDoubleOrNull()
             if (amt != null) {
                 if (i == EditorInfo.IME_ACTION_DONE && amt > 0) {
-                    completed = currencyToFiat(tv.text.toString().toFloat())
+                    completed = currencyToFiat(tv.text.toString().toDouble())
                 }
                 completed
             } else {
@@ -391,10 +391,10 @@ class CurrencyDetail : AppCompatActivity() {
 
         AmountToCurrency.setOnEditorActionListener { tv, i, _ ->
             var completed = false
-            var amt = tv.text.toString().toFloatOrNull()
+            var amt = tv.text.toString().toDoubleOrNull()
             if (amt != null) {
                 if (i == EditorInfo.IME_ACTION_DONE && amt > 0) {
-                    completed = fiatToCurrency(tv.text.toString().toFloat())
+                    completed = fiatToCurrency(tv.text.toString().toDouble())
                 }
                 completed
             } else {
@@ -406,10 +406,10 @@ class CurrencyDetail : AppCompatActivity() {
 
         AmountToSell.setOnEditorActionListener { tv, i, _ ->
             var completed = false
-            var amt = tv.text.toString().toFloatOrNull()
+            var amt = tv.text.toString().toDoubleOrNull()
             if (amt != null) {
                 if (i == EditorInfo.IME_ACTION_DONE && amt > 0) {
-                    completed = sellCoins(tv.text.toString().toFloat())
+                    completed = sellCoins(tv.text.toString().toDouble())
                 }
                 completed
             } else {
@@ -418,63 +418,9 @@ class CurrencyDetail : AppCompatActivity() {
                 completed
             }
         }
-
-//        Sell.setOnClickListener {
-//            var price = findViewById<EditText>(R.id.VaultSellCoinsPrice).text.toString().toFloatOrNull()
-//            var amount = findViewById<EditText>(R.id.VaultSellCoinsAmount).text.toString().toFloatOrNull()
-//
-//            if (price == null || amount == null) {
-//                Toast.makeText(this, "Enter a value for amount and price", Toast.LENGTH_SHORT).show()
-//            } else if (NumberOfCoins <= 0 || amount > NumberOfCoins) {
-//                Toast.makeText(this, "Not enough coins to sell", Toast.LENGTH_SHORT).show()
-//            } else {
-//                var t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), amount,
-//                        false, true, price, (price * amount))
-//                TransactionDB?.TransactionDao()?.insertAll(t0)
-//                Toast.makeText(this, "Sold $amount coins @$price for a net of ${price * amount}", Toast.LENGTH_SHORT).show()
-//                AllSells += price * amount
-//                NumberOfCoins -= amount
-//                LiquidUSD += amount * price
-//                AssetsSoldTV.text = "$ $AllSells"
-//                CurrentNetTV.text = "$ ${AllSells + AllBuys}"
-//                VaultPref.edit().putFloat(currSymbol, NumberOfCoins).apply()
-//                VaultPref.edit().putFloat("USD", LiquidUSD).apply()
-//
-//            }
-//            findViewById<EditText>(R.id.VaultSellCoinsPrice).setText("")
-//            findViewById<EditText>(R.id.VaultSellCoinsAmount).setText("")
-//
-//
-//        }
-//
-//        Buy.setOnClickListener {
-//            var price = findViewById<EditText>(R.id.VaultBuyCoinsPrice).text.toString().toFloatOrNull()
-//            var amount = findViewById<EditText>(R.id.VaultBuyCoinsAmount).text.toString().toFloatOrNull()
-//
-//            if (price == null || amount == null) {
-//                Toast.makeText(this, "Enter a value for amount and price", Toast.LENGTH_SHORT).show()
-//            } else if (price*amount > LiquidUSD) {
-//                Toast.makeText(this, "Not enough in vault to buy, add more funds", Toast.LENGTH_SHORT).show()
-//            } else {
-//                var t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), amount,
-//                        true, false, price, (price * amount) * -1)
-//                TransactionDB?.TransactionDao()?.insertAll(t0)
-//                AllBuys -= price * amount
-//                NumberOfCoins += amount
-//                LiquidUSD -= amount * price
-//                AssetsBoughtTV.text = "$ ${AllBuys * -1}"
-//                CurrentNetTV.text = "$ ${AllSells + AllBuys}"
-//                Toast.makeText(this, "Bought $amount coins @$price for a net of ${price * -amount}", Toast.LENGTH_SHORT).show()
-//                VaultPref.edit().putFloat(currSymbol, NumberOfCoins).apply()
-//                VaultPref.edit().putFloat("USD", LiquidUSD).apply()
-//            }
-//            findViewById<EditText>(R.id.VaultBuyCoinsPrice).setText("")
-//            findViewById<EditText>(R.id.VaultBuyCoinsAmount).setText("")
-//
-//        }
     }
 
-    private fun currencyToFiat(amt: Float): Boolean {
+    private fun currencyToFiat(amt: Double): Boolean {
         var completed = true
         if (amt > NumberOfCoins * CurrentPrice) {
             Toast.makeText(this, "Not enough coins in vault to exchange", Toast.LENGTH_LONG)
@@ -495,17 +441,17 @@ class CurrencyDetail : AppCompatActivity() {
             LiquidUSD += amt
             AssetsSoldTV.text = "$ $AllSells"
             CurrentNetTV.text = "$ ${AllSells + AllBuys}"
-            VaultPref.edit().putFloat(currSymbol, NumberOfCoins).apply()
-            VaultPref.edit().putFloat("USD", LiquidUSD).apply()
+            VaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(NumberOfCoins)).apply()
+            VaultPref.edit().putString("USD", LiquidUSD.toString()).apply()
             completed = false
         }
-        if (NumberOfCoins == 0f)
+        if (NumberOfCoins == 0.0)
             VaultPref.edit().remove(currSymbol).apply()
         AmountToUSD.setText("")
         return completed
     }
 
-    private fun fiatToCurrency(amt: Float): Boolean {
+    private fun fiatToCurrency(amt: Double): Boolean {
         var completed = true
         if (amt > LiquidUSD) {
             Toast.makeText(this, "Not enough in vault to exchange, add more funds", Toast.LENGTH_LONG)
@@ -520,22 +466,22 @@ class CurrencyDetail : AppCompatActivity() {
             AllBuys -= amt
             NumberOfCoins += numCoins
             LiquidUSD -= amt
-            if (LiquidUSD < .0001) LiquidUSD = 0f
+            if (LiquidUSD < .00001) LiquidUSD = 0.0
             AssetsBoughtTV.text = "$ ${AllBuys * -1}"
             CurrentNetTV.text = "$ ${AllSells + AllBuys}"
             Toast.makeText(this, "Exchanged $amt USD to $numCoins $curr", Toast.LENGTH_SHORT)
                     .apply { setGravity(Gravity.CENTER, 0, 0) }
                     .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
                     .show()
-            VaultPref.edit().putFloat(currSymbol, NumberOfCoins).apply()
-            VaultPref.edit().putFloat("USD", LiquidUSD).apply()
+            VaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(NumberOfCoins)).apply()
+            VaultPref.edit().putString("USD", LiquidUSD.toString()).apply()
             completed = false
         }
         AmountToCurrency.setText("")
         return completed
     }
 
-    private fun sellCoins(amt: Float): Boolean {
+    private fun sellCoins(amt: Double): Boolean {
         var completed = true
         if (amt > NumberOfCoins) {
             Toast.makeText(this, "Not enough coins in vault to exchange", Toast.LENGTH_LONG)
@@ -555,17 +501,17 @@ class CurrencyDetail : AppCompatActivity() {
             LiquidUSD += (CurrentPrice * amt)
             AssetsSoldTV.text = "$ $AllSells"
             CurrentNetTV.text = "$ ${AllSells + AllBuys}"
-            VaultPref.edit().putFloat(currSymbol, NumberOfCoins).apply()
-            VaultPref.edit().putFloat("USD", LiquidUSD).apply()
+            VaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(NumberOfCoins)).apply()
+            VaultPref.edit().putString("USD", LiquidUSD.toString()).apply()
             completed = false
         }
-        if (NumberOfCoins == 0f)
+        if (NumberOfCoins == 0.0)
             VaultPref.edit().remove(currSymbol).apply()
         AmountToSell.setText("")
         return completed
     }
 
-    private fun buyCoins(amt: Float): Boolean {
+    private fun buyCoins(amt: Double): Boolean {
         var completed = true
         if (amt * CurrentPrice > LiquidUSD) {
             Toast.makeText(this, "Not enough in vault to buy, add more funds", Toast.LENGTH_SHORT)
@@ -579,15 +525,15 @@ class CurrencyDetail : AppCompatActivity() {
             AllBuys -= CurrentPrice * amt
             NumberOfCoins += amt
             LiquidUSD -= amt * CurrentPrice
-            if (LiquidUSD < .0001) LiquidUSD = 0f
+            if (LiquidUSD < .0001) LiquidUSD = 0.0
             AssetsBoughtTV.text = "$ ${AllBuys * -1}"
             CurrentNetTV.text = "$ ${AllSells + AllBuys}"
             Toast.makeText(this, "Bought $amt coins @$CurrentPrice for a net of ${CurrentPrice * -amt}", Toast.LENGTH_LONG)
                     .apply { setGravity(Gravity.CENTER, 0, 0) }
                     .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
                     .show()
-            VaultPref.edit().putFloat(currSymbol, NumberOfCoins).apply()
-            VaultPref.edit().putFloat("USD", LiquidUSD).apply()
+            VaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(NumberOfCoins)).apply()
+            VaultPref.edit().putString("USD", LiquidUSD.toString()).apply()
             completed = false
         }
         AmountToBuy.setText("")
@@ -596,9 +542,6 @@ class CurrencyDetail : AppCompatActivity() {
 
     private fun testDB() {
         TransactionDB = TransactionDatabase.getInstance(this)
-        //TransactionDB!!.TransactionDao().deleteAll()
-
-
         async(UI) {
             val buys = async(CommonPool)
             {
@@ -676,7 +619,7 @@ class CurrencyDetail : AppCompatActivity() {
 
         var update = data[6].substringAfter(">")
 
-        MarketDeets.add(Market(marketName, pair, volBTC.toFloat(), volUSD.toFloat(), priceBTC.toFloat(), priceUSD.toFloat(), percent, update))
+        MarketDeets.add(Market(marketName, pair, volBTC.toDouble(), volUSD.toDouble(), priceBTC.toDouble(), priceUSD.toDouble(), percent, update))
         //Log.i("Market", MarketDeets[MarketDeets.size - 1].toString())
         if (!MarketPairs.contains(pair)) MarketPairs.add(pair.capitalize())
         if (!MarketNames.contains(marketName)) MarketNames.add(marketName.capitalize())

@@ -1,15 +1,14 @@
 package com.andyisdope.cryptowatcher
 
 import android.graphics.Color
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import com.andyisdope.cryptowatcher.Adapters.TransactionAdapter
 import com.andyisdope.cryptowatcher.database.TransactionDatabase
 import com.andyisdope.cryptowatcher.model.Transaction
@@ -46,7 +45,6 @@ class TransactionHistory : AppCompatActivity() {
         initViews()
         initList()
     }
-
 
     private fun initList() {
         TransactionDB = TransactionDatabase.getInstance(this)!!

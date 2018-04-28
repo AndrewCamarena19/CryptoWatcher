@@ -25,10 +25,10 @@ interface TransactionDAO {
     fun getAllBuys(): List<Transaction>
 
     @Query("Select SUM(Net) from Transactions where Buy = 1 AND Coin = :coin")
-    fun getAllCoinBuys(coin: String):Float
+    fun getAllCoinBuys(coin: String):Double
 
     @Query("Select SUM(Net) from Transactions where Sell = 1 AND Coin = :coin")
-    fun getAllCoinSells(coin: String): Float
+    fun getAllCoinSells(coin: String): Double
 
     @Query("Select * from Transactions where Sell = 1")
     fun getAllSells(): List<Transaction>
@@ -37,14 +37,14 @@ interface TransactionDAO {
     fun getCoinTransactions(coin: String): List<Transaction>
 
     @Query("Select SUM(Net) from Transactions")
-    fun getNetAssests(): Float
+    fun getNetAssests(): Double
 
     @Query("Select SUM(Net) from Transactions where Sell = 1")
-    fun getSellSum(): Float
+    fun getSellSum(): Double
 
     @Query("Select SUM(Net) from Transactions where Buy = 1")
-    fun getBuySum(): Float
+    fun getBuySum(): Double
 
     @Query("Select SUM(Amount) from Transactions where Coin = :coin")
-    fun getCurrentCoins(coin: String): Float
+    fun getCurrentCoins(coin: String): Double
 }

@@ -7,12 +7,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
-import com.andyisdope.cryptowatch.Currency
+import com.andyisdope.cryptowatcher.model.Currency
 import com.andyisdope.cryptowatcher.R
 import com.andyisdope.cryptowatcher.model.Market
 import com.andyisdope.cryptowatcher.utils.CurrencyFormatter
-import java.text.DecimalFormat
-import java.text.NumberFormat
 
 /**
  * Created by Andy on 2/6/2018.
@@ -27,7 +25,7 @@ class MarketAdapter(private val mContext: Context, private val mItems: ArrayList
             MarketName.text = item.market + "     "
             PairName.text = item.pair + "     "
             Updated.text = item.update
-            VolPer.text = "${CurrencyFormatter.formatterSmall.format(item.volPer.toFloat())}%"
+            VolPer.text = "${CurrencyFormatter.formatterSmall.format(item.volPer.toDouble())}%"
 
             when (CurrentCurrency) {
                 "USD" -> {
@@ -39,8 +37,8 @@ class MarketAdapter(private val mContext: Context, private val mItems: ArrayList
                     PriceNum.text = "${CurrencyFormatter.formatterLarge.format(item.priceUSD/ Currency.ETH)} ETH "
                 }
                 "BTC" -> {
-                    VolNum.text = "${CurrencyFormatter.formatterLarge.format(item.volUSD/Currency.BTC)} BTC "
-                    PriceNum.text = "${CurrencyFormatter.formatterLarge.format(item.priceUSD/Currency.BTC)} BTC "
+                    VolNum.text = "${CurrencyFormatter.formatterLarge.format(item.volUSD/ Currency.BTC)} BTC "
+                    PriceNum.text = "${CurrencyFormatter.formatterLarge.format(item.priceUSD/ Currency.BTC)} BTC "
                 }
             }
 

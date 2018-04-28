@@ -3,7 +3,6 @@ package com.andyisdope.cryptowatcher.Adapters
 import android.content.Context
 import android.graphics.Color
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,8 +11,6 @@ import android.widget.TextView
 import com.andyisdope.cryptowatcher.R
 import com.andyisdope.cryptowatcher.model.Transaction
 import com.andyisdope.cryptowatcher.utils.CurrencyFormatter
-import java.text.DecimalFormat
-import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.abs

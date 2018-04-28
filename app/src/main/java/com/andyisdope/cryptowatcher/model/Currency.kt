@@ -1,4 +1,4 @@
-package com.andyisdope.cryptowatch
+package com.andyisdope.cryptowatcher.model
 
 import android.os.Parcel
 import android.os.Parcelable
@@ -45,8 +45,8 @@ data class Currency(val Name: String, val Symbol: String, val Place: Int, var is
         var SortMethod: String = "Place"
         var TimeFrame = "Hourly"
         var Order = "Ascending"
-        var ETH = 0f
-        var BTC = 0f
+        var ETH = 0.0
+        var BTC = 0.0
 
         override fun createFromParcel(parcel: Parcel): Currency {
             return Currency(parcel)

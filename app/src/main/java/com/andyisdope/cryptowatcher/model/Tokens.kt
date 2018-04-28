@@ -2,7 +2,6 @@ package com.andyisdope.cryptowatcher.model
 
 import android.os.Parcel
 import android.os.Parcelable
-import java.util.*
 
 /**
  * Created by Andy on 1/22/2018.

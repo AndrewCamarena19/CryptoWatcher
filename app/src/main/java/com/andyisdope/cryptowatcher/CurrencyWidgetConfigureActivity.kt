@@ -6,8 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.preference.PreferenceManager
-import android.util.Log
 import android.view.View
 import android.widget.*
 import com.andyisdope.cryptowatcher.Services.CurrencyService
@@ -43,7 +41,7 @@ class CurrencyWidgetConfigureActivity : Activity() {
 
     private fun initUI()
     {
-        sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        sharedPref = baseContext.getSharedPreferences("Favorites", Context.MODE_PRIVATE)
 
         HighPrice = findViewById<EditText>(R.id.WidgetHighSet) as EditText
         BottomPrice = findViewById<EditText>(R.id.WidgetBottomSet) as EditText
@@ -97,23 +95,23 @@ class CurrencyWidgetConfigureActivity : Activity() {
         // It is the responsibility of the configuration activity to update the app widget
         //val appWidgetManager = AppWidgetManager.getInstance(context)
         //Log.i("Here", "in config buton")
-        var HP = -999.0f
-        var BP = -999.0f
-        var CP = -999.0f
+        var HP = -999.0
+        var BP = -999.0
+        var CP = -999.0
         if(HighPriceBox.isChecked)
         {
-            HP = HighPrice.text.toString().toFloat()
+            HP = HighPrice.text.toString().toDouble()
         }
         if(BottomPriceBox.isChecked)
         {
-            BP = BottomPrice.text.toString().toFloat()
+            BP = BottomPrice.text.toString().toDouble()
         }
         if(AbsoluteChangeBox.isChecked)
         {
-            CP = AbsoluteChange.text.toString().toFloat()
+            CP = AbsoluteChange.text.toString().toDouble()
         }
 
-        CurrencyService.startActionFoo(context, mAppWidgetId, "$CurrencyName,$HP,$BP,$CP")
+        CurrencyService.enqueueWork(context, mAppWidgetId, "$CurrencyName,$HP,$BP,$CP")
 
 
         // Make sure we pass back the original appWidgetId

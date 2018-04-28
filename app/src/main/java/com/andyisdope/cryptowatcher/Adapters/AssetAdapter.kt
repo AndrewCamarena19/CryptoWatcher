@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.andyisdope.cryptowatcher.R
 import com.andyisdope.cryptowatcher.model.Asset
-import com.github.mikephil.charting.charts.PieChart
 
 class AssetAdapter(private val mContext: Context, private val mItems: ArrayList<Asset>) : RecyclerView.Adapter<AssetAdapter.ViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {

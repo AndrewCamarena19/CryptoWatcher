@@ -1,27 +1,31 @@
 package com.andyisdope.cryptowatcher.Services
 
+import android.app.IntentService
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
-import android.content.Intent
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
+import android.os.Build
+import android.os.PowerManager
+import android.support.v4.app.JobIntentService
+import android.support.v4.app.NotificationCompat
 import android.widget.RemoteViews
-import java.text.DecimalFormat
-import java.text.NumberFormat
+import android.widget.Toast
+import com.andyisdope.cryptowatcher.CurrencyDetail
+import com.andyisdope.cryptowatcher.CurrencyWidget
+import com.andyisdope.cryptowatcher.CurrencyWidgetConfigureActivity
+import com.andyisdope.cryptowatcher.R
+import com.andyisdope.cryptowatcher.utils.CurrencyFormatter
+import java.lang.Math.abs
 import java.text.SimpleDateFormat
 import java.util.*
-import android.os.Build
-import android.app.*
-import android.support.v4.app.NotificationCompat
-import android.app.PendingIntent
-import android.widget.Toast
-import com.andyisdope.cryptowatcher.*
-import java.lang.Math.abs
-import android.os.PowerManager
-import com.andyisdope.cryptowatcher.utils.CurrencyFormatter
 
-class CurrencyService : IntentService("CurrencyService") {
+class CurrencyService : JobIntentService() {
 
-    override fun onHandleIntent(intent: Intent?) {
+    override fun onHandleWork(intent: Intent) {
         if (intent != null) {
             val action = intent.action
             if (UPDATE == action) {
@@ -116,15 +120,14 @@ class CurrencyService : IntentService("CurrencyService") {
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setLights(0xccccff, 1000,1000)
+                .setLights(0xccccff, 1000, 1000)
                 .build()
         wakeScreen()
         Toast.makeText(this, "Recreate Widget to set new notification", Toast.LENGTH_SHORT).show()
         mNotific.notify(ncode, n)
     }
 
-    private fun wakeScreen()
-    {
+    private fun wakeScreen() {
         val pm = this.getSystemService(Context.POWER_SERVICE) as PowerManager
         val isScreenOn = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
             pm.isInteractive
@@ -169,6 +172,20 @@ class CurrencyService : IntentService("CurrencyService") {
             intent.putExtra(WIDGETBOTTOM, extras[2])
             intent.putExtra(WIDGETCHANGE, extras[3])
             context.startService(intent)
+        }
+
+        fun enqueueWork(context: Context, param1: Int, param2: String) {
+            val intent = Intent(context, CurrencyService::class.java)
+            intent.action = UPDATE
+            var extras = param2.split(",")
+            intent.putExtra(WIDGETID, param1)
+            intent.putExtra(WIDGETTEXT, extras[0])
+            //Log.i("Here", extras.toString())
+            intent.putExtra(WIDGETHIGH, extras[1])
+            intent.putExtra(WIDGETBOTTOM, extras[2])
+            intent.putExtra(WIDGETCHANGE, extras[3])
+            enqueueWork(context, CurrencyService::class.java, param1, intent)
+
         }
 
         fun parseCurrencyData(curr: String): String {

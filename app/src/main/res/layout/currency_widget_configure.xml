@@ -1,93 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/linearLayout"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark">
 
     <TextView
-        android:layout_width="match_parent"
+        android:id="@+id/textView15"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="@string/configure" />
-
-    <Spinner
-        android:id="@+id/appwidget_text"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:inputType="text" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
-
-        <CheckBox
-            android:id="@+id/WidgetHighPrice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/falling_price" />
-
-        <CheckBox
-            android:id="@+id/WidgetBottomPrice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/rising_price" />
-
-        <CheckBox
-            android:id="@+id/WidgetAbsoluteChange"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/absolute_change" />
-
-    </LinearLayout>
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Wiget Configuration"
+        android:textColor="@color/colorPrimary"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+    <CheckBox
+        android:id="@+id/WidgetHighPrice"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/falling_price"
+        android:textColor="@color/TickerNameColor"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toStartOf="@+id/WidgetBottomPrice"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appwidget_text" />
 
-        <EditText
-            android:id="@+id/WidgetAbsoluteSet"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:ems="10"
-            android:hint="@string/set_percent_of_change_absolute_value"
-            android:inputType="numberDecimal"
-            android:visibility="invisible" />
+    <CheckBox
+        android:id="@+id/WidgetBottomPrice"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="@string/rising_price"
+        android:textColor="@color/TickerNameColor"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/WidgetHighPrice"
+        app:layout_constraintEnd_toStartOf="@+id/WidgetAbsoluteChange"
+        app:layout_constraintStart_toEndOf="@+id/WidgetHighPrice" />
 
-        <EditText
-            android:id="@+id/WidgetBottomSet"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:ems="10"
-            android:hint="@string/set_price_of_bottom_in_us_dollars"
-            android:inputType="numberDecimal"
-            android:visibility="invisible" />
+    <CheckBox
+        android:id="@+id/WidgetAbsoluteChange"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="@string/absolute_change"
+        android:textColor="@color/TickerNameColor"
+        android:textSize="16sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/WidgetBottomPrice"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/WidgetBottomPrice" />
 
-        <EditText
-            android:id="@+id/WidgetHighSet"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:ems="10"
-            android:hint="@string/set_price_of_high_in_us_dollars"
-            android:inputType="numberDecimal"
-            android:visibility="invisible" />
-    </LinearLayout>
+
+    <EditText
+        android:id="@+id/WidgetAbsoluteSet"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="@string/set_percent_of_change_absolute_value"
+        android:inputType="numberDecimal"
+        android:textColor="@color/colorPrimary"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/WidgetBottomSet" />
+
+    <EditText
+        android:id="@+id/WidgetBottomSet"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="@string/set_price_of_bottom_in_us_dollars"
+        android:inputType="numberDecimal"
+        android:textColor="@color/colorPrimary"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/WidgetHighSet" />
+
+    <EditText
+        android:id="@+id/WidgetHighSet"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:ems="10"
+        android:hint="@string/set_price_of_high_in_us_dollars"
+        android:inputType="numberDecimal"
+        android:textColor="@color/colorPrimary"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/WidgetHighPrice" />
+
 
     <Button
         android:id="@+id/add_button"
+        style="@android:style/Widget.Holo.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="@string/add_widget" />
+        android:text="@string/add_widget"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/WidgetAbsoluteSet" />
 
-</LinearLayout>
+    <Spinner
+        android:id="@+id/appwidget_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:inputType="text"
+        android:textColor="@color/TickerNameColor"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView15" />
+
+</android.support.constraint.ConstraintLayout>
