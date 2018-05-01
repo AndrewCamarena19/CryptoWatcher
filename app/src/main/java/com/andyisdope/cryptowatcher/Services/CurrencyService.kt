@@ -7,24 +7,34 @@ import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Build
 import android.os.PowerManager
 import android.support.v4.app.JobIntentService
 import android.support.v4.app.NotificationCompat
+import android.util.Log
 import android.widget.RemoteViews
 import android.widget.Toast
 import com.andyisdope.cryptowatcher.CurrencyDetail
 import com.andyisdope.cryptowatcher.CurrencyWidget
 import com.andyisdope.cryptowatcher.CurrencyWidgetConfigureActivity
 import com.andyisdope.cryptowatcher.R
+import com.andyisdope.cryptowatcher.database.AssetDatabase
+import com.andyisdope.cryptowatcher.model.Asset
+import com.andyisdope.cryptowatcher.model.DateAsset
 import com.andyisdope.cryptowatcher.utils.CurrencyFormatter
+import com.google.gson.JsonObject
+import org.json.JSONArray
+import org.json.JSONObject
 import java.lang.Math.abs
 import java.text.SimpleDateFormat
 import java.util.*
 
 class CurrencyService : JobIntentService() {
-
+    private lateinit var currentTime: Date
+    val sdf = SimpleDateFormat("HH:mm:ss")
+    val adf = SimpleDateFormat("MM/dd/YYYY")
     override fun onHandleWork(intent: Intent) {
         if (intent != null) {
             val action = intent.action
@@ -44,14 +54,13 @@ class CurrencyService : JobIntentService() {
      * parameters.
      */
     private fun handleActionFoo(param1: Int, param2: String, High: Float, Bottom: Float, Change: Float) {
-        val currentTime = Calendar.getInstance().time
-        val date = Date(currentTime.time)
-        val sdf = SimpleDateFormat("HH:mm:ss")
+        currentTime = Calendar.getInstance().time
+        val date = sdf.format(Date(currentTime.time))
         var WM: AppWidgetManager = AppWidgetManager.getInstance(this.applicationContext)
         val views = RemoteViews(this.packageName, R.layout.currency_widget)
         var data = parseCurrencyData(param2).split(",")
         views.setTextViewText(R.id.appwidget_text, param2.toUpperCase())
-        views.setTextViewText(R.id.widgetLast, "Updated: " + sdf.format(date))
+        views.setTextViewText(R.id.widgetLast, "Updated: $date")
         views.setTextViewText(R.id.WidgetPrice, "$ " + CurrencyFormatter.formatterLarge.format(data[0].toFloat()))
         when {
             (data[1].toFloat() < 0) -> {
@@ -84,8 +93,31 @@ class CurrencyService : JobIntentService() {
             createNotification(param2, data[1], param1, "absolute percent change")
             CurrencyWidgetConfigureActivity.saveTitlePref(this, param1, "$param2,$data,$High,$Bottom,-999.0f")
         }
+        if(date.startsWith("00")) {
+            Log.i("Data", "We in der")
+            checkAllPrices(this.applicationContext)
+        }
+        else
+            Log.i("Data", "nah dog")
         WM.updateAppWidget(param1, views)
 
+    }
+
+    private fun checkAllPrices(context: Context) {
+        val CoinsPref: SharedPreferences = context.getSharedPreferences("CoinNames", Context.MODE_PRIVATE)
+        val TotalWorth: SharedPreferences = context.getSharedPreferences("TotalWorth", Context.MODE_PRIVATE)
+        val USD: SharedPreferences = context.getSharedPreferences("Coins", Context.MODE_PRIVATE)
+        val AssetDB = AssetDatabase.getInstance(context)
+        TotalWorth.edit().clear().apply()
+        var total = USD.getString("USD", "0.0").toDouble()
+        CoinsPref.all.entries.forEach {
+            val call = webService.getInitial("https://api.coinmarketcap.com/v1/ticker/${it.key}/")
+            val resp = call.execute().body()
+            var json = JSONArray(resp)
+            total += json.getJSONObject(0)["price_usd"].toString().toDouble() * CoinsPref.getString(it.key, "0.0").toDouble()
+        }
+        val date = DateAsset(adf.format(Date(currentTime.time)).toString(), total)
+        AssetDB?.AssetDao()?.insertAll(date)
     }
 
     private fun createNotification(curr: String, Change: String, WidgetID: Int, Alert: String) {
@@ -144,10 +176,8 @@ class CurrencyService : JobIntentService() {
     }
 
     companion object {
-        // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
+        val webService = DataWebService.retrofit.create(DataWebService::class.java)
         val UPDATE = AppWidgetManager.ACTION_APPWIDGET_UPDATE
-        private val ACTION_BAZ = "com.andyisdope.cryptowatcher.Services.action.BAZ"
-
         val WIDGETID = "com.andyisdope.cryptowatcher.Services.extra.WidgetID"
         val WIDGETTEXT = "com.andyisdope.cryptowatcher.Services.extra.WidgetText"
         val WIDGETHIGH = "com.andyisdope.cryptowatcher.Services.extra.WidgetHigh"
@@ -155,45 +185,22 @@ class CurrencyService : JobIntentService() {
         val WIDGETCHANGE = "com.andyisdope.cryptowatcher.Services.extra.WidgetChange"
 
 
-        /**
-         * Starts this service to perform action Foo with the given parameters. If
-         * the service is already performing a task this action will be queued.
-         *
-         * @see IntentService
-         */
-        fun startActionFoo(context: Context, param1: Int, param2: String) {
-            val intent = Intent(context, CurrencyService::class.java)
-            intent.action = UPDATE
-            var extras = param2.split(",")
-            intent.putExtra(WIDGETID, param1)
-            intent.putExtra(WIDGETTEXT, extras[0])
-            //Log.i("Here", extras.toString())
-            intent.putExtra(WIDGETHIGH, extras[1])
-            intent.putExtra(WIDGETBOTTOM, extras[2])
-            intent.putExtra(WIDGETCHANGE, extras[3])
-            context.startService(intent)
-        }
-
         fun enqueueWork(context: Context, param1: Int, param2: String) {
             val intent = Intent(context, CurrencyService::class.java)
             intent.action = UPDATE
             var extras = param2.split(",")
             intent.putExtra(WIDGETID, param1)
             intent.putExtra(WIDGETTEXT, extras[0])
-            //Log.i("Here", extras.toString())
             intent.putExtra(WIDGETHIGH, extras[1])
             intent.putExtra(WIDGETBOTTOM, extras[2])
             intent.putExtra(WIDGETCHANGE, extras[3])
-            enqueueWork(context, CurrencyService::class.java, param1, intent)
-
+            enqueueWork(context, CurrencyService::class.java, 1001, intent)
         }
 
         fun parseCurrencyData(curr: String): String {
-            val webService = DataWebService.retrofit.create(DataWebService::class.java)
             val call = webService.getInitial("https://coinmarketcap.com/currencies/$curr/")
             val resp = call.execute().body()
 
-            //Log.i("Here", resp)
             var price = resp?.substringAfter("<span class=\"price\" data-usd=\"")
             price = price?.substring(0, price.indexOf("\""))
 

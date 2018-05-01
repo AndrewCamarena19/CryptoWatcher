@@ -7,15 +7,15 @@ import android.os.Parcel
 import android.os.Parcelable
 
 @Entity(tableName = "Assets")
-data class DateAsset(@PrimaryKey() val Date: Long,
-                     @ColumnInfo(name = "Sum") val Price: Float) : Parcelable {
+data class DateAsset(@PrimaryKey() val Date: String,
+                     @ColumnInfo(name = "Sum") val Price: Double) : Parcelable {
     constructor(parcel: Parcel) : this(
-            parcel.readLong(),
-            parcel.readFloat())
+            parcel.readString(),
+            parcel.readDouble())
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeLong(Date)
-        parcel.writeFloat(Price)
+        parcel.writeString(Date)
+        parcel.writeDouble(Price)
     }
 
     override fun describeContents(): Int {

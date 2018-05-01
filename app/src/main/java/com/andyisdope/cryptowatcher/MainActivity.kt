@@ -48,6 +48,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sharedPref: SharedPreferences
     private lateinit var PricingPref: SharedPreferences
     private lateinit var CoinsPref: SharedPreferences
+    private lateinit var CoinNames: SharedPreferences
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,9 +58,11 @@ class MainActivity : AppCompatActivity() {
         mAdView = findViewById(R.id.adView)
         mAdView.loadAd(AdRequest.Builder().build())
 
+        CoinNames = baseContext.getSharedPreferences("CoinNames", Context.MODE_PRIVATE)
         sharedPref = baseContext.getSharedPreferences("Favorites", Context.MODE_PRIVATE)
         PricingPref = baseContext.getSharedPreferences("Prices", Context.MODE_PRIVATE)
         CoinsPref = baseContext.getSharedPreferences("Coins", Context.MODE_PRIVATE)
+
         initTabs()
         Log.i("Prefer", sharedPref.all.toString())
         Order = arrayOf("Ascending", "Descending")
@@ -476,6 +479,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     if (CoinsPref.contains(temp.Symbol)) {
                         PricingPref.edit().putString(temp.Symbol, temp.CurrentPrice).apply()
+                        CoinNames.edit().putString(temp.Name, CoinsPref.getString(temp.Symbol, "0")).apply()
                     }
                     mCoins.add(temp)
                 }
@@ -558,6 +562,8 @@ class MainActivity : AppCompatActivity() {
                     }
                     if (CoinsPref.contains(temp.Symbol)) {
                         PricingPref.edit().putString(temp.Symbol, temp.CurrentPrice).apply()
+                        CoinNames.edit().putString(temp.Name, CoinsPref.getString(temp.Symbol, "0")).apply()
+
                     }
                     mTokens.add(temp)
                 }

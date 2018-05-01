@@ -41,13 +41,13 @@
 
         <service
             android:name=".Services.CurrencyService"
-            android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="false" />
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
         <service
             android:name=".Services.DataService"
             android:exported="false" />
 
-        <activity android:name=".VaultActivity"></activity>
+        <activity android:name=".VaultActivity" />
     </application>
 
 </manifest>

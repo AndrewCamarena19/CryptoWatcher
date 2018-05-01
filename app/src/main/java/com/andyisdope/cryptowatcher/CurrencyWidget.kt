@@ -13,7 +13,6 @@ import com.andyisdope.cryptowatcher.Services.CurrencyService
  * App Widget Configuration implemented in [CurrencyWidgetConfigureActivity]
  */
 class CurrencyWidget : AppWidgetProvider() {
-    //TODO: replace with jobscheduler
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         // There may be multiple widgets active, so update all of them

@@ -272,7 +272,6 @@ class CurrencyDetail : AppCompatActivity() {
     //endregion
 
     //region Load Coin Vault
-
     private fun initVaultData() {
         ToMainVault = findViewById(R.id.MainVaultBtn)
         ToMainVault.setOnClickListener {
@@ -333,7 +332,7 @@ class CurrencyDetail : AppCompatActivity() {
             findViewById<TextView>(R.id.NumberCoins).text = "$NumberOfCoins"
             CurrentNetTV.text = "$ ${AllSells + AllBuys}"
             AssetsSoldTV.text = "$ ${AllSells}"
-            InvestedTV.text = "$ ${NumberOfCoins * CurrentPrice}"
+            InvestedTV.text = "$ ${CurrencyFormatter.formatterView.format(NumberOfCoins * CurrentPrice)}"
             LiquidText.text = "$ $LiquidUSD"
         }
 

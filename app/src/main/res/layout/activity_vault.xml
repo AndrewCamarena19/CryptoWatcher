@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark">
+
     <TabHost
         android:id="@+id/VaultTabs"
         android:layout_width="0dp"
@@ -11,8 +13,10 @@
         android:background="@color/colorPrimaryDark"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -29,6 +33,117 @@
                 android:id="@android:id/tabcontent"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/VaultPortfolioGraph"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/colorPrimaryDark"
+                    android:orientation="vertical">
+
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:id="@+id/lineChart"
+                        android:layout_width="0dp"
+                        android:layout_height="300dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:background="@color/colorPrimaryDark"
+                        app:layout_constraintBottom_toTopOf="@+id/PortfolioDateTV"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="1.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/PortfolioHistory" />
+
+                    <View
+                        android:id="@+id/view5"
+                        android:layout_width="0dp"
+                        android:layout_height="5dp"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_weight="1"
+                        android:background="@color/colorBorder"
+                        app:layout_constraintBottom_toTopOf="@+id/textView18"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/PortfolioDateTV"></View>
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/PortfolioValuesRV"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_marginBottom="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/textView18" />
+
+                    <TextView
+                        android:id="@+id/PortfolioHistory"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:text="PortfolioHistory"
+                        android:textColor="@color/TickerNameColor"
+                        android:textSize="20sp"
+                        app:layout_constraintBottom_toTopOf="@+id/lineChart"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/PortfolioDateTV"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:text="Select a graph point"
+                        android:textAlignment="center"
+                        android:textColor="@color/TickerNameColor"
+                        android:textSize="16sp"
+                        app:layout_constraintBottom_toTopOf="@+id/view5"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/lineChart" />
+
+                    <TextView
+                        android:id="@+id/textView18"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:text="Date"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="18sp"
+                        app:layout_constraintBottom_toTopOf="@+id/PortfolioValuesRV"
+                        app:layout_constraintEnd_toStartOf="@+id/textView19"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/view5" />
+
+                    <TextView
+                        android:id="@+id/textView19"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginStart="8dp"
+                        android:text="Portfolio Value"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="18sp"
+                        app:layout_constraintBaseline_toBaselineOf="@+id/textView18"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/textView18" />
+
+                </android.support.constraint.ConstraintLayout>
 
                 <android.support.constraint.ConstraintLayout
                     android:id="@+id/VaultCoinShares"
@@ -246,14 +361,6 @@
 
                 </android.support.constraint.ConstraintLayout>
 
-                <android.support.constraint.ConstraintLayout
-                    android:id="@+id/VaultPortfolioGraph"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@color/colorPrimaryDark"
-                    android:orientation="vertical">
-
-                </android.support.constraint.ConstraintLayout>
             </FrameLayout>
         </LinearLayout>
     </TabHost>
