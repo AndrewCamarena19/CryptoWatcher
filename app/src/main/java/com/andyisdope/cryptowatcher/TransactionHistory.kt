@@ -21,123 +21,127 @@ import java.util.*
 //TODO: Complete all transactions button
 class TransactionHistory : AppCompatActivity() {
 
-    private lateinit var CoinName: TextView
-    private lateinit var BuyBtn: Button
-    private lateinit var SellBtn: Button
-    private lateinit var AllBtn: Button
-    private lateinit var StartDate: EditText
-    private lateinit var EndDate: EditText
-    private lateinit var TransactionList: RecyclerView
-    private lateinit var SellsTotal: TextView
-    private lateinit var BuysTotal: TextView
-    private lateinit var NetTotal: TextView
+    private lateinit var coinName: TextView
+    private lateinit var buyBtn: Button
+    private lateinit var sellBtn: Button
+    private lateinit var allBtn: Button
+    private lateinit var startDate: EditText
+    private lateinit var endDate: EditText
+    private lateinit var transactionList: RecyclerView
+    private lateinit var sellsTotal: TextView
+    private lateinit var buysTotal: TextView
+    private lateinit var netTotal: TextView
     private lateinit var mTransAdapter: TransactionAdapter
-    private lateinit var TransactionDB: TransactionDatabase
-    private lateinit var TransactionsFull: ArrayList<Transaction>
-    private lateinit var CoinNameString: String
-    private lateinit var BuyList: List<Transaction>
-    private lateinit var SellList: List<Transaction>
+    private lateinit var transactionDB: TransactionDatabase
+    private lateinit var transactionsFull: ArrayList<Transaction>
+    private lateinit var coinNameString: String
+    private lateinit var buyList: List<Transaction>
+    private lateinit var sellList: List<Transaction>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transaction_history)
-        CoinNameString = intent.getStringExtra("Coin")
+        coinNameString = intent.getStringExtra("Coin")
         initViews()
         initList()
     }
 
+    //Init Recycler Views with Transaction Room lookup
+    //Create 3 views, Buys, Sells, All
     private fun initList() {
-        TransactionDB = TransactionDatabase.getInstance(this)!!
+        transactionDB = TransactionDatabase.getInstance(this)!!
         async(UI) {
             val FullList = async(CommonPool)
             {
-                TransactionDB!!.TransactionDao().getCoinTransactions(CoinNameString)
+                transactionDB!!.TransactionDao().getCoinTransactions(coinNameString)
             }
             val SellNet = async(CommonPool)
             {
-                TransactionDB!!.TransactionDao().getAllCoinSells(CoinNameString)
+                transactionDB!!.TransactionDao().getAllCoinSells(coinNameString)
             }
             val BuyNet = async(CommonPool)
             {
-                TransactionDB!!.TransactionDao().getAllCoinBuys(CoinNameString)
+                transactionDB!!.TransactionDao().getAllCoinBuys(coinNameString)
             }
-            TransactionsFull = ArrayList(FullList.await())
+            transactionsFull = ArrayList(FullList.await())
 
             val selltemp = SellNet.await()
             val buytemp = BuyNet.await()
-            SellsTotal.text = "$ $selltemp"
-            BuysTotal.text = "$ $buytemp"
+            sellsTotal.text = "$ $selltemp"
+            buysTotal.text = "$ $buytemp"
             if (selltemp + buytemp > 0)
-                NetTotal.setTextColor(Color.GREEN)
+                netTotal.setTextColor(Color.GREEN)
             else
-                NetTotal.setTextColor(Color.RED)
+                netTotal.setTextColor(Color.RED)
 
-            NetTotal.text = "$ ${selltemp + buytemp}"
-            Log.i("Database", TransactionsFull.toString())
-
+            netTotal.text = "$ ${selltemp + buytemp}"
+            //Runnables to filter lists
             Runnable {
-                SellList = TransactionsFull
+                sellList = transactionsFull
                         .filter { it.Sell }
                         .sortedBy { it.Date }
             }.run()
             Runnable {
-                BuyList = TransactionsFull
+                buyList = transactionsFull
                         .filter { it.Buy }
                         .sortedBy { it.Date }
             }.run()
 
 
-            mTransAdapter = TransactionAdapter(baseContext, TransactionsFull)
-            TransactionList.adapter = mTransAdapter
-            TransactionList.adapter.notifyDataSetChanged()
+            mTransAdapter = TransactionAdapter(baseContext, transactionsFull)
+            transactionList.adapter = mTransAdapter
+            transactionList.adapter.notifyDataSetChanged()
         }
 
     }
 
+    //Set up UI elements
     private fun initViews() {
-        CoinName = findViewById(R.id.TransactionCoin)
-        CoinName.text = CoinNameString
-        BuyBtn = findViewById(R.id.TransctionBuys)
-        SellBtn = findViewById(R.id.TransactionSells)
-        AllBtn = findViewById(R.id.TransactionsAll)
-        StartDate = findViewById(R.id.TransactionDateStart)
-        EndDate = findViewById(R.id.TransactionDateEnd)
-        TransactionList = findViewById(R.id.TransactionsList)
-        TransactionList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        SellsTotal = findViewById(R.id.TransactionSellTotals)
-        BuysTotal = findViewById(R.id.TransactionBuyTotals)
-        NetTotal = findViewById(R.id.TransactionNetTotals)
+        coinName = findViewById(R.id.TransactionCoin)
+        coinName.text = coinNameString
+        buyBtn = findViewById(R.id.TransctionBuys)
+        sellBtn = findViewById(R.id.TransactionSells)
+        allBtn = findViewById(R.id.TransactionsAll)
+        startDate = findViewById(R.id.TransactionDateStart)
+        endDate = findViewById(R.id.TransactionDateEnd)
+        transactionList = findViewById(R.id.TransactionsList)
+        transactionList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        sellsTotal = findViewById(R.id.TransactionSellTotals)
+        buysTotal = findViewById(R.id.TransactionBuyTotals)
+        netTotal = findViewById(R.id.TransactionNetTotals)
 
-        BuysTotal.setTextColor(Color.RED)
-        SellsTotal.setTextColor(Color.GREEN)
+        buysTotal.setTextColor(Color.RED)
+        sellsTotal.setTextColor(Color.GREEN)
 
-        BuyBtn.setOnClickListener {
-            var preParseStart = StartDate.text.toString()
+        //Button to select only buy in certain date range with regex
+        buyBtn.setOnClickListener {
+            var preParseStart = startDate.text.toString()
             if(preParseStart.contains("^\\d{1,2}\\/\\d{1,2}\\/\\d{4}\$")) {
                 var StartLong = Date(preParseStart).time
-                var EndLong = EndDate.text.toString().toLongOrNull() ?: Long.MAX_VALUE
-                var range = BuyList
+                var EndLong = endDate.text.toString().toLongOrNull() ?: Long.MAX_VALUE
+                var range = buyList
                         .filter { it.Date in StartLong..(EndLong - 1) }
 
                 mTransAdapter = TransactionAdapter(baseContext, ArrayList(range))
-                TransactionList.adapter = mTransAdapter
-                TransactionList.adapter.notifyDataSetChanged()
+                transactionList.adapter = mTransAdapter
+                transactionList.adapter.notifyDataSetChanged()
             }
         }
-
-        SellBtn.setOnClickListener {
-            var StartLong = StartDate.text.toString().toLongOrNull() ?: 0
-            var EndLong = EndDate.text.toString().toLongOrNull() ?: Long.MAX_VALUE
-            var range = SellList
+        //Sell Button for date ranges without regex yet
+        sellBtn.setOnClickListener {
+            var StartLong = startDate.text.toString().toLongOrNull() ?: 0
+            var EndLong = endDate.text.toString().toLongOrNull() ?: Long.MAX_VALUE
+            var range = sellList
                     .filter { it.Date in StartLong..(EndLong - 1) }
 
             mTransAdapter = TransactionAdapter(baseContext, ArrayList(range))
-            TransactionList.adapter = mTransAdapter
-            TransactionList.adapter.notifyDataSetChanged()
+            transactionList.adapter = mTransAdapter
+            transactionList.adapter.notifyDataSetChanged()
         }
 
     }
 
+    //Clean up Database
     override fun onDestroy() {
         TransactionDatabase.destroyInstance()
         super.onDestroy()

@@ -42,24 +42,24 @@ import kotlin.collections.ArrayList
 class CurrencyDetail : AppCompatActivity() {
     //TODO: Create Master Vault view with pie chart and other graphs
     //TODO: Create functions for ranges and Buttons in transaction view
-    private var Signal: ArrayList<Float> = ArrayList()
-    private var EMA12: ArrayList<Float> = ArrayList()
-    private var EMA26: ArrayList<Float> = ArrayList()
-    private var MACD: ArrayList<Float> = ArrayList()
-    private var Histo: ArrayList<Float> = ArrayList()
-    private var DisplayMarkets: ArrayList<Market> = ArrayList()
-    private var CurrencyDeets: ArrayList<CurrencyDetails> = ArrayList()
-    private var MarketDeets: ArrayList<Market> = ArrayList()
-    private var MarketPairs: TreeSet<String> = TreeSet()
-    private var MarketNames: TreeSet<String> = TreeSet()
-    private lateinit var MarketAdapt: MarketAdapter
+    private var signal: ArrayList<Float> = ArrayList()
+    private var eMA12: ArrayList<Float> = ArrayList()
+    private var eMA26: ArrayList<Float> = ArrayList()
+    private var mACD: ArrayList<Float> = ArrayList()
+    private var histo: ArrayList<Float> = ArrayList()
+    private var displayMarkets: ArrayList<Market> = ArrayList()
+    private var currencyDeets: ArrayList<CurrencyDetails> = ArrayList()
+    private var marketDeets: ArrayList<Market> = ArrayList()
+    private var marketPairs: TreeSet<String> = TreeSet()
+    private var marketNames: TreeSet<String> = TreeSet()
+    private lateinit var marketAdapt: MarketAdapter
     private lateinit var mMarketList: RecyclerView
     private lateinit var response: String
     private lateinit var marketResponse: String
     private lateinit var entry: TextView
     private lateinit var time: TextView
-    private lateinit var MarketSpinner: Spinner
-    private lateinit var PairSpinner: Spinner
+    private lateinit var marketSpinner: Spinner
+    private lateinit var pairSpinner: Spinner
     private lateinit var sigData: LineDataSet
     private lateinit var mCombined: CombinedChart
     private lateinit var mBar: BarChart
@@ -68,57 +68,42 @@ class CurrencyDetail : AppCompatActivity() {
     private lateinit var USD: RadioButton
     private lateinit var BTC: RadioButton
     private lateinit var ETH: RadioButton
-    private lateinit var ToTransactionHistory: Button
-    private lateinit var ToMainVault: Button
+    private lateinit var toTransactionHistory: Button
+    private lateinit var toMainVault: Button
     private lateinit var curr: String
     private lateinit var currSymbol: String
     private var marketLoaded: Boolean = false
     private var xValues: ArrayList<String> = ArrayList()
-    private var TransactionDB: TransactionDatabase? = null
-    private lateinit var VaultPref: SharedPreferences
-    private var LiquidUSD: Double = 0.0
-    private lateinit var LiquidText: TextView
-    private lateinit var InvestedTV: TextView
-    private lateinit var UnitsHeldTV: TextView
-    private lateinit var AssetsSoldTV: TextView
-    private lateinit var CurrentPriceTV: TextView
-    private lateinit var CurrentNetTV: TextView
-    private lateinit var AssetsBoughtTV: TextView
-    private lateinit var VaultLogo: ImageView
-    private lateinit var AmountToBuy: EditText
-    private lateinit var AmountToUSD: EditText
-    private lateinit var AmountToSell: EditText
-    private lateinit var AddFunds: EditText
-    private lateinit var AmountToCurrency: EditText
-    private var NumberOfCoins: Double = 0.0
-    private var Invested: Double = 0.0
-    private var AllBuys: Double = 0.0
-    private var AllSells: Double = 0.0
-    private var CurrentPrice: Double = 0.0
+    private var transactionDB: TransactionDatabase? = null
+    private lateinit var vaultPref: SharedPreferences
+    private var liquidUSD: Double = 0.0
+    private lateinit var liquidText: TextView
+    private lateinit var investedTV: TextView
+    private lateinit var unitsHeldTV: TextView
+    private lateinit var assetsSoldTV: TextView
+    private lateinit var currentPriceTV: TextView
+    private lateinit var currentNetTV: TextView
+    private lateinit var assetsBoughtTV: TextView
+    private lateinit var vaultLogo: ImageView
+    private lateinit var amountToBuy: EditText
+    private lateinit var amountToUSD: EditText
+    private lateinit var amountToSell: EditText
+    private lateinit var addFunds: EditText
+    private lateinit var amountToCurrency: EditText
+    private var numberOfCoins: Double = 0.0
+    private var invested: Double = 0.0
+    private var allBuys: Double = 0.0
+    private var allSells: Double = 0.0
+    private var currentPrice: Double = 0.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_currency_detail)
-        val c: Calendar = Calendar.getInstance()
-        val df: SimpleDateFormat = SimpleDateFormat("yyyyMMdd")
-        val today: Int = df.format(c.time).toInt()
-        val start: Int = today - 10000
-        curr = intent.getStringExtra("Currency")
-        currSymbol = intent.getStringExtra("Symbol")
-        CurrentPrice = intent.getStringExtra("Price").toDouble()
-        marketLoaded = false
-        title = "${curr.toUpperCase()}"
-        entry = findViewById<TextView>(R.id.CurrencyPrice) as TextView
-        time = findViewById<TextView>(R.id.PriceTime) as TextView
-        mMarketList = findViewById<RecyclerView>(R.id.MarketView) as RecyclerView
-        mMarketList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
-
-
+        initVariables()
         initSpinners()
         initTabs()
         initRadioGroup()
-
 
         LocalBroadcastManager.getInstance(applicationContext)
                 .registerReceiver(mBroadcastReceiver,
@@ -127,11 +112,31 @@ class CurrencyDetail : AppCompatActivity() {
                 .registerReceiver(mBroadcastReceiver2,
                         IntentFilter(DataService.MARKET))
 
+
+    }
+
+    //Initialize Variables and UI components
+    private fun initVariables() {
+        val c: Calendar = Calendar.getInstance()
+        val df = SimpleDateFormat("yyyyMMdd", Locale.US)
+        val today: Int = df.format(c.time).toInt()
+        val start: Int = today - 10000
+        curr = intent.getStringExtra("Currency")
+        currSymbol = intent.getStringExtra("Symbol")
+        currentPrice = intent.getStringExtra("Price").toDouble()
+        marketLoaded = false
+        title = curr.toUpperCase()
+        entry = findViewById(R.id.CurrencyPrice)
+        time = findViewById(R.id.PriceTime)
+        mMarketList = findViewById(R.id.MarketView)
+        mMarketList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        //Request data of currency from today and 45 days ago
         requestData("https://coinmarketcap.com/currencies/${curr.toLowerCase()}/historical-data/?start=$start&end=$today")
 
     }
 
     //region Broadcast Receivers
+    //First receiver for receiving Coin details for Candlestick, LineChart and Combined Chart
     private val mBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             //val dataItems = intent
@@ -140,6 +145,7 @@ class CurrencyDetail : AppCompatActivity() {
         }
     }
 
+    //Second receiver for receiving Market Data on Currency
     private val mBroadcastReceiver2 = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             //val dataItems = intent
@@ -156,89 +162,94 @@ class CurrencyDetail : AppCompatActivity() {
     //endregion
 
     //region Market and Chart Views
+    //Radio group for Market Data tab for which currency to display in
     private fun initRadioGroup() {
         MarketAdapter.CurrentCurrency = "USD"
-        radioGroup = findViewById<RadioGroup>(R.id.CurrencyRadio) as RadioGroup
-        USD = findViewById<RadioButton>(R.id.RadioUSD) as RadioButton
-        BTC = findViewById<RadioButton>(R.id.RadioBTC) as RadioButton
-        ETH = findViewById<RadioButton>(R.id.RadioETH) as RadioButton
+        radioGroup = findViewById(R.id.CurrencyRadio)
+        USD = findViewById(R.id.RadioUSD)
+        BTC = findViewById(R.id.RadioBTC)
+        ETH = findViewById(R.id.RadioETH)
         //clear view and use apply
-        radioGroup.setOnCheckedChangeListener { radioGroup, i ->
+        radioGroup.setOnCheckedChangeListener { _, i ->
             when (i) {
                 R.id.RadioUSD -> {
                     MarketAdapter.CurrentCurrency = "USD"
-                    MarketAdapt = MarketAdapter(baseContext, DisplayMarkets)
-                    mMarketList.adapter = MarketAdapt
+                    marketAdapt = MarketAdapter(baseContext, displayMarkets)
+                    mMarketList.adapter = marketAdapt
                     mMarketList.adapter.notifyDataSetChanged()
                 }
                 R.id.RadioBTC -> {
                     MarketAdapter.CurrentCurrency = "BTC"
-                    MarketAdapt = MarketAdapter(baseContext, DisplayMarkets)
-                    mMarketList.adapter = MarketAdapt
+                    marketAdapt = MarketAdapter(baseContext, displayMarkets)
+                    mMarketList.adapter = marketAdapt
                     mMarketList.adapter.notifyDataSetChanged()
                 }
                 R.id.RadioETH -> {
                     MarketAdapter.CurrentCurrency = "ETH"
-                    MarketAdapt = MarketAdapter(baseContext, DisplayMarkets)
-                    mMarketList.adapter = MarketAdapt
+                    marketAdapt = MarketAdapter(baseContext, displayMarkets)
+                    mMarketList.adapter = marketAdapt
                     mMarketList.adapter.notifyDataSetChanged()
                 }
             }
         }
     }
 
+    //Init Market Spinners to allow user to select a market or currency pair to view
     private fun initSpinners() {
-        MarketSpinner = findViewById<Spinner>(R.id.MarketSpinner) as Spinner
-        PairSpinner = findViewById<Spinner>(R.id.PairSpinner) as Spinner
+        marketSpinner = findViewById(R.id.MarketSpinner)
+        pairSpinner = findViewById(R.id.PairSpinner)
 
-        MarketSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        marketSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {
             }
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                DisplayMarkets.clear()
-                var mark = MarketSpinner.getItemAtPosition(p2).toString()
-                MarketDeets.asSequence()
-                        .forEach { if (it.market == mark) DisplayMarkets.add(it) }
+                displayMarkets.clear()
+                val mark = marketSpinner.getItemAtPosition(p2).toString()
+                marketDeets.asSequence()
+                        .forEach { if (it.market == mark) displayMarkets.add(it) }
 
-                MarketAdapt = MarketAdapter(baseContext, DisplayMarkets)
-                mMarketList.adapter = MarketAdapt
+                marketAdapt = MarketAdapter(baseContext, displayMarkets)
+                mMarketList.adapter = marketAdapt
                 mMarketList.adapter.notifyDataSetChanged()
             }
         }
-        PairSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        pairSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<*>?) {
             }
 
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-                DisplayMarkets.clear()
-                var mark = PairSpinner.getItemAtPosition(p2).toString()
-                MarketDeets.asSequence()
-                        .forEach { if (it.pair == mark) DisplayMarkets.add(it) }
+                displayMarkets.clear()
+                val mark = pairSpinner.getItemAtPosition(p2).toString()
+                marketDeets.asSequence()
+                        .forEach { if (it.pair == mark) displayMarkets.add(it) }
 
-                MarketAdapt = MarketAdapter(baseContext, DisplayMarkets)
-                mMarketList.adapter = MarketAdapt
+                marketAdapt = MarketAdapter(baseContext, displayMarkets)
+                mMarketList.adapter = marketAdapt
                 mMarketList.adapter.notifyDataSetChanged()
             }
         }
     }
 
+    //Begin to get charts ready for display currently displays 45 most recent days
     private fun initAllCharts(count: Int) {
-        if (CurrencyDeets.size > 45) {
+        if (currencyDeets.size > 45) {
             initBar(count)
             initCandle(count)
             initCombined(count)
         } else {
+            //If currency is new then MACD chart cannot be displayed due to lack of data
             Toast.makeText(baseContext, "Currency has less than 45 days of data", Toast.LENGTH_SHORT)
                     .apply { setGravity(Gravity.CENTER, 0, 0) }
                     .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
                     .show()
-            initBar(CurrencyDeets.size - 1)
-            initCandle(CurrencyDeets.size - 1)
+            initBar(currencyDeets.size - 1)
+            initCandle(currencyDeets.size - 1)
         }
     }
 
-    fun initTabs() {
+    //Tab initialization and call methods when tab is selected
+    private fun initTabs() {
         val tabs = findViewById<TabHost>(R.id.DetailTab)
         tabs.setup()
         with(tabs)
@@ -263,7 +274,7 @@ class CurrencyDetail : AppCompatActivity() {
                         requestMarketData()
                     }
                     "Vault" -> {
-                        testDB()
+                        initDB()
                     }
                 }
             }
@@ -272,80 +283,84 @@ class CurrencyDetail : AppCompatActivity() {
     //endregion
 
     //region Load Coin Vault
+    //Set Vault UI's display values
     private fun initVaultData() {
-        ToMainVault = findViewById(R.id.MainVaultBtn)
-        ToMainVault.setOnClickListener {
-            var intent = Intent(this, VaultActivity::class.java)
+        toMainVault = findViewById(R.id.MainVaultBtn)
+        toMainVault.setOnClickListener {
+            val intent = Intent(this, VaultActivity::class.java)
             startActivity(intent)
         }
-        ToTransactionHistory = findViewById(R.id.ToTransactionHistory)
-        ToTransactionHistory.setOnClickListener {
-            var intent = Intent(this, TransactionHistory::class.java)
+        toTransactionHistory = findViewById(R.id.ToTransactionHistory)
+        toTransactionHistory.setOnClickListener {
+            val intent = Intent(this, TransactionHistory::class.java)
             intent.putExtra("Coin", curr.toUpperCase())
             startActivity(intent)
         }
-        VaultPref = baseContext.getSharedPreferences("Coins", Context.MODE_PRIVATE)
+        vaultPref = baseContext.getSharedPreferences("Coins", Context.MODE_PRIVATE)
 
-        LiquidUSD = VaultPref.getString("USD", "0.0").toDouble()
-        NumberOfCoins = VaultPref.getString(currSymbol, "0.0").toDouble()
-        Invested = NumberOfCoins * CurrentPrice
+        liquidUSD = vaultPref.getString("USD", "0.0").toDouble()
+        numberOfCoins = vaultPref.getString(currSymbol, "0.0").toDouble()
+        invested = numberOfCoins * currentPrice
 
-        VaultLogo = findViewById(R.id.VaultLogo)
+        vaultLogo = findViewById(R.id.VaultLogo)
 
-        AssetsBoughtTV = findViewById(R.id.VaultAssetsBought)
-        AssetsBoughtTV.text = "$ ${AllBuys * -1}"
+        assetsBoughtTV = findViewById(R.id.VaultAssetsBought)
+        assetsBoughtTV.text = "$ ${allBuys * -1}"
 
-        AssetsSoldTV = findViewById(R.id.VaultAssetsSold)
-        AssetsSoldTV.text = "$ $AllSells"
+        assetsSoldTV = findViewById(R.id.VaultAssetsSold)
+        assetsSoldTV.text = "$ $allSells"
 
-        UnitsHeldTV = findViewById(R.id.NumberCoins)
-        UnitsHeldTV.text = "${CurrencyFormatter.formatterView.format(NumberOfCoins)}"
+        unitsHeldTV = findViewById(R.id.NumberCoins)
+        unitsHeldTV.text = "${CurrencyFormatter.formatterView.format(numberOfCoins)}"
 
-        CurrentPriceTV = findViewById(R.id.VaultCurrentPrice)
-        CurrentPriceTV.text = "$ $CurrentPrice"
+        currentPriceTV = findViewById(R.id.VaultCurrentPrice)
+        currentPriceTV.text = "$ $currentPrice"
 
-        CurrentNetTV = findViewById(R.id.VaultNet)
-        CurrentNetTV.text = "$ ${AllSells + AllBuys}"
+        currentNetTV = findViewById(R.id.VaultNet)
+        currentNetTV.text = "$ ${allSells + allBuys}"
 
-        InvestedTV = findViewById(R.id.VaultInvested)
-        InvestedTV.text = "$ ${CurrencyFormatter.formatterView.format(Invested)}"
+        investedTV = findViewById(R.id.VaultInvested)
+        investedTV.text = "$ ${CurrencyFormatter.formatterView.format(invested)}"
 
-        LiquidText = findViewById(R.id.VaultLiquid)
-        LiquidText.text = "$ $LiquidUSD"
+        liquidText = findViewById(R.id.VaultLiquid)
+        liquidText.text = "$ $liquidUSD"
 
-        AmountToBuy = findViewById(R.id.VaultBuyCoinsAmount)
-        AmountToSell = findViewById(R.id.VaultSellCoinsAmount)
+        amountToBuy = findViewById(R.id.VaultBuyCoinsAmount)
+        amountToSell = findViewById(R.id.VaultSellCoinsAmount)
 
-        AmountToCurrency = findViewById(R.id.VaultBuyCoinsPrice)
-        AmountToUSD = findViewById(R.id.VaultSellCoinsPrice)
+        amountToCurrency = findViewById(R.id.VaultBuyCoinsPrice)
+        amountToUSD = findViewById(R.id.VaultSellCoinsPrice)
 
-        AddFunds = findViewById(R.id.VaultAddFunds)
+        addFunds = findViewById(R.id.VaultAddFunds)
 
+        //Load image using Picasso
         Picasso.with(applicationContext).load(intent.getStringExtra("Image"))
-                .error(R.drawable.cream).into(VaultLogo)
+                .error(R.drawable.cream).into(vaultLogo)
 
     }
 
+    //Set Listeners for UI
     private fun initVaultButtons() {
-        VaultPref.registerOnSharedPreferenceChangeListener { sharedPreferences, s ->
-            NumberOfCoins = sharedPreferences.getString(currSymbol, "0").toDouble()
-            findViewById<TextView>(R.id.NumberCoins).text = "$NumberOfCoins"
-            CurrentNetTV.text = "$ ${AllSells + AllBuys}"
-            AssetsSoldTV.text = "$ ${AllSells}"
-            InvestedTV.text = "$ ${CurrencyFormatter.formatterView.format(NumberOfCoins * CurrentPrice)}"
-            LiquidText.text = "$ $LiquidUSD"
+        vaultPref.registerOnSharedPreferenceChangeListener { sharedPreferences, _ ->
+            numberOfCoins = sharedPreferences.getString(currSymbol, "0").toDouble()
+            findViewById<TextView>(R.id.NumberCoins).text = "$numberOfCoins"
+            currentNetTV.text = "$ ${allSells + allBuys}"
+            assetsSoldTV.text = "$ ${allSells}"
+            investedTV.text = "$ ${CurrencyFormatter.formatterView.format(numberOfCoins * currentPrice)}"
+            liquidText.text = "$ $liquidUSD"
         }
 
         findViewById<TextView>(R.id.VaultName).text = curr.toUpperCase()
 
-        AddFunds.setOnEditorActionListener { textView, i, keyEvent ->
-            var amt = textView.text.toString().toDoubleOrNull()
+        //Adds funds to Liquid USD
+        addFunds.setOnEditorActionListener { textView, i, _ ->
+            val amt = textView.text.toString().toDoubleOrNull()
             var completed = true
             if (amt != null) {
                 if (i == EditorInfo.IME_ACTION_DONE && amt > 0) {
-                    LiquidUSD += amt
-                    LiquidText.text = "$ $amt"
-                    VaultPref.edit().putString("USD", LiquidUSD.toString()).apply()
+                    liquidUSD += amt
+                    liquidText.text = "$ $amt"
+                    vaultPref.edit().putString("USD", liquidUSD.toString()).apply()
                     completed = false
                     Toast.makeText(this, "Added $ $amt to Liquid Funds", Toast.LENGTH_LONG).show()
 
@@ -358,9 +373,10 @@ class CurrencyDetail : AppCompatActivity() {
             completed
         }
 
-        AmountToBuy.setOnEditorActionListener { textView, i, _ ->
+        //Amount of currency to buy at current price point
+        amountToBuy.setOnEditorActionListener { textView, i, _ ->
             var completed = false
-            var amt = textView.text.toString().toDoubleOrNull()
+            val amt = textView.text.toString().toDoubleOrNull()
             if (amt != null) {
                 if (i == EditorInfo.IME_ACTION_DONE && amt > 0) {
                     completed = buyCoins(textView.text.toString().toDouble())
@@ -373,9 +389,10 @@ class CurrencyDetail : AppCompatActivity() {
             }
         }
 
-        AmountToUSD.setOnEditorActionListener { tv, i, _ ->
+        //Amount of USD to exchange for currency
+        amountToUSD.setOnEditorActionListener { tv, i, _ ->
             var completed = false
-            var amt = tv.text.toString().toDoubleOrNull()
+            val amt = tv.text.toString().toDoubleOrNull()
             if (amt != null) {
                 if (i == EditorInfo.IME_ACTION_DONE && amt > 0) {
                     completed = currencyToFiat(tv.text.toString().toDouble())
@@ -388,9 +405,10 @@ class CurrencyDetail : AppCompatActivity() {
             }
         }
 
-        AmountToCurrency.setOnEditorActionListener { tv, i, _ ->
+        //Amount of currency to exchange to USD
+        amountToCurrency.setOnEditorActionListener { tv, i, _ ->
             var completed = false
-            var amt = tv.text.toString().toDoubleOrNull()
+            val amt = tv.text.toString().toDoubleOrNull()
             if (amt != null) {
                 if (i == EditorInfo.IME_ACTION_DONE && amt > 0) {
                     completed = fiatToCurrency(tv.text.toString().toDouble())
@@ -403,9 +421,10 @@ class CurrencyDetail : AppCompatActivity() {
             }
         }
 
-        AmountToSell.setOnEditorActionListener { tv, i, _ ->
+        //Amount of coins to sell at current price point
+        amountToSell.setOnEditorActionListener { tv, i, _ ->
             var completed = false
-            var amt = tv.text.toString().toDoubleOrNull()
+            val amt = tv.text.toString().toDoubleOrNull()
             if (amt != null) {
                 if (i == EditorInfo.IME_ACTION_DONE && amt > 0) {
                     completed = sellCoins(tv.text.toString().toDouble())
@@ -419,138 +438,155 @@ class CurrencyDetail : AppCompatActivity() {
         }
     }
 
+    //Method to convert currency to USD must have enough to do so
     private fun currencyToFiat(amt: Double): Boolean {
         var completed = true
-        if (amt > NumberOfCoins * CurrentPrice) {
+        if (amt > numberOfCoins * currentPrice) {
             Toast.makeText(this, "Not enough coins in vault to exchange", Toast.LENGTH_LONG)
                     .apply { setGravity(Gravity.CENTER, 0, 0) }
                     .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
                     .show()
         } else {
-            var numCoins = amt / CurrentPrice
-            var t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), numCoins,
-                    false, true, CurrentPrice, amt)
-            TransactionDB?.TransactionDao()?.insertAll(t0)
+            val numCoins = amt / currentPrice
+
+            //Insert Transaction into Database for tracking
+            val t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), numCoins,
+                    false, true, currentPrice, amt)
+            transactionDB?.TransactionDao()?.insertAll(t0)
+
             Toast.makeText(this, "Exchanged $ $amt worth of $curr into USD", Toast.LENGTH_LONG)
                     .apply { setGravity(Gravity.CENTER, 0, 0) }
                     .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
                     .show()
-            AllSells += amt
-            NumberOfCoins -= numCoins
-            LiquidUSD += amt
-            AssetsSoldTV.text = "$ $AllSells"
-            CurrentNetTV.text = "$ ${AllSells + AllBuys}"
-            VaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(NumberOfCoins)).apply()
-            VaultPref.edit().putString("USD", LiquidUSD.toString()).apply()
+
+            allSells += amt
+            numberOfCoins -= numCoins
+            liquidUSD += amt
+            assetsSoldTV.text = "$ $allSells"
+            currentNetTV.text = "$ ${allSells + allBuys}"
+            //Place current coins and usd into preferences
+            vaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(numberOfCoins)).apply()
+            vaultPref.edit().putString("USD", liquidUSD.toString()).apply()
             completed = false
         }
-        if (NumberOfCoins == 0.0)
-            VaultPref.edit().remove(currSymbol).apply()
-        AmountToUSD.setText("")
+        //If sold all coins remove from preferences to track
+        if (numberOfCoins == 0.0)
+            vaultPref.edit().remove(currSymbol).apply()
+        amountToUSD.setText("")
         return completed
     }
 
+    //USD to Currency method
     private fun fiatToCurrency(amt: Double): Boolean {
         var completed = true
-        if (amt > LiquidUSD) {
+        if (amt > liquidUSD) {
             Toast.makeText(this, "Not enough in vault to exchange, add more funds", Toast.LENGTH_LONG)
                     .apply { setGravity(Gravity.CENTER, 0, 0) }
                     .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
                     .show()
         } else {
-            var numCoins = amt / CurrentPrice
-            var t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), numCoins,
-                    true, false, CurrentPrice, (amt) * -1)
-            TransactionDB?.TransactionDao()?.insertAll(t0)
-            AllBuys -= amt
-            NumberOfCoins += numCoins
-            LiquidUSD -= amt
-            if (LiquidUSD < .00001) LiquidUSD = 0.0
-            AssetsBoughtTV.text = "$ ${AllBuys * -1}"
-            CurrentNetTV.text = "$ ${AllSells + AllBuys}"
+            val numCoins = amt / currentPrice
+            //Create transaction record for tracking
+            val t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), numCoins,
+                    true, false, currentPrice, (amt) * -1)
+            transactionDB?.TransactionDao()?.insertAll(t0)
+            allBuys -= amt
+            numberOfCoins += numCoins
+            liquidUSD -= amt
+            //if USD is less than this amount zero it out to avoid tiny fractions
+            if (liquidUSD < .00001) liquidUSD = 0.0
+            assetsBoughtTV.text = "$ ${allBuys * -1}"
+            currentNetTV.text = "$ ${allSells + allBuys}"
             Toast.makeText(this, "Exchanged $amt USD to $numCoins $curr", Toast.LENGTH_SHORT)
                     .apply { setGravity(Gravity.CENTER, 0, 0) }
                     .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
                     .show()
-            VaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(NumberOfCoins)).apply()
-            VaultPref.edit().putString("USD", LiquidUSD.toString()).apply()
+            vaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(numberOfCoins)).apply()
+            vaultPref.edit().putString("USD", liquidUSD.toString()).apply()
             completed = false
         }
-        AmountToCurrency.setText("")
+        amountToCurrency.setText("")
         return completed
     }
 
+    //Sell Coins at current price point
     private fun sellCoins(amt: Double): Boolean {
         var completed = true
-        if (amt > NumberOfCoins) {
+        if (amt > numberOfCoins) {
             Toast.makeText(this, "Not enough coins in vault to exchange", Toast.LENGTH_LONG)
                     .apply { setGravity(Gravity.CENTER, 0, 0) }
                     .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
                     .show()
         } else {
-            var t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), amt,
-                    false, true, CurrentPrice, (amt * CurrentPrice))
-            TransactionDB?.TransactionDao()?.insertAll(t0)
-            Toast.makeText(this, "Sold $amt coins @$CurrentPrice for a net of ${CurrentPrice * amt}", Toast.LENGTH_LONG)
+            //Create record for tracking
+            val t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), amt,
+                    false, true, currentPrice, (amt * currentPrice))
+            transactionDB?.TransactionDao()?.insertAll(t0)
+            Toast.makeText(this, "Sold $amt coins @$currentPrice for a net of ${currentPrice * amt}", Toast.LENGTH_LONG)
                     .apply { setGravity(Gravity.CENTER, 0, 0) }
                     .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
                     .show()
-            AllSells += (CurrentPrice * amt)
-            NumberOfCoins -= amt
-            LiquidUSD += (CurrentPrice * amt)
-            AssetsSoldTV.text = "$ $AllSells"
-            CurrentNetTV.text = "$ ${AllSells + AllBuys}"
-            VaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(NumberOfCoins)).apply()
-            VaultPref.edit().putString("USD", LiquidUSD.toString()).apply()
+            allSells += (currentPrice * amt)
+            numberOfCoins -= amt
+            liquidUSD += (currentPrice * amt)
+            assetsSoldTV.text = "$ $allSells"
+            currentNetTV.text = "$ ${allSells + allBuys}"
+            vaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(numberOfCoins)).apply()
+            vaultPref.edit().putString("USD", liquidUSD.toString()).apply()
             completed = false
         }
-        if (NumberOfCoins == 0.0)
-            VaultPref.edit().remove(currSymbol).apply()
-        AmountToSell.setText("")
+
+        //If coins are 0 remove from preference tracking
+        if (numberOfCoins == 0.0)
+            vaultPref.edit().remove(currSymbol).apply()
+        amountToSell.setText("")
         return completed
     }
 
+    //Buy coins at price point
     private fun buyCoins(amt: Double): Boolean {
         var completed = true
-        if (amt * CurrentPrice > LiquidUSD) {
+        if (amt * currentPrice > liquidUSD) {
             Toast.makeText(this, "Not enough in vault to buy, add more funds", Toast.LENGTH_SHORT)
                     .apply { setGravity(Gravity.CENTER, 0, 0) }
                     .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
                     .show()
         } else {
-            var t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), amt,
-                    true, false, CurrentPrice, (CurrentPrice * amt) * -1)
-            TransactionDB?.TransactionDao()?.insertAll(t0)
-            AllBuys -= CurrentPrice * amt
-            NumberOfCoins += amt
-            LiquidUSD -= amt * CurrentPrice
-            if (LiquidUSD < .0001) LiquidUSD = 0.0
-            AssetsBoughtTV.text = "$ ${AllBuys * -1}"
-            CurrentNetTV.text = "$ ${AllSells + AllBuys}"
-            Toast.makeText(this, "Bought $amt coins @$CurrentPrice for a net of ${CurrentPrice * -amt}", Toast.LENGTH_LONG)
+            val t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), amt,
+                    true, false, currentPrice, (currentPrice * amt) * -1)
+            transactionDB?.TransactionDao()?.insertAll(t0)
+            allBuys -= currentPrice * amt
+            numberOfCoins += amt
+            liquidUSD -= amt * currentPrice
+            if (liquidUSD < .0001) liquidUSD = 0.0
+            assetsBoughtTV.text = "$ ${allBuys * -1}"
+            currentNetTV.text = "$ ${allSells + allBuys}"
+            Toast.makeText(this, "Bought $amt coins @ $currentPrice for a net of ${currentPrice * -amt}", Toast.LENGTH_LONG)
                     .apply { setGravity(Gravity.CENTER, 0, 0) }
                     .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
                     .show()
-            VaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(NumberOfCoins)).apply()
-            VaultPref.edit().putString("USD", LiquidUSD.toString()).apply()
+            //Updated USD and Coin amounts
+            vaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(numberOfCoins)).apply()
+            vaultPref.edit().putString("USD", liquidUSD.toString()).apply()
             completed = false
         }
-        AmountToBuy.setText("")
+        amountToBuy.setText("")
         return completed
     }
 
-    private fun testDB() {
-        TransactionDB = TransactionDatabase.getInstance(this)
+    //Load Two database calls using Room and Coroutines to await data
+    private fun initDB() {
+        transactionDB = TransactionDatabase.getInstance(this)
         async(UI) {
             val buys = async(CommonPool)
             {
-                TransactionDB!!.TransactionDao().getAllCoinBuys(curr.toUpperCase())
+                transactionDB!!.TransactionDao().getAllCoinBuys(curr.toUpperCase())
             }
             val sell = async(CommonPool) {
-                TransactionDB!!.TransactionDao().getAllCoinSells(curr.toUpperCase())
+                transactionDB!!.TransactionDao().getAllCoinSells(curr.toUpperCase())
             }
-            AllBuys = buys.await()
-            AllSells = sell.await()
+            allBuys = buys.await()
+            allSells = sell.await()
             initVaultData()
             initVaultButtons()
         }
@@ -558,7 +594,8 @@ class CurrencyDetail : AppCompatActivity() {
     //endregion
 
     //region Request MarketData
-
+    //Request Market Data and start service to currency data
+    //Load only once
     private fun requestMarketData() {
         if (!marketLoaded) {
             val intent = Intent(this, DataService::class.java)
@@ -573,6 +610,7 @@ class CurrencyDetail : AppCompatActivity() {
                     .show()
     }
 
+    //Parse details for Spinners and RecyclerView
     private fun parseMarketDetails() {
         var blocks = marketResponse.substringAfter("<tbody>").split("</tr>")
         blocks.take(blocks.size - 1)
@@ -582,18 +620,19 @@ class CurrencyDetail : AppCompatActivity() {
         initMarketView()
     }
 
+    //Set Adapters with Market Data
     private fun initMarketView() {
-        MarketSpinner.adapter = ArrayAdapter<String>(
-                this, R.layout.spinner_layout, MarketNames.toList()
+        marketSpinner.adapter = ArrayAdapter<String>(
+                this, R.layout.spinner_layout, marketNames.toList()
         )
-        PairSpinner.adapter = ArrayAdapter<String>(
-                this, R.layout.spinner_layout, MarketPairs.toList()
+        pairSpinner.adapter = ArrayAdapter<String>(
+                this, R.layout.spinner_layout, marketPairs.toList()
         )
     }
 
+    //Parse of web scraped Data to get unavailable API data
     private fun createMarketDetail(block: String) {
         var data = block.split("</td>")
-        //data index: date,open,high,low,close,volume,marketcap
 
         var marketName = data[1].substringAfter("data-sort=\"")
         marketName = marketName.substring(0, marketName.indexOf("\""))
@@ -618,26 +657,28 @@ class CurrencyDetail : AppCompatActivity() {
 
         var update = data[6].substringAfter(">")
 
-        MarketDeets.add(Market(marketName, pair, volBTC.toDouble(), volUSD.toDouble(), priceBTC.toDouble(), priceUSD.toDouble(), percent, update))
-        //Log.i("Market", MarketDeets[MarketDeets.size - 1].toString())
-        if (!MarketPairs.contains(pair)) MarketPairs.add(pair.capitalize())
-        if (!MarketNames.contains(marketName)) MarketNames.add(marketName.capitalize())
+        marketDeets.add(Market(marketName, pair, volBTC.toDouble(), volUSD.toDouble(), priceBTC.toDouble(), priceUSD.toDouble(), percent, update))
+        //If a pair exists AA/BB then don't include BB/AA
+        if (!marketPairs.contains(pair)) marketPairs.add(pair.capitalize())
+        if (!marketNames.contains(marketName)) marketNames.add(marketName.capitalize())
     }
 
     //endregion
 
     //region Combined Chart
+    //Initialize Combined Chart for MACD indicator Line and Bar graph
     private fun initCombined(count: Int) {
-        mCombined = findViewById<CombinedChart>(R.id.MACD) as CombinedChart
+        mCombined = findViewById(R.id.MACD)
         mCombined.drawOrder = arrayOf(DrawOrder.BAR, DrawOrder.LINE)
 
+        //Listener for when point is touched display info of that point
         val keylistener = object : OnChartValueSelectedListener {
             override fun onValueSelected(e: Entry, h: Highlight) {
-                entry.text = "MACD: ${CurrencyFormatter.formatterLarge.format(MACD[e.x.toInt()].toDouble())}," +
-                        "S: ${CurrencyFormatter.formatterLarge.format(Signal[e.x.toInt()])}," +
-                        "H: ${CurrencyFormatter.formatterLarge.format(Histo[e.x.toInt()])}"
+                entry.text = "MACD: ${CurrencyFormatter.formatterLarge.format(mACD[e.x.toInt()].toDouble())}," +
+                        "S: ${CurrencyFormatter.formatterLarge.format(signal[e.x.toInt()])}," +
+                        "H: ${CurrencyFormatter.formatterLarge.format(histo[e.x.toInt()])}"
 
-                time.text = "${CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Date}"
+                time.text = "${currencyDeets[e.x.toInt() + (currencyDeets.size - 1 - count)].Date}"
             }
 
             override fun onNothingSelected() {
@@ -651,11 +692,12 @@ class CurrencyDetail : AppCompatActivity() {
         initCombinedChart(count)
     }
 
+    //Set UI of Combined Chart and view window
     private fun initCombinedChart(count: Int) {
         mCombined.setPinchZoom(false)
         mCombined.setDrawGridBackground(false)
 
-        var xAxis: XAxis = mCombined.xAxis
+        val xAxis: XAxis = mCombined.xAxis
         xAxis.isEnabled = true
         xAxis.textColor = Color.WHITE
         xAxis.position = XAxis.XAxisPosition.BOTTOM
@@ -665,13 +707,13 @@ class CurrencyDetail : AppCompatActivity() {
         })
 
 
-        var rightAxis: YAxis = mCombined.axisRight
+        val rightAxis: YAxis = mCombined.axisRight
         rightAxis.setLabelCount(7, false)
         rightAxis.setDrawGridLines(true)
         rightAxis.setDrawAxisLine(true)
         rightAxis.textColor = Color.WHITE
 
-        var leftAxis: YAxis = mCombined.axisLeft
+        val leftAxis: YAxis = mCombined.axisLeft
         leftAxis.isEnabled = false
 
         mCombined.legend.isEnabled = true
@@ -686,12 +728,14 @@ class CurrencyDetail : AppCompatActivity() {
 
     }
 
+    //Set Data for two signal lines for MACD generation
     private fun setCombinedData(count: Int) {
         var data = CombinedData()
 
-        generateEMA(count, 12, EMA12)
-        generateEMA(count, 26, EMA26)
-
+        //EMA is number of days to take into account
+        //Using 12 26 9 day MACD
+        generateEMA(count, 12, eMA12)
+        generateEMA(count, 26, eMA26)
 
         data.setData(generateMacD(count))
         data.setData(generateHistogram(count))
@@ -700,31 +744,33 @@ class CurrencyDetail : AppCompatActivity() {
         mCombined.invalidate()
     }
 
+    //Generate an EMA of number of days into arraylist
     private fun generateEMA(count: Int, EMA: Int, toAdd: ArrayList<Float>) {
         //{Close - EMA(previous day)} x multiplier + EMA(previous day)
-        var size = CurrencyDeets.size - 1
+        val size = currencyDeets.size - 1
         var e = 1
         var sum = 0.0f
         while (e <= EMA) {
-            sum += CurrencyDeets[e + (size - count - EMA)].Close.toFloat()
+            sum += currencyDeets[e + (size - count - EMA)].Close.toFloat()
             e++
         }
         var mult = 2 / (EMA + 1).toFloat()
         var i = 0
         toAdd.add(i, sum / EMA)
         while (i <= count) {
-            toAdd.add(i + 1, (CurrencyDeets[i + (size - count)].Close.toFloat() - toAdd[i]) * mult + toAdd[i])
+            toAdd.add(i + 1, (currencyDeets[i + (size - count)].Close.toFloat() - toAdd[i]) * mult + toAdd[i])
             i++
         }
 
     }
 
+    //Generate Histogram bar graph to show difference in Signal Line and MACD Line for trend direction
     private fun generateHistogram(count: Int): BarData {
         val yVals1 = ArrayList<BarEntry>()
         var i = 0
         while (i <= count) {
-            val value = MACD[i] - Signal[i]
-            Histo.add(value)
+            val value = mACD[i] - signal[i]
+            histo.add(value)
             yVals1.add(BarEntry(i.toFloat(), value))
             i++
         }
@@ -739,87 +785,92 @@ class CurrencyDetail : AppCompatActivity() {
 
     }
 
+    //Signal Line generation from EMA and MACD
     private fun generateSignalData(count: Int, EMA: Int, toAdd: ArrayList<Float>) {
         //{Close - EMA(previous day)} x multiplier + EMA(previous day)
-        var size = MACD.size - 1
+        var size = mACD.size - 1
         var e = 1
         var sum = 0.0f
         while (e <= EMA) {
-            sum += MACD[e]
+            sum += mACD[e]
             e++
         }
         var mult = 2 / (EMA + 1).toFloat()
         var i = 0
         toAdd.add(i, sum / EMA)
         while (i <= count) {
-            toAdd.add(i + 1, (MACD[i + (size - count)] - toAdd[i]) * mult + toAdd[i])
+            toAdd.add(i + 1, (mACD[i + (size - count)] - toAdd[i]) * mult + toAdd[i])
             i++
         }
     }
 
+    //MACD line generation using 12 day EMA and 26 EMA
     private fun generateMacD(count: Int): LineData {
         //EMA12[i] - EMA26[i]
-        var d = LineData()
+        val d = LineData()
 
-        var entries: ArrayList<Entry> = ArrayList()
-
+        val entries: ArrayList<Entry> = ArrayList()
 
         var i = 0
         while (i <= count) {
-            MACD.add(EMA12[i] - EMA26[i])
-            entries.add(Entry(i.toFloat(), (EMA12[i] - EMA26[i])))
-            //Log.i("MACD ", "${EMA12[i]} - ${EMA26[i]} = ${EMA12[i] - EMA26[i]}")
+            mACD.add(eMA12[i] - eMA26[i])
+            entries.add(Entry(i.toFloat(), (eMA12[i] - eMA26[i])))
             i++
         }
 
-        var set: LineDataSet = LineDataSet(entries, "MACD")
-        set.setColor(Color.BLUE)
-        set.setLineWidth(.5f)
-        set.setMode(LineDataSet.Mode.CUBIC_BEZIER)
-        set.valueTextSize = 0f
-        set.setAxisDependency(YAxis.AxisDependency.LEFT)
-        generateSignalData(count, 9, Signal)
+        val set = LineDataSet(entries, "MACD")
+        with(set)
+        {
+            color = Color.BLUE
+            lineWidth = .5f
+            mode = LineDataSet.Mode.CUBIC_BEZIER
+            valueTextSize = 0f
+            axisDependency = YAxis.AxisDependency.LEFT
+        }
+        generateSignalData(count, 9, signal)
         generateSignalLine(count)
         d.addDataSet(set)
         d.addDataSet(sigData)
-
         return d
 
     }
 
+    //Generate Signal line to indicate shifting trend line
     private fun generateSignalLine(count: Int) {
         //EMA12[i] - EMA26[i]
-        var d = LineData()
-
         var entries: ArrayList<Entry> = ArrayList()
 
 
         var i = 0
         while (i <= count) {
-            entries.add(Entry(i.toFloat(), Signal[i]))
+            entries.add(Entry(i.toFloat(), signal[i]))
             i++
         }
 
         sigData = LineDataSet(entries, "Signal Line")
-        sigData.setColor(Color.RED)
-        sigData.setLineWidth(.5f)
-        sigData.setMode(LineDataSet.Mode.CUBIC_BEZIER)
-        sigData.valueTextSize = 0f
-        sigData.setAxisDependency(YAxis.AxisDependency.LEFT)
+        with(sigData)
+        {
+            color = Color.RED
+            lineWidth = .5f
+            mode = LineDataSet.Mode.CUBIC_BEZIER
+            valueTextSize = 0f
+            axisDependency = YAxis.AxisDependency.LEFT
+        }
 
     }
     //endregion
 
     //region Candlestick Chart
+    //Set up CandlestickChart
     private fun initCandle(count: Int) {
-        mCandle = findViewById<CandleStickChart>(R.id.CurrencyChart) as CandleStickChart
+        mCandle = findViewById(R.id.CurrencyChart)
         val keylistener = object : OnChartValueSelectedListener {
             override fun onValueSelected(e: Entry, h: Highlight) {
-                entry.text = "O:${CurrencyFormatter.formatterLarge.format(CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Open.toDouble())}," +
-                        " C:${CurrencyFormatter.formatterLarge.format(CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Close.toDouble())}" +
-                        ", L:${CurrencyFormatter.formatterLarge.format(CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Low.toDouble())}"
+                entry.text = "O:${CurrencyFormatter.formatterLarge.format(currencyDeets[e.x.toInt() + (currencyDeets.size - 1 - count)].Open.toDouble())}," +
+                        " C:${CurrencyFormatter.formatterLarge.format(currencyDeets[e.x.toInt() + (currencyDeets.size - 1 - count)].Close.toDouble())}" +
+                        ", L:${CurrencyFormatter.formatterLarge.format(currencyDeets[e.x.toInt() + (currencyDeets.size - 1 - count)].Low.toDouble())}"
 
-                time.text = "${CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Date}"
+                time.text = "${currencyDeets[e.x.toInt() + (currencyDeets.size - 1 - count)].Date}"
             }
 
             override fun onNothingSelected() {
@@ -834,14 +885,12 @@ class CurrencyDetail : AppCompatActivity() {
 
     }
 
-    fun initCandleChart(count: Int) {
-        //mCandle.setMaxVisibleValueCount(365)
-
-        // scaling can now only be done on x- and y-axis separately
+    //Set up look of chart
+    private fun initCandleChart(count: Int) {
         mCandle.setPinchZoom(false)
         mCandle.setDrawGridBackground(false)
 
-        var xAxis: XAxis = mCandle.xAxis
+        val xAxis: XAxis = mCandle.xAxis
         with(xAxis)
         {
             isEnabled = true
@@ -854,7 +903,7 @@ class CurrencyDetail : AppCompatActivity() {
         }
 
 
-        var leftAxis: YAxis = mCandle.axisRight
+        val leftAxis: YAxis = mCandle.axisRight
         with(leftAxis)
         {
             setLabelCount(7, false)
@@ -863,7 +912,7 @@ class CurrencyDetail : AppCompatActivity() {
             textColor = Color.WHITE
         }
 
-        var rightAxis: YAxis = mCandle.axisLeft
+        val rightAxis: YAxis = mCandle.axisLeft
         rightAxis.isEnabled = false
 
         with(mCandle)
@@ -881,42 +930,37 @@ class CurrencyDetail : AppCompatActivity() {
 
     }
 
+    //Create data points for number of days count
     private fun setCandleData(count: Int) {
 
-        //var prog = (mSeekBarX.getProgress() + 1)
-
-        //entry.text = "" +
-        //time.text = "" + (mSeekBarY.getProgress())
-
         mCandle.resetTracking()
-        var size: Int = CurrencyDeets.size - 1
-        var yVals1: ArrayList<CandleEntry> = ArrayList()
+        val size: Int = currencyDeets.size - 1
+        val yVals1: ArrayList<CandleEntry> = ArrayList()
         var i = 0
         while (i <= count) {
             yVals1.add(CandleEntry(
-                    i.toFloat(), CurrencyDeets[i + (size - count)].High.toFloat(),
-                    CurrencyDeets[i + (size - count)].Low.toFloat(),
-                    CurrencyDeets[i + (size - count)].Open.toFloat(),
-                    CurrencyDeets[i + (size - count)].Close.toFloat()
+                    i.toFloat(), currencyDeets[i + (size - count)].High.toFloat(),
+                    currencyDeets[i + (size - count)].Low.toFloat(),
+                    currencyDeets[i + (size - count)].Open.toFloat(),
+                    currencyDeets[i + (size - count)].Close.toFloat()
             ))
             i++
         }
 
-
         var set1 = CandleDataSet(yVals1, "Data Set")
-
-        set1.setDrawIcons(false)
-        set1.axisDependency = YAxis.AxisDependency.LEFT
-//        set1.setColor(Color.rgb(80, 80, 80));
-        set1.shadowColor = Color.YELLOW
-        set1.valueTextColor = Color.WHITE
-        set1.shadowWidth = 0.7f
-        set1.decreasingColor = Color.RED
-        set1.decreasingPaintStyle = Paint.Style.FILL
-        set1.increasingColor = Color.GREEN
-        set1.increasingPaintStyle = Paint.Style.STROKE
-        set1.neutralColor = Color.BLUE
-        //set1.setHighlightLineWidth(1f)
+        with(set1)
+        {
+            setDrawIcons(false)
+            axisDependency = YAxis.AxisDependency.LEFT
+            shadowColor = Color.YELLOW
+            valueTextColor = Color.WHITE
+            shadowWidth = 0.7f
+            decreasingColor = Color.RED
+            decreasingPaintStyle = Paint.Style.FILL
+            increasingColor = Color.GREEN
+            increasingPaintStyle = Paint.Style.STROKE
+            neutralColor = Color.BLUE
+        }
 
         var data = CandleData(set1)
 
@@ -926,12 +970,13 @@ class CurrencyDetail : AppCompatActivity() {
     //endregion
 
     //region Bar Chart
+    //24Hour Volume Chart
     private fun initBar(count: Int) {
         mBar = findViewById<BarChart>(R.id.VolumeChart) as BarChart
         val keylistener = object : OnChartValueSelectedListener {
             override fun onValueSelected(e: Entry, h: Highlight) {
                 entry.text = "Volume: ${CurrencyFormatter.formatterLarge.format(e.y)} M"
-                time.text = "${CurrencyDeets[e.x.toInt() + (CurrencyDeets.size - 1 - count)].Date}"
+                time.text = "${currencyDeets[e.x.toInt() + (currencyDeets.size - 1 - count)].Date}"
             }
 
             override fun onNothingSelected() {
@@ -944,12 +989,12 @@ class CurrencyDetail : AppCompatActivity() {
         initBarChart(count)
     }
 
-    fun initBarChart(count: Int) {
+    //Set up look and set date values for x axis
+    private fun initBarChart(count: Int) {
         var i = 0
-        var size = CurrencyDeets.size - 1
+        var size = currencyDeets.size - 1
         while (i <= count) {
-            //Log.i("Date", CurrencyDeets[i + (size - count)].Date)
-            val value = CurrencyDeets[i + (size - count)].Date
+            val value = currencyDeets[i + (size - count)].Date
             xValues.add(value)
             i++
         }
@@ -970,81 +1015,51 @@ class CurrencyDetail : AppCompatActivity() {
             xAxis.setDrawAxisLine(true)
         }
 
-        var xAxis: XAxis = mBar.xAxis
+        val xAxis: XAxis = mBar.xAxis
+        with(xAxis)
+        {
+            position = XAxis.XAxisPosition.BOTTOM
+            setDrawGridLines(true)
+            granularity = 7f
+            labelCount = 7
+            setValueFormatter({ value, _ ->
+                xValues[(value % xValues.size).toInt()]
+            })
+            textColor = Color.WHITE
+            isEnabled = true
+        }
 
-        xAxis.position = XAxis.XAxisPosition.BOTTOM
-        xAxis.setDrawGridLines(true)
-        xAxis.granularity = 7f // only intervals of 1 day
-        xAxis.labelCount = 7
-        xAxis.setValueFormatter({ value, axis ->
-            xValues[(value % xValues.size).toInt()]
-        })
-        xAxis.textColor = Color.WHITE
-        xAxis.isEnabled = true
-
-
-        //var leftAxis: YAxis = mBar.axisLeft
-        //leftAxis.setLabelCount(8, false)
-        //leftAxis.setPosition(YAxis.YAxisLabelPosition.OUTSIDE_CHART)
-        //leftAxis.spaceTop = 15f
-        //leftAxis.axisMinimum = 0f // this replaces setStartAtZero(true)
-//        var leftAxis: YAxis = mBar.axisLeft
-//        leftAxis.setDrawGridLines(false)
-//        leftAxis.setLabelCount(7, false)
-//        leftAxis.spaceTop = 0f
-//        leftAxis.axisMinimum = 0f // this replaces setStartAtZero(true)
-//        leftAxis.textColor = Color.WHITE
-
-        var rightAxis: YAxis = mBar.axisRight
-        rightAxis.setDrawGridLines(true)
-        rightAxis.setLabelCount(7, false)
-        rightAxis.spaceTop = 0f
-        rightAxis.axisMinimum = 0f // this replaces setStartAtZero(true)
-        rightAxis.textColor = Color.WHITE
-
-//        var l: Legend = mBar.legend
-//        l.verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
-//        l.horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
-//        l.orientation = Legend.LegendOrientation.HORIZONTAL
-//        l.setDrawInside(false)
-//        l.form = Legend.LegendForm.SQUARE
-//        l.formSize = 9f
-//        l.textSize = 11f
-//        l.xEntrySpace = 4f
-        // l.setExtra(ColorTemplate.VORDIPLOM_COLORS, new String[] { "abc",
-        // "def", "ghj", "ikl", "mno" })
-        // l.setCustom(ColorTemplate.VORDIPLOM_COLORS, new String[] { "abc",
-        // "def", "ghj", "ikl", "mno" })
-
+        val rightAxis: YAxis = mBar.axisRight
+        with(rightAxis)
+        {
+            setDrawGridLines(true)
+            setLabelCount(7, false)
+            spaceTop = 0f
+            axisMinimum = 0f // this replaces setStartAtZero(true)
+            textColor = Color.WHITE
+        }
 
         setBarData(count)
-
-        // setting data
-        //mSeekBarY.setProgress(50)
-        //mSeekBarX.setProgress(12)
-
-        //mSeekBarY.setOnSeekBarChangeListener(this)
-        //mSeekBarX.setOnSeekBarChangeListener(this)
-
         mBar.legend.isEnabled = false
         mBar.axisLeft.isEnabled = false
         mBar.setVisibleXRangeMaximum(20f)
 
     }
 
+    //Load up data for each bar date
     private fun setBarData(count: Int) {
 
-        var size: Int = CurrencyDeets.size - 1
+        var size: Int = currencyDeets.size - 1
         val yVals1 = ArrayList<BarEntry>()
         var i = 0
         while (i <= count) {
-            val value = CurrencyDeets[i + (size - count)].Volume.toDouble() / 1000000
+            val value = currencyDeets[i + (size - count)].Volume.toDouble() / 1000000
             yVals1.add(BarEntry(i.toFloat(), value.toFloat()))
             i++
         }
 
         val set1: BarDataSet
-
+        //If data is available
         if (mBar.data != null && mBar.data.dataSetCount > 0) {
             set1 = (mBar.data.getDataSetByIndex(0)) as BarDataSet
             set1.values = yVals1
@@ -1052,9 +1067,7 @@ class CurrencyDetail : AppCompatActivity() {
             mBar.notifyDataSetChanged()
         } else {
             set1 = BarDataSet(yVals1, null)
-
             set1.setDrawIcons(false)
-
             set1.setColors(Color.GRAY)
 
             val dataSets = ArrayList<IBarDataSet>()
@@ -1073,22 +1086,25 @@ class CurrencyDetail : AppCompatActivity() {
     //endregion
 
     //region Parse and Create Coin Details
+    //Parse coin payload from service
     private fun parseCoinDetails() {
         var blocks = response.substringAfter("<tbody>").split("</tr>")
         blocks.take(blocks.size - 1)
                 .forEach {
-                    CurrencyDeets.add(createCurrencyDetail(it))
+                    currencyDeets.add(createCurrencyDetail(it))
                 }
-        CurrencyDeets.sortBy { it.Date }
-        CurrencyDeets.forEach {
+        currencyDeets.sortBy { it.Date }
+        currencyDeets.forEach {
             it.Date = (parseUnix(it.Date.toLong()))
         }
+        //if more than 45 days of data exists use 45 other wise use as many days as it has
         if (blocks.size >= 45)
             initAllCharts(45)
         else
             initAllCharts(blocks.size)
     }
 
+    //Create Currency structure from parsed details
     private fun createCurrencyDetail(block: String): CurrencyDetails {
         var data = block.substringAfter("<tr class=\"text-right\">").split("</td>")
         //data index: date,open,high,low,close,volume,marketcap
@@ -1113,19 +1129,17 @@ class CurrencyDetail : AppCompatActivity() {
         var volume = data[5].substringAfter("<td data-format-market-cap data-format-value=\"")
         volume = volume.substring(0, volume.indexOf("\""))
 
-        //Log.i("Entry", volume)
-
         return CurrencyDetails(unixTime.toString(), high, open, low, close, volume)
-
-
     }
 
+    //Request data method for service endpoing
     private fun requestData(path: String) {
         val intent = Intent(this, DataService::class.java)
         intent.putExtra("Path", path)
         startService(intent)
     }
 
+    //Convert millis time into MM/DD/YY format
     fun parseUnix(time: Long): String {
         val date = Date(time)
         val sdf = SimpleDateFormat("MM/dd/yy")
@@ -1134,16 +1148,8 @@ class CurrencyDetail : AppCompatActivity() {
     //endregion
 
     //region Activity Lifecycle
-    override fun onPause() {
-        super.onPause()
-        //mDataSource.close()
-    }
 
-    override fun onResume() {
-        super.onResume()
-        //mDataSource.open()
-    }
-
+    //Clean up Transaction and broadcasters
     override fun onDestroy() {
         TransactionDatabase.destroyInstance()
         super.onDestroy()

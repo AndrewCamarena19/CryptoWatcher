@@ -4,9 +4,7 @@ import android.app.job.JobInfo
 import android.app.job.JobScheduler
 import android.content.*
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
-import android.support.annotation.RequiresApi
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AlertDialog
@@ -14,7 +12,6 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.InputType
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
@@ -23,6 +20,7 @@ import android.widget.Toast
 import com.andyisdope.cryptowatcher.model.Currency
 import com.andyisdope.cryptowatcher.Adapters.CurrencyAdapter
 import com.andyisdope.cryptowatcher.Adapters.TokenAdapter
+import com.andyisdope.cryptowatcher.R.id.Favorites
 import com.andyisdope.cryptowatcher.Services.DataService
 import com.andyisdope.cryptowatcher.Services.PortfolioService
 import com.andyisdope.cryptowatcher.model.Tokens
@@ -33,8 +31,8 @@ import com.google.android.gms.ads.AdView
 class MainActivity : AppCompatActivity() {
 
     private lateinit var mAdView: AdView
-    private lateinit var Refresh: SwipeRefreshLayout
-    var mSelectedList: ArrayList<String> = ArrayList()
+    private lateinit var refresh: SwipeRefreshLayout
+    private var mSelectedList: ArrayList<String> = ArrayList()
     private var mCoins: ArrayList<Currency> = ArrayList()
     private var mTokens: ArrayList<Tokens> = ArrayList()
     private var mFavor: ArrayList<Currency> = ArrayList()
@@ -46,36 +44,49 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mFavAdapter: CurrencyAdapter
     private var response: String = ""
     private var response2: String = ""
-    private lateinit var TimeFrames: Array<String>
-    private lateinit var SortBy: Array<String>
-    private lateinit var Order: Array<String>
+    private lateinit var timeFrames: Array<String>
+    private lateinit var sortBy: Array<String>
+    private lateinit var order: Array<String>
     private lateinit var sharedPref: SharedPreferences
-    private lateinit var PricingPref: SharedPreferences
-    private lateinit var CoinsPref: SharedPreferences
-    private lateinit var CoinNames: SharedPreferences
+    private lateinit var pricingPref: SharedPreferences
+    private lateinit var coinsPref: SharedPreferences
+    private lateinit var coinNames: SharedPreferences
 
 
-    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        //Banner AdView
         mAdView = findViewById(R.id.adView)
         mAdView.loadAd(AdRequest.Builder().build())
 
-        CoinNames = baseContext.getSharedPreferences("CoinNames", Context.MODE_PRIVATE)
-        sharedPref = baseContext.getSharedPreferences("Favorites", Context.MODE_PRIVATE)
-        PricingPref = baseContext.getSharedPreferences("Prices", Context.MODE_PRIVATE)
-        CoinsPref = baseContext.getSharedPreferences("Coins", Context.MODE_PRIVATE)
-        if(sharedPref.contains("Job")) {
-            scheduleJob()
-            sharedPref.edit().putString("Job", "Job").apply()
-        }
+        //Schedule portfolio tracking job
+        scheduleJob()
         initTabs()
-        Order = arrayOf("Ascending", "Descending")
-        TimeFrames = arrayOf("Hourly", "Daily", "Weekly")
-        SortBy = arrayOf("Place", "Alphabet", "Price", "24Hr Volume", "MarketCap", "Hourly", "Daily", "Weekly")
+        initVariables()
 
+        //New call to services on swipe refresh
+        refresh.setOnRefreshListener {
+            requestData("Coins")
+            requestData("Tokens")
+        }
+    }
+
+    //Initialize Views and User Preferences
+    private fun initVariables() {
+        //Load Preferences to start tracking coin data
+        coinNames = baseContext.getSharedPreferences("CoinNames", Context.MODE_PRIVATE)
+        sharedPref = baseContext.getSharedPreferences("Favorites", Context.MODE_PRIVATE)
+        pricingPref = baseContext.getSharedPreferences("Prices", Context.MODE_PRIVATE)
+        coinsPref = baseContext.getSharedPreferences("Coins", Context.MODE_PRIVATE)
+
+        //Arrays of options menu data
+        order = arrayOf("Ascending", "Descending")
+        timeFrames = arrayOf("Hourly", "Daily", "Weekly")
+        sortBy = arrayOf("Place", "Alphabet", "Price", "24Hr Volume", "MarketCap", "Hourly", "Daily", "Weekly")
+
+        //Initial ordering of coin and token data
         Currency.SortMethod = "Place"
         Currency.TimeFrame = "Hourly"
         Currency.Order = "Ascending"
@@ -83,43 +94,38 @@ class MainActivity : AppCompatActivity() {
         Tokens.TimeFrame = "Hourly"
         Tokens.Order = "Ascending"
 
+        //UI recyclerViews
+        mCoinList = findViewById(R.id.CoinList)
+        mTokenList = findViewById(R.id.TokenList)
+        mFavourites = findViewById(Favorites)
+        refresh = findViewById(R.id.RefreshLayout)
 
-        mCoinList = findViewById<RecyclerView>(R.id.CoinList) as RecyclerView
-        mTokenList = findViewById<RecyclerView>(R.id.TokenList) as RecyclerView
-        mFavourites = findViewById<RecyclerView>(R.id.Favorites) as RecyclerView
-        Refresh = findViewById<SwipeRefreshLayout>(R.id.RefreshLayout) as SwipeRefreshLayout
-
-
+        //Broadcast receivers to start and display coins and tokens
         LocalBroadcastManager.getInstance(applicationContext)
                 .registerReceiver(mBroadcastReceiver,
                         IntentFilter(DataService.COINS))
-        requestData("Coins")
-
         LocalBroadcastManager.getInstance(applicationContext)
                 .registerReceiver(mBroadcastReceiver2,
                         IntentFilter(DataService.TOKENS))
+
+        //Initial requests for Token and coin data
+        requestData("Coins")
         requestData("Tokens")
-
-
-        Refresh.setOnRefreshListener {
-            requestData("Coins")
-            requestData("Tokens")
-        }
     }
 
+    //Scheduled job to track portfolio performance in Room taken every 6 hours persisted on reboot
     private fun scheduleJob() {
-        var comp = ComponentName(applicationContext, PortfolioService::class.java)
-        var builder: JobInfo = JobInfo.Builder(1111, comp)
+        val comp = ComponentName(applicationContext, PortfolioService::class.java)
+        val builder: JobInfo = JobInfo.Builder(1111, comp)
                 .setPeriodic(21600000)
                 .setPersisted(true)
                 .build()
-        var scheduler: JobScheduler = getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+        val scheduler: JobScheduler = getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
         scheduler.schedule(builder)
-        scheduler.allPendingJobs.forEach { Log.i("Jobb", it.toString()) }
-
     }
 
     //region Broadcasts and Data methods
+    //First Broadcast receiver for coin items to kick off displaying Coins
     private val mBroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             //val dataItems = intent
@@ -128,23 +134,26 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
-
+    //Second Broadcast receiver for token items to kick of displaying Tokens
     private val mBroadcastReceiver2 = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             //val dataItems = intent
             response2 = intent.getStringExtra(DataService.MY_SERVICE_PAYLOAD)// as Array<Currency>
             displayTokenItems()
-            Refresh.isRefreshing = false
+            refresh.isRefreshing = false
 
         }
     }
 
+    //Helper method to call Retrofit Service use Path intent string as URL endpoint
+    //Or keyword to get hardcoded endpoing
     private fun requestData(path: String) {
         val intent = Intent(this, DataService::class.java)
         intent.putExtra("Path", path)
         startService(intent)
     }
 
+    //Sort the Arrayadapters for recyclerviews based on ordering criteria
     private fun sortAdapters(method: String) {
         Currency.SortMethod = method
         Tokens.SortMethod = method
@@ -276,6 +285,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        //Update all RecyclerViews with same ordering scheme
         mTokenAdapter = TokenAdapter(this, mTokens)
         mTokenList.adapter = mTokenAdapter
         mTokenList.adapter.notifyDataSetChanged()
@@ -289,13 +300,15 @@ class MainActivity : AppCompatActivity() {
         mFavourites.adapter = mFavAdapter
         mFavourites.adapter.notifyDataSetChanged()
 
+        //Let user know how adapters were sorted
         Toast.makeText(baseContext, "Sorting ${Currency.SortMethod} in ${Currency.Order} order.", Toast.LENGTH_SHORT).show()
 
     }
     //endregion
 
     //region UI and Dialog methods
-    fun initTabs() {
+    //Set Tab info and layout
+    private fun initTabs() {
         val tabs = findViewById<TabHost>(R.id.CTlist)
         tabs.setup()
         var spec: TabHost.TabSpec = tabs.newTabSpec("Coin List")
@@ -307,45 +320,47 @@ class MainActivity : AppCompatActivity() {
         spec.setIndicator("Token List")
         tabs.addTab(spec)
         spec = tabs.newTabSpec("Favorites")
-        spec.setContent(R.id.Favorites)
+        spec.setContent(Favorites)
         spec.setIndicator("Favorites")
         tabs.addTab(spec)
     }
 
-    fun createBuilderDialog(array: Array<String>, title: String) {
+    //Dialog builder for different sorting, or display info
+    private fun createBuilderDialog(array: Array<String>, title: String) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(title)
-        builder.setItems(array, { dialog, which ->
+        builder.setItems(array, { _, which ->
             sortAdapters(array[which])
         })
         builder.show()
     }
 
+    //Search dialog for token or coin, searches on Symbol or full Name
     private fun createSearchDialog() {
-        var m_Text: String
+        var mText: String
         val builder: AlertDialog.Builder = AlertDialog.Builder(this, R.style.ThemeDialog)
         val input = EditText(this)
         input.setTextColor(Color.WHITE)
         input.inputType = InputType.TYPE_CLASS_TEXT
         builder.setMessage("Enter a Coin/Token name or symbol")
         builder.setView(input)
-        builder.setPositiveButton("Tokens") { dialog, which ->
-            m_Text = input.text.toString()
+        builder.setPositiveButton("Tokens") { _, _ ->
+            mText = input.text.toString()
 
-            mTokens.firstOrNull { (it.Symbol == m_Text.toUpperCase() || it.Name.trim() == m_Text.toLowerCase()) }
+            mTokens.firstOrNull { (it.Symbol == mText.toUpperCase() || it.Name.trim() == mText.toLowerCase()) }
                     ?.let {
-                        var intent: Intent = Intent(this, CurrencyDetail::class.java)
+                        val intent = Intent(this, CurrencyDetail::class.java)
                         intent.putExtra("Currency", it.Name)
                         startActivity(intent)
                     } ?: run {
                 Toast.makeText(this, "Entry not found", Toast.LENGTH_SHORT).show()
             }
         }
-        builder.setNegativeButton("Coins") { dialog, which ->
-            m_Text = input.text.toString()
-            mCoins.firstOrNull { (it.Symbol == m_Text.toUpperCase() || it.Name.trim() == m_Text.toLowerCase()) }
+        builder.setNegativeButton("Coins") { _, _ ->
+            mText = input.text.toString()
+            mCoins.firstOrNull { (it.Symbol == mText.toUpperCase() || it.Name.trim() == mText.toLowerCase()) }
                     ?.let {
-                        var intent: Intent = Intent(this, CurrencyDetail::class.java)
+                        val intent = Intent(this, CurrencyDetail::class.java)
                         intent.putExtra("Currency", it.Name)
                         startActivity(intent)
                     } ?: run {
@@ -353,25 +368,26 @@ class MainActivity : AppCompatActivity() {
 
             }
         }
-        builder.setNeutralButton("Cancel") { dialog, which -> dialog.cancel() }
-        var alert: AlertDialog = builder.create()
+        builder.setNeutralButton("Cancel") { dialog, _ -> dialog.cancel() }
+        val alert: AlertDialog = builder.create()
         alert.show()
 
     }
 
+    //Set action bar items, Search, Sort, TimeFrame, Ordering
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         //sorts: alphabet, marketcap, biggest change, price, place
         when (item.itemId) {
             R.id.search -> createSearchDialog()
             R.id.sort -> {
-                createBuilderDialog(SortBy, "Select a criteria to sort in ${Currency.Order} order.")
+                createBuilderDialog(sortBy, "Select a criteria to sort in ${Currency.Order} order.")
             }
             R.id.time -> {
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle("Select a time frame")
-                builder.setItems(TimeFrames, { _, which ->
-                    Currency.TimeFrame = TimeFrames[which]
-                    Tokens.TimeFrame = TimeFrames[which]
+                builder.setItems(timeFrames, { _, which ->
+                    Currency.TimeFrame = timeFrames[which]
+                    Tokens.TimeFrame = timeFrames[which]
                     Toast.makeText(baseContext, "Current time frame: ${Currency.TimeFrame}", Toast.LENGTH_SHORT).show()
                     mCoinList.adapter.notifyDataSetChanged()
                     mTokenList.adapter.notifyDataSetChanged()
@@ -383,9 +399,9 @@ class MainActivity : AppCompatActivity() {
             R.id.order -> {
                 val builder = AlertDialog.Builder(this)
                 builder.setTitle("Select an order direction")
-                builder.setItems(Order, { _, which ->
-                    Currency.Order = Order[which]
-                    Tokens.Order = Order[which]
+                builder.setItems(order, { _, which ->
+                    Currency.Order = order[which]
+                    Tokens.Order = order[which]
                     Toast.makeText(baseContext, "Sorting ${Currency.SortMethod} in ${Currency.Order} order.", Toast.LENGTH_SHORT).show()
                     sortAdapters(Currency.SortMethod)
                 })
@@ -395,6 +411,7 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    //Inflate the ActionBar
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater = menuInflater
         inflater.inflate(R.menu.actionmenu, menu)
@@ -403,16 +420,7 @@ class MainActivity : AppCompatActivity() {
     //endregion
 
     //region Lifecycle methods
-    override fun onPause() {
-        super.onPause()
-        //mDataSource.close()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        //mDataSource.open()
-    }
-
+    //Unregister Broadcast recievers on destory for leaks
     override fun onDestroy() {
         super.onDestroy()
 
@@ -424,52 +432,52 @@ class MainActivity : AppCompatActivity() {
     //endregion
 
     //region Currency Methods
+    //Convert Token to Currency Function
     private fun toCurrency(Toke: Tokens): Currency {
         return Currency(Toke.Name, Toke.Symbol, Toke.Place, Toke.isFavorite, Toke.Num, Toke.MarketCap, Toke.CurrentPrice, Toke.HrChange, Toke.TwoChange, Toke.SevenChange, Toke.Volume)
     }
 
+    //Parse through data request payload block by block
+    //Webscraped to avoid API limits and info not available through API
     private fun createCurrency(block: String): Currency {
 
         var id = block.substringAfter("<tr id=\"id-")
         id = id.substring(0, id.indexOf("\""))
 
-        var data = block.split("</td")
+        val data = block.split("</td")
 
-        var place = data[0].substringAfter("<td class=\"text-center\">").trim()
+        val place = data[0].substringAfter("<td class=\"text-center\">").trim()
 
         var symbol = data[1].substringAfter("<span class=\"currency-symbol\"><a href=\"/currencies/$id/\">")
         symbol = symbol.substring(0, symbol.indexOf("<"))
 
         var marketCap = data[3].substringAfter("data-sort=\"")
         marketCap = marketCap.substring(0, marketCap.indexOf("\""))
-        //if(marketCap.contains("+")) marketCap = marketCap.replace("+", "")
 
         var currPrice = data[4].substringAfter("data-sort=\"")
         currPrice = currPrice.substring(0, currPrice.indexOf("\""))
-        //if(currPrice.contains("+")) currPrice = currPrice.replace("+", "")
 
         var volume = data[6].substringAfter("data-sort=\"")
         volume = volume.substring(0, volume.indexOf("\""))
-        //if(volume.contains("+")) volume = volume.replace("+", "")
 
         var hrChange = data[7].substringAfter("text-right\"")
         hrChange = if (hrChange.length < 5) "?"
         else {
-            var temp = hrChange.substringAfter("data-sort=\"")
+            val temp = hrChange.substringAfter("data-sort=\"")
             temp.substring(0, temp.indexOf("\""))
         }
 
         var twoChange = data[8].substringAfter("text-right\"")
         twoChange = if (twoChange.length < 5) "?"
         else {
-            var temp = twoChange.substringAfter("data-sort=\"")
+            val temp = twoChange.substringAfter("data-sort=\"")
             temp.substring(0, temp.indexOf("\""))
         }
 
         var sevenChange = data[9].substringAfter("text-right\"")
         sevenChange = if (sevenChange.length < 5) "?"
         else {
-            var temp = sevenChange.substringAfter("data-sort=\"")
+            val temp = sevenChange.substringAfter("data-sort=\"")
             temp.substring(0, temp.indexOf("\""))
         }
         if (marketCap == "0") marketCap = "-9999"
@@ -481,12 +489,14 @@ class MainActivity : AppCompatActivity() {
         return Currency(id, symbol, Integer.parseInt(place), false, 0.0, marketCap, currPrice, hrChange, twoChange, sevenChange, volume)
     }
 
+    //Parse Coins and display them, if a coin is in preferences keep track for favorites
+    //And portfolio tracking
     private fun displayCoinItems() {
         mCoins.clear()
         mFavor.clear()
         mSelectedList.clear()
         var temp: Currency
-        var blocks = response.substringAfter("<tbody>").split("</tr>")
+        val blocks = response.substringAfter("<tbody>").split("</tr>")
         blocks.take(blocks.size - 1)
                 .filter { it.length > 19 }
                 .forEach {
@@ -496,9 +506,9 @@ class MainActivity : AppCompatActivity() {
                         mFavor.add(temp)
                         mSelectedList.add(temp.Name)
                     }
-                    if (CoinsPref.contains(temp.Symbol)) {
-                        PricingPref.edit().putString(temp.Symbol, temp.CurrentPrice).apply()
-                        CoinNames.edit().putString(temp.Name, CoinsPref.getString(temp.Symbol, "0")).apply()
+                    if (coinsPref.contains(temp.Symbol)) {
+                        pricingPref.edit().putString(temp.Symbol, temp.CurrentPrice).apply()
+                        coinNames.edit().putString(temp.Name, coinsPref.getString(temp.Symbol, "0")).apply()
                     }
                     mCoins.add(temp)
                 }
@@ -509,6 +519,8 @@ class MainActivity : AppCompatActivity() {
     //endregion
 
     //region Token and Favorites methods
+    //Parse through data request payload block by block
+    //Webscraped to avoid API limits and info not available through API
     private fun createToken(block: String): Tokens {
         var id = block.substringAfter("<tr id=\"id-")
         id = id.substring(0, id.indexOf("\""))
@@ -516,9 +528,9 @@ class MainActivity : AppCompatActivity() {
         var platform = block.substringAfter("data-platformsymbol=\"")
         platform = platform.substring(0, platform.indexOf("\""))
 
-        var data = block.split("</td")
+        val data = block.split("</td")
 
-        var place = data[0].substringAfter("<td class=\"text-center\">").trim()
+        val place = data[0].substringAfter("<td class=\"text-center\">").trim()
 
         var symbol = data[1].substringAfter("<span class=\"currency-symbol\"><a href=\"/currencies/$id/\">")
         symbol = symbol.substring(0, symbol.indexOf("<"))
@@ -538,21 +550,21 @@ class MainActivity : AppCompatActivity() {
         var hrChange = data[7].substringAfter("text-right\"")
         hrChange = if (hrChange.length < 5) "?"
         else {
-            var temp = hrChange.substringAfter("data-sort=\"")
+            val temp = hrChange.substringAfter("data-sort=\"")
             temp.substring(0, temp.indexOf("\""))
         }
 
         var twoChange = data[8].substringAfter("text-right\"")
         twoChange = if (twoChange.length < 5) "?"
         else {
-            var temp = twoChange.substringAfter("data-sort=\"")
+            val temp = twoChange.substringAfter("data-sort=\"")
             temp.substring(0, temp.indexOf("\""))
         }
 
         var sevenChange = data[9].substringAfter("text-right\"")
         sevenChange = if (sevenChange.length < 5) "?"
         else {
-            var temp = sevenChange.substringAfter("data-sort=\"")
+            val temp = sevenChange.substringAfter("data-sort=\"")
             temp.substring(0, temp.indexOf("\""))
         }
 
@@ -566,10 +578,12 @@ class MainActivity : AppCompatActivity() {
         return Tokens(id, symbol, Integer.parseInt(place), platform, false, 0.0, marketCap, currPrice, hrChange, twoChange, sevenChange, volume)
     }
 
+    //Parse Tokens and display them, if a coin is in preferences keep track for favorites
+    //And portfolio tracking
     private fun displayTokenItems() {
         mTokens.clear()
         var temp: Tokens
-        var blocks = response2.substringAfter("<tbody>").split("</tr>")
+        val blocks = response2.substringAfter("<tbody>").split("</tr>")
         blocks.take(blocks.size - 1)
                 .filter { it.length > 19 }
                 .forEach {
@@ -579,9 +593,9 @@ class MainActivity : AppCompatActivity() {
                         mFavor.add(toCurrency(temp))
                         mSelectedList.add(temp.Name)
                     }
-                    if (CoinsPref.contains(temp.Symbol)) {
-                        PricingPref.edit().putString(temp.Symbol, temp.CurrentPrice).apply()
-                        CoinNames.edit().putString(temp.Name, CoinsPref.getString(temp.Symbol, "0")).apply()
+                    if (coinsPref.contains(temp.Symbol)) {
+                        pricingPref.edit().putString(temp.Symbol, temp.CurrentPrice).apply()
+                        coinNames.edit().putString(temp.Name, coinsPref.getString(temp.Symbol, "0")).apply()
 
                     }
                     mTokens.add(temp)
@@ -590,10 +604,9 @@ class MainActivity : AppCompatActivity() {
         mTokenList.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         sortAdapters(Currency.SortMethod)
         displayFavourites()
-        //Log.i("Here", mSelectedList.toString())
-
     }
 
+    //Add all currencies that are favored to that tab
     private fun displayFavourites() {
         mFavourites.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 

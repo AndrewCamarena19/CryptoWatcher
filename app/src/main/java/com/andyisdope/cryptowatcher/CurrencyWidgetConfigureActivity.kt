@@ -17,60 +17,57 @@ import com.andyisdope.cryptowatcher.Services.CurrencyService
 class CurrencyWidgetConfigureActivity : Activity() {
     private var mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
     private lateinit var mAppWidgetText: Spinner
-    private lateinit var HighPrice: EditText
-    private lateinit var BottomPrice: EditText
-    private lateinit var AbsoluteChange: EditText
-    private lateinit var HighPriceBox: CheckBox
-    private lateinit var BottomPriceBox: CheckBox
-    private lateinit var AbsoluteChangeBox: CheckBox
+    private lateinit var highPrice: EditText
+    private lateinit var bottomPrice: EditText
+    private lateinit var absoluteChange: EditText
+    private lateinit var highPriceBox: CheckBox
+    private lateinit var bottomPriceBox: CheckBox
+    private lateinit var absoluteChangeBox: CheckBox
     private var selected: String = ""
     private lateinit var sharedPref: SharedPreferences
 
+    //Spinner to select currency widget
     private var spinnerOnclick = object : AdapterView.OnItemSelectedListener {
         override fun onNothingSelected(p0: AdapterView<*>?) {
         }
 
         override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
             selected = mAppWidgetText.getItemAtPosition(p2).toString()
-            //CurrencyService.startActionFoo(context,appWidgetId, widgetText)
-
             Toast.makeText(baseContext, selected, Toast.LENGTH_SHORT).show()
 
         }
     }
 
-    private fun initUI()
-    {
+    //Configuration Screen for widget
+    private fun initUI() {
         sharedPref = baseContext.getSharedPreferences("Favorites", Context.MODE_PRIVATE)
 
-        HighPrice = findViewById<EditText>(R.id.WidgetHighSet) as EditText
-        BottomPrice = findViewById<EditText>(R.id.WidgetBottomSet) as EditText
-        AbsoluteChange = findViewById<EditText>(R.id.WidgetAbsoluteSet) as EditText
-        mAppWidgetText = findViewById<Spinner>(R.id.appwidget_text) as Spinner
+        //If a price passes a high, bottom or absolute change in either direction notify user if set
+        highPrice = findViewById(R.id.WidgetHighSet)
+        bottomPrice = findViewById(R.id.WidgetBottomSet)
+        absoluteChange = findViewById(R.id.WidgetAbsoluteSet)
+        mAppWidgetText = findViewById(R.id.appwidget_text)
         findViewById<View>(R.id.add_button).setOnClickListener(mOnClickListener)
 
-        HighPriceBox = findViewById<CheckBox>(R.id.WidgetHighPrice) as CheckBox
-        HighPriceBox.setOnCheckedChangeListener { compoundButton, b ->
-            when(b)
-            {
-                true -> HighPrice.visibility = View.VISIBLE
-                false -> HighPrice.visibility = View.GONE
+        highPriceBox = findViewById(R.id.WidgetHighPrice)
+        highPriceBox.setOnCheckedChangeListener { _, b ->
+            when (b) {
+                true -> highPrice.visibility = View.VISIBLE
+                false -> highPrice.visibility = View.GONE
             }
         }
-        BottomPriceBox = findViewById<CheckBox>(R.id.WidgetBottomPrice) as CheckBox
-        BottomPriceBox.setOnCheckedChangeListener { compoundButton, b ->
-            when(b)
-            {
-                true -> BottomPrice.visibility = View.VISIBLE
-                false -> BottomPrice.visibility = View.GONE
+        bottomPriceBox = findViewById(R.id.WidgetBottomPrice)
+        bottomPriceBox.setOnCheckedChangeListener { _, b ->
+            when (b) {
+                true -> bottomPrice.visibility = View.VISIBLE
+                false -> bottomPrice.visibility = View.GONE
             }
         }
-        AbsoluteChangeBox = findViewById<CheckBox>(R.id.WidgetAbsoluteChange) as CheckBox
-        AbsoluteChangeBox.setOnCheckedChangeListener { compoundButton, b ->
-            when(b)
-            {
-                true -> AbsoluteChange.visibility = View.VISIBLE
-                false -> AbsoluteChange.visibility = View.GONE
+        absoluteChangeBox = findViewById(R.id.WidgetAbsoluteChange)
+        absoluteChangeBox.setOnCheckedChangeListener { _, b ->
+            when (b) {
+                true -> absoluteChange.visibility = View.VISIBLE
+                false -> absoluteChange.visibility = View.GONE
             }
         }
 
@@ -84,37 +81,33 @@ class CurrencyWidgetConfigureActivity : Activity() {
         mAppWidgetText.adapter = adapters
 
     }
+
     private var mOnClickListener: View.OnClickListener = View.OnClickListener {
         val context = this@CurrencyWidgetConfigureActivity
 
         // When the button is clicked, store the string locally
         val CurrencyName = selected
 
-        //saveTitlePref(context, mAppWidgetId, CurrencyName)
 
         // It is the responsibility of the configuration activity to update the app widget
-        //val appWidgetManager = AppWidgetManager.getInstance(context)
-        //Log.i("Here", "in config buton")
         var HP = -999.0
         var BP = -999.0
         var CP = -999.0
-        if(HighPriceBox.isChecked)
-        {
-            HP = HighPrice.text.toString().toDouble()
+        if (highPriceBox.isChecked) {
+            HP = highPrice.text.toString().toDouble()
         }
-        if(BottomPriceBox.isChecked)
-        {
-            BP = BottomPrice.text.toString().toDouble()
+        if (bottomPriceBox.isChecked) {
+            BP = bottomPrice.text.toString().toDouble()
         }
-        if(AbsoluteChangeBox.isChecked)
-        {
-            CP = AbsoluteChange.text.toString().toDouble()
+        if (absoluteChangeBox.isChecked) {
+            CP = absoluteChange.text.toString().toDouble()
         }
-
+        //First update call issued manually
         CurrencyService.enqueueWork(context, mAppWidgetId, "$CurrencyName,$HP,$BP,$CP")
 
 
         // Make sure we pass back the original appWidgetId
+        //Only a single notification will be issued, user must create new widget for new notification
         val resultValue = Intent()
         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId)
         setResult(Activity.RESULT_OK, resultValue)
@@ -134,8 +127,6 @@ class CurrencyWidgetConfigureActivity : Activity() {
         initUI()
 
 
-
-
         // Find the widget id from the intent.
         val intent = intent
         val extras = intent.extras
@@ -149,9 +140,6 @@ class CurrencyWidgetConfigureActivity : Activity() {
             finish()
             return
         }
-
-
-        //mAppWidgetText.setText(loadTitlePref(this@CurrencyWidgetConfigureActivity, mAppWidgetId))
     }
 
     companion object {
