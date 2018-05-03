@@ -1,8 +1,12 @@
 package com.andyisdope.cryptowatcher
 
+import android.app.job.JobInfo
+import android.app.job.JobScheduler
 import android.content.*
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.support.annotation.RequiresApi
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AlertDialog
@@ -20,6 +24,7 @@ import com.andyisdope.cryptowatcher.model.Currency
 import com.andyisdope.cryptowatcher.Adapters.CurrencyAdapter
 import com.andyisdope.cryptowatcher.Adapters.TokenAdapter
 import com.andyisdope.cryptowatcher.Services.DataService
+import com.andyisdope.cryptowatcher.Services.PortfolioService
 import com.andyisdope.cryptowatcher.model.Tokens
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.AdView
@@ -39,7 +44,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mCoinAdapter: CurrencyAdapter
     private lateinit var mTokenAdapter: TokenAdapter
     private lateinit var mFavAdapter: CurrencyAdapter
-    private var networkOk: Boolean = false
     private var response: String = ""
     private var response2: String = ""
     private lateinit var TimeFrames: Array<String>
@@ -51,6 +55,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var CoinNames: SharedPreferences
 
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -62,9 +67,11 @@ class MainActivity : AppCompatActivity() {
         sharedPref = baseContext.getSharedPreferences("Favorites", Context.MODE_PRIVATE)
         PricingPref = baseContext.getSharedPreferences("Prices", Context.MODE_PRIVATE)
         CoinsPref = baseContext.getSharedPreferences("Coins", Context.MODE_PRIVATE)
-
+        if(sharedPref.contains("Job")) {
+            scheduleJob()
+            sharedPref.edit().putString("Job", "Job").apply()
+        }
         initTabs()
-        Log.i("Prefer", sharedPref.all.toString())
         Order = arrayOf("Ascending", "Descending")
         TimeFrames = arrayOf("Hourly", "Daily", "Weekly")
         SortBy = arrayOf("Place", "Alphabet", "Price", "24Hr Volume", "MarketCap", "Hourly", "Daily", "Weekly")
@@ -98,6 +105,18 @@ class MainActivity : AppCompatActivity() {
             requestData("Coins")
             requestData("Tokens")
         }
+    }
+
+    private fun scheduleJob() {
+        var comp = ComponentName(applicationContext, PortfolioService::class.java)
+        var builder: JobInfo = JobInfo.Builder(1111, comp)
+                .setPeriodic(21600000)
+                .setPersisted(true)
+                .build()
+        var scheduler: JobScheduler = getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
+        scheduler.schedule(builder)
+        scheduler.allPendingJobs.forEach { Log.i("Jobb", it.toString()) }
+
     }
 
     //region Broadcasts and Data methods

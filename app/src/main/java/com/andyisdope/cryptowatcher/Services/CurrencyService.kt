@@ -93,31 +93,8 @@ class CurrencyService : JobIntentService() {
             createNotification(param2, data[1], param1, "absolute percent change")
             CurrencyWidgetConfigureActivity.saveTitlePref(this, param1, "$param2,$data,$High,$Bottom,-999.0f")
         }
-        if(date.startsWith("00")) {
-            Log.i("Data", "We in der")
-            checkAllPrices(this.applicationContext)
-        }
-        else
-            Log.i("Data", "nah dog")
         WM.updateAppWidget(param1, views)
 
-    }
-
-    private fun checkAllPrices(context: Context) {
-        val CoinsPref: SharedPreferences = context.getSharedPreferences("CoinNames", Context.MODE_PRIVATE)
-        val TotalWorth: SharedPreferences = context.getSharedPreferences("TotalWorth", Context.MODE_PRIVATE)
-        val USD: SharedPreferences = context.getSharedPreferences("Coins", Context.MODE_PRIVATE)
-        val AssetDB = AssetDatabase.getInstance(context)
-        TotalWorth.edit().clear().apply()
-        var total = USD.getString("USD", "0.0").toDouble()
-        CoinsPref.all.entries.forEach {
-            val call = webService.getInitial("https://api.coinmarketcap.com/v1/ticker/${it.key}/")
-            val resp = call.execute().body()
-            var json = JSONArray(resp)
-            total += json.getJSONObject(0)["price_usd"].toString().toDouble() * CoinsPref.getString(it.key, "0.0").toDouble()
-        }
-        val date = DateAsset(adf.format(Date(currentTime.time)).toString(), total)
-        AssetDB?.AssetDao()?.insertAll(date)
     }
 
     private fun createNotification(curr: String, Change: String, WidgetID: Int, Alert: String) {
