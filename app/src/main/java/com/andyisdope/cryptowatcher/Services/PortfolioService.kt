@@ -38,16 +38,16 @@ class PortfolioService : JobService() {
             var context = js.applicationContext
             currentTime = Calendar.getInstance().time
             val CoinsPref: SharedPreferences = context.getSharedPreferences("CoinNames", Context.MODE_PRIVATE)
-            val TotalWorth: SharedPreferences = context.getSharedPreferences("TotalWorth", Context.MODE_PRIVATE)
             val USD: SharedPreferences = context.getSharedPreferences("Coins", Context.MODE_PRIVATE)
             val AssetDB = AssetDatabase.getInstance(context)
-            TotalWorth.edit().clear().apply()
             var total = USD.getString("USD", "0.0").toDouble()
             CoinsPref.all.entries.forEach {
                 val call = CurrencyService.webService.getInitial("https://api.coinmarketcap.com/v1/ticker/${it.key}/")
                 val resp = call.execute().body()
                 var json = JSONArray(resp)
-                total += json.getJSONObject(0)["price_usd"].toString().toDouble() * CoinsPref.getString(it.key, "0.0").toDouble()
+                var temp = json.getJSONObject(0)["price_usd"].toString().toDouble() * CoinsPref.getString(it.key, "0.0").toDouble()
+                Log.i("Values", temp.toString() + json.getJSONObject(0)["name"] + CoinsPref.getString(it.key, "0.0"))
+                total += temp
             }
             val date = DateAsset(adf.format(Date(currentTime.time)).toString(), total)
             AssetDB?.AssetDao()?.insertAll(date)

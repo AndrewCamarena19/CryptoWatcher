@@ -5,6 +5,7 @@ import android.arch.persistence.room.Delete
 import android.arch.persistence.room.Insert
 import android.arch.persistence.room.Query
 import com.andyisdope.cryptowatcher.model.Transaction
+import java.math.BigDecimal
 
 @Dao
 interface TransactionDAO {
@@ -25,7 +26,7 @@ interface TransactionDAO {
     fun getAllBuys(): List<Transaction>
 
     @Query("Select SUM(Net) from Transactions where Buy = 1 AND Coin = :coin")
-    fun getAllCoinBuys(coin: String):Double
+    fun getAllCoinBuys(coin: String): Double
 
     @Query("Select SUM(Net) from Transactions where Sell = 1 AND Coin = :coin")
     fun getAllCoinSells(coin: String): Double

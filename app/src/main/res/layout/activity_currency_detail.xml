@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.andyisdope.cryptowatcher.CurrencyDetail">
-
     <TabHost
         android:id="@+id/DetailTab"
         android:layout_width="match_parent"
@@ -28,78 +27,6 @@
                 android:id="@android:id/tabcontent"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-
-                <android.support.constraint.ConstraintLayout
-                    android:id="@+id/Charts"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-
-                    <TextView
-                        android:id="@+id/CurrencyPrice"
-                        android:layout_width="0dp"
-                        android:layout_height="30dp"
-                        android:layout_alignParentTop="true"
-                        android:layout_toEndOf="@+id/PriceTime"
-                        android:background="@color/colorPrimaryDark"
-                        android:textAlignment="center"
-                        android:textColor="@color/colorText"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/PriceTime"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/PriceTime"
-                        android:layout_width="130dp"
-                        android:layout_height="30dp"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentTop="true"
-                        android:background="@color/colorPrimaryDark"
-                        android:textAlignment="viewStart"
-                        android:textColor="@color/colorText"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toStartOf="@+id/CurrencyPrice"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <com.github.mikephil.charting.charts.CandleStickChart
-
-                        android:id="@+id/CurrencyChart"
-                        android:layout_width="match_parent"
-                        android:layout_height="200dp"
-                        android:background="@color/colorPrimaryDark"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/CurrencyPrice">
-
-                    </com.github.mikephil.charting.charts.CandleStickChart>
-
-                    <com.github.mikephil.charting.charts.BarChart
-                        android:id="@+id/VolumeChart"
-                        android:layout_width="match_parent"
-                        android:layout_height="150dp"
-                        android:background="@color/colorPrimaryDark"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/CurrencyChart">
-
-                    </com.github.mikephil.charting.charts.BarChart>
-
-                    <com.github.mikephil.charting.charts.CombinedChart
-                        android:id="@+id/MACD"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:background="@color/colorPrimaryDark"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/VolumeChart">
-
-                    </com.github.mikephil.charting.charts.CombinedChart>
-
-                </android.support.constraint.ConstraintLayout>
 
                 <android.support.constraint.ConstraintLayout
                     android:id="@+id/Vault"
@@ -144,7 +71,7 @@
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="8dp"
                         android:layout_marginTop="2dp"
-                        android:text="TextView"
+                        android:text="text"
                         android:textColor="@color/TickerNameColor"
                         android:textSize="16sp"
                         app:layout_constraintEnd_toStartOf="@+id/VaultCurrentPrice"
@@ -445,8 +372,8 @@
                         android:layout_marginEnd="8dp"
                         android:layout_marginStart="24dp"
                         android:hint="Add Funds"
-                        android:inputType="numberDecimal"
                         android:imeOptions="actionDone"
+                        android:inputType="numberDecimal"
                         android:textAlignment="center"
                         app:layout_constraintBaseline_toBaselineOf="@+id/VaultLiquid"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -515,6 +442,78 @@
                         app:layout_constraintBaseline_toBaselineOf="@+id/MainVaultBtn"
                         app:layout_constraintEnd_toStartOf="@+id/MainVaultBtn"
                         app:layout_constraintStart_toStartOf="parent" />
+
+                </android.support.constraint.ConstraintLayout>
+
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/Charts"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+
+                    <TextView
+                        android:id="@+id/CurrencyPrice"
+                        android:layout_width="0dp"
+                        android:layout_height="30dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_toEndOf="@+id/PriceTime"
+                        android:background="@color/colorPrimaryDark"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorText"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/PriceTime"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/PriceTime"
+                        android:layout_width="130dp"
+                        android:layout_height="30dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        android:background="@color/colorPrimaryDark"
+                        android:textAlignment="viewStart"
+                        android:textColor="@color/colorText"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toStartOf="@+id/CurrencyPrice"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.github.mikephil.charting.charts.CandleStickChart
+
+                        android:id="@+id/CurrencyChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="200dp"
+                        android:background="@color/colorPrimaryDark"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/CurrencyPrice">
+
+                    </com.github.mikephil.charting.charts.CandleStickChart>
+
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/VolumeChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="150dp"
+                        android:background="@color/colorPrimaryDark"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/CurrencyChart">
+
+                    </com.github.mikephil.charting.charts.BarChart>
+
+                    <com.github.mikephil.charting.charts.CombinedChart
+                        android:id="@+id/MACD"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@color/colorPrimaryDark"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/VolumeChart">
+
+                    </com.github.mikephil.charting.charts.CombinedChart>
 
                 </android.support.constraint.ConstraintLayout>
 

@@ -8,6 +8,7 @@ import android.support.v4.content.LocalBroadcastManager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -30,6 +31,7 @@ import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.activity_currency_detail.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -40,8 +42,6 @@ import kotlin.collections.ArrayList
 
 
 class CurrencyDetail : AppCompatActivity() {
-    //TODO: Create Master Vault view with pie chart and other graphs
-    //TODO: Create functions for ranges and Buttons in transaction view
     private var signal: ArrayList<Float> = ArrayList()
     private var eMA12: ArrayList<Float> = ArrayList()
     private var eMA26: ArrayList<Float> = ArrayList()
@@ -76,6 +76,8 @@ class CurrencyDetail : AppCompatActivity() {
     private var xValues: ArrayList<String> = ArrayList()
     private var transactionDB: TransactionDatabase? = null
     private lateinit var vaultPref: SharedPreferences
+    private lateinit var coinNames: SharedPreferences
+    private lateinit var pricingPref: SharedPreferences
     private var liquidUSD: Double = 0.0
     private lateinit var liquidText: TextView
     private lateinit var investedTV: TextView
@@ -122,6 +124,7 @@ class CurrencyDetail : AppCompatActivity() {
         val today: Int = df.format(c.time).toInt()
         val start: Int = today - 10000
         curr = intent.getStringExtra("Currency")
+        Log.i("Tag", curr)
         currSymbol = intent.getStringExtra("Symbol")
         currentPrice = intent.getStringExtra("Price").toDouble()
         marketLoaded = false
@@ -236,7 +239,13 @@ class CurrencyDetail : AppCompatActivity() {
         if (currencyDeets.size > 45) {
             initBar(count)
             initCandle(count)
-            initCombined(count)
+            if(currencyDeets.size >= 60)
+                initCombined(count)
+            else
+                Toast.makeText(baseContext, "Currency needs at least 60 days of data for MACD indicators", Toast.LENGTH_SHORT)
+                        .apply { setGravity(Gravity.CENTER, 0, 0) }
+                        .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
+                        .show()
         } else {
             //If currency is new then MACD chart cannot be displayed due to lack of data
             Toast.makeText(baseContext, "Currency has less than 45 days of data", Toast.LENGTH_SHORT)
@@ -296,34 +305,36 @@ class CurrencyDetail : AppCompatActivity() {
             intent.putExtra("Coin", curr.toUpperCase())
             startActivity(intent)
         }
-        vaultPref = baseContext.getSharedPreferences("Coins", Context.MODE_PRIVATE)
+        vaultPref = getSharedPreferences("Coins", Context.MODE_PRIVATE)
+        pricingPref = getSharedPreferences("Prices", Context.MODE_PRIVATE)
+        coinNames = getSharedPreferences("CoinNames", Context.MODE_PRIVATE)
 
         liquidUSD = vaultPref.getString("USD", "0.0").toDouble()
         numberOfCoins = vaultPref.getString(currSymbol, "0.0").toDouble()
-        invested = numberOfCoins * currentPrice
+        invested = (numberOfCoins * currentPrice)
 
         vaultLogo = findViewById(R.id.VaultLogo)
 
         assetsBoughtTV = findViewById(R.id.VaultAssetsBought)
-        assetsBoughtTV.text = "$ ${allBuys * -1}"
+        assetsBoughtTV.text = "$ ${CurrencyFormatter.formatterView.format(allBuys * -1)}"
 
         assetsSoldTV = findViewById(R.id.VaultAssetsSold)
-        assetsSoldTV.text = "$ $allSells"
+        assetsSoldTV.text = "$ ${CurrencyFormatter.formatterView.format(allSells)}"
 
         unitsHeldTV = findViewById(R.id.NumberCoins)
         unitsHeldTV.text = "${CurrencyFormatter.formatterView.format(numberOfCoins)}"
 
         currentPriceTV = findViewById(R.id.VaultCurrentPrice)
-        currentPriceTV.text = "$ $currentPrice"
+        currentPriceTV.text = "$ ${CurrencyFormatter.formatterView.format(currentPrice)}"
 
         currentNetTV = findViewById(R.id.VaultNet)
-        currentNetTV.text = "$ ${allSells + allBuys}"
+        currentNetTV.text = "$ ${CurrencyFormatter.formatterView.format(allSells + allBuys)}"
 
         investedTV = findViewById(R.id.VaultInvested)
         investedTV.text = "$ ${CurrencyFormatter.formatterView.format(invested)}"
 
         liquidText = findViewById(R.id.VaultLiquid)
-        liquidText.text = "$ $liquidUSD"
+        liquidText.text = "$ ${CurrencyFormatter.formatterView.format(liquidUSD)}"
 
         amountToBuy = findViewById(R.id.VaultBuyCoinsAmount)
         amountToSell = findViewById(R.id.VaultSellCoinsAmount)
@@ -343,11 +354,10 @@ class CurrencyDetail : AppCompatActivity() {
     private fun initVaultButtons() {
         vaultPref.registerOnSharedPreferenceChangeListener { sharedPreferences, _ ->
             numberOfCoins = sharedPreferences.getString(currSymbol, "0").toDouble()
-            findViewById<TextView>(R.id.NumberCoins).text = "$numberOfCoins"
-            currentNetTV.text = "$ ${allSells + allBuys}"
-            assetsSoldTV.text = "$ ${allSells}"
+            currentNetTV.text = "$ ${CurrencyFormatter.formatterView.format(allSells + allBuys)}"
+            assetsSoldTV.text = "$ ${CurrencyFormatter.formatterView.format(allSells)}"
             investedTV.text = "$ ${CurrencyFormatter.formatterView.format(numberOfCoins * currentPrice)}"
-            liquidText.text = "$ $liquidUSD"
+            liquidText.text = "$ ${CurrencyFormatter.formatterView.format(liquidUSD)}"
         }
 
         findViewById<TextView>(R.id.VaultName).text = curr.toUpperCase()
@@ -459,19 +469,25 @@ class CurrencyDetail : AppCompatActivity() {
                     .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
                     .show()
 
-            allSells += amt
             numberOfCoins -= numCoins
+            allSells += amt
             liquidUSD += amt
-            assetsSoldTV.text = "$ $allSells"
-            currentNetTV.text = "$ ${allSells + allBuys}"
-            //Place current coins and usd into preferences
+
+            liquidText.text = " $ ${CurrencyFormatter.formatterView.format(liquidUSD)}"
+            unitsHeldTV.text = CurrencyFormatter.formatterView.format(numberOfCoins)
+            assetsSoldTV.text = "$ ${CurrencyFormatter.formatterView.format(allSells)}"
+            currentNetTV.text = "$ ${CurrencyFormatter.formatterView.format(allSells + allBuys)}"
+
             vaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(numberOfCoins)).apply()
             vaultPref.edit().putString("USD", liquidUSD.toString()).apply()
             completed = false
         }
         //If sold all coins remove from preferences to track
-        if (numberOfCoins == 0.0)
+        if (numberOfCoins < 0.0001) {
+            coinNames.edit().remove(curr).apply()
+            pricingPref.edit().remove(currSymbol).apply()
             vaultPref.edit().remove(currSymbol).apply()
+        }
         amountToUSD.setText("")
         return completed
     }
@@ -490,20 +506,26 @@ class CurrencyDetail : AppCompatActivity() {
             val t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), numCoins,
                     true, false, currentPrice, (amt) * -1)
             transactionDB?.TransactionDao()?.insertAll(t0)
+
             allBuys -= amt
             numberOfCoins += numCoins
             liquidUSD -= amt
+
             //if USD is less than this amount zero it out to avoid tiny fractions
             if (liquidUSD < .00001) liquidUSD = 0.0
-            assetsBoughtTV.text = "$ ${allBuys * -1}"
-            currentNetTV.text = "$ ${allSells + allBuys}"
+
+            liquidText.text = " $ ${CurrencyFormatter.formatterView.format(liquidUSD)}"
+            assetsBoughtTV.text = "$ ${CurrencyFormatter.formatterView.format(allBuys * -1)}"
+            currentNetTV.text = "$ ${CurrencyFormatter.formatterView.format(allSells + allBuys)}"
+            unitsHeldTV.text = CurrencyFormatter.formatterView.format(numberOfCoins)
+
+            vaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(numberOfCoins)).apply()
+            vaultPref.edit().putString("USD", liquidUSD.toString()).apply()
+            completed = false
             Toast.makeText(this, "Exchanged $amt USD to $numCoins $curr", Toast.LENGTH_SHORT)
                     .apply { setGravity(Gravity.CENTER, 0, 0) }
                     .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
                     .show()
-            vaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(numberOfCoins)).apply()
-            vaultPref.edit().putString("USD", liquidUSD.toString()).apply()
-            completed = false
         }
         amountToCurrency.setText("")
         return completed
@@ -522,23 +544,32 @@ class CurrencyDetail : AppCompatActivity() {
             val t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), amt,
                     false, true, currentPrice, (amt * currentPrice))
             transactionDB?.TransactionDao()?.insertAll(t0)
+
+            liquidUSD += (currentPrice * amt)
+            allSells += (currentPrice * amt)
+            numberOfCoins -= amt
+
+            liquidText.text = " $ ${CurrencyFormatter.formatterView.format(liquidUSD)}"
+            unitsHeldTV.text = CurrencyFormatter.formatterView.format(numberOfCoins)
+            assetsSoldTV.text = "$ ${CurrencyFormatter.formatterView.format(allSells)}"
+            currentNetTV.text = "$ ${CurrencyFormatter.formatterView.format(allSells + allBuys)}"
+
+            vaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(numberOfCoins)).apply()
+            vaultPref.edit().putString("USD", liquidUSD.toString()).apply()
+            completed = false
             Toast.makeText(this, "Sold $amt coins @$currentPrice for a net of ${currentPrice * amt}", Toast.LENGTH_LONG)
                     .apply { setGravity(Gravity.CENTER, 0, 0) }
                     .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
                     .show()
-            allSells += (currentPrice * amt)
-            numberOfCoins -= amt
-            liquidUSD += (currentPrice * amt)
-            assetsSoldTV.text = "$ $allSells"
-            currentNetTV.text = "$ ${allSells + allBuys}"
-            vaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(numberOfCoins)).apply()
-            vaultPref.edit().putString("USD", liquidUSD.toString()).apply()
-            completed = false
         }
 
         //If coins are 0 remove from preference tracking
-        if (numberOfCoins == 0.0)
+        if (numberOfCoins < 0.0001) {
+            Log.i("Values", "Removed pref")
+            coinNames.edit().remove(curr).apply()
+            pricingPref.edit().remove(currSymbol).apply()
             vaultPref.edit().remove(currSymbol).apply()
+        }
         amountToSell.setText("")
         return completed
     }
@@ -555,20 +586,25 @@ class CurrencyDetail : AppCompatActivity() {
             val t0 = Transaction(Calendar.getInstance().time.time, curr.toUpperCase(), amt,
                     true, false, currentPrice, (currentPrice * amt) * -1)
             transactionDB?.TransactionDao()?.insertAll(t0)
+
             allBuys -= currentPrice * amt
             numberOfCoins += amt
             liquidUSD -= amt * currentPrice
             if (liquidUSD < .0001) liquidUSD = 0.0
-            assetsBoughtTV.text = "$ ${allBuys * -1}"
-            currentNetTV.text = "$ ${allSells + allBuys}"
+
+            unitsHeldTV.text = CurrencyFormatter.formatterView.format(numberOfCoins)
+            assetsBoughtTV.text = "$ ${CurrencyFormatter.formatterView.format(allBuys * -1)}"
+            currentNetTV.text = "$ ${CurrencyFormatter.formatterView.format(allSells + allBuys)}"
+            liquidText.text = " $ ${CurrencyFormatter.formatterView.format(liquidUSD)}"
+
+            vaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(numberOfCoins)).apply()
+            vaultPref.edit().putString("USD", liquidUSD.toString()).apply()
+            completed = false
+
             Toast.makeText(this, "Bought $amt coins @ $currentPrice for a net of ${currentPrice * -amt}", Toast.LENGTH_LONG)
                     .apply { setGravity(Gravity.CENTER, 0, 0) }
                     .apply { view.textAlignment = View.TEXT_ALIGNMENT_CENTER }
                     .show()
-            //Updated USD and Coin amounts
-            vaultPref.edit().putString(currSymbol, CurrencyFormatter.formatterView.format(numberOfCoins)).apply()
-            vaultPref.edit().putString("USD", liquidUSD.toString()).apply()
-            completed = false
         }
         amountToBuy.setText("")
         return completed
@@ -577,19 +613,13 @@ class CurrencyDetail : AppCompatActivity() {
     //Load Two database calls using Room and Coroutines to await data
     private fun initDB() {
         transactionDB = TransactionDatabase.getInstance(this)
-        async(UI) {
-            val buys = async(CommonPool)
-            {
-                transactionDB!!.TransactionDao().getAllCoinBuys(curr.toUpperCase())
-            }
-            val sell = async(CommonPool) {
-                transactionDB!!.TransactionDao().getAllCoinSells(curr.toUpperCase())
-            }
-            allBuys = buys.await()
-            allSells = sell.await()
+        //async(UI) {
+            val buys = transactionDB!!.TransactionDao().getAllCoinBuys(curr.toUpperCase())
+            val sell = transactionDB!!.TransactionDao().getAllCoinSells(curr.toUpperCase())
+            allBuys = buys
+            allSells = sell
             initVaultData()
             initVaultButtons()
-        }
     }
     //endregion
 

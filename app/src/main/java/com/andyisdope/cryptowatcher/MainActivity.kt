@@ -76,10 +76,10 @@ class MainActivity : AppCompatActivity() {
     //Initialize Views and User Preferences
     private fun initVariables() {
         //Load Preferences to start tracking coin data
-        coinNames = baseContext.getSharedPreferences("CoinNames", Context.MODE_PRIVATE)
-        sharedPref = baseContext.getSharedPreferences("Favorites", Context.MODE_PRIVATE)
-        pricingPref = baseContext.getSharedPreferences("Prices", Context.MODE_PRIVATE)
-        coinsPref = baseContext.getSharedPreferences("Coins", Context.MODE_PRIVATE)
+        coinNames = applicationContext.getSharedPreferences("CoinNames", Context.MODE_PRIVATE)
+        sharedPref = applicationContext.getSharedPreferences("Favorites", Context.MODE_PRIVATE)
+        pricingPref = applicationContext.getSharedPreferences("Prices", Context.MODE_PRIVATE)
+        coinsPref = applicationContext.getSharedPreferences("Coins", Context.MODE_PRIVATE)
 
         //Arrays of options menu data
         order = arrayOf("Ascending", "Descending")
@@ -117,7 +117,7 @@ class MainActivity : AppCompatActivity() {
     private fun scheduleJob() {
         val comp = ComponentName(applicationContext, PortfolioService::class.java)
         val builder: JobInfo = JobInfo.Builder(1111, comp)
-                .setPeriodic(21600000)
+                .setPeriodic(900000)//21600000
                 .setPersisted(true)
                 .build()
         val scheduler: JobScheduler = getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
@@ -596,7 +596,6 @@ class MainActivity : AppCompatActivity() {
                     if (coinsPref.contains(temp.Symbol)) {
                         pricingPref.edit().putString(temp.Symbol, temp.CurrentPrice).apply()
                         coinNames.edit().putString(temp.Name, coinsPref.getString(temp.Symbol, "0")).apply()
-
                     }
                     mTokens.add(temp)
                 }

@@ -34,10 +34,6 @@ import kotlin.collections.ArrayList
 
 
 class VaultActivity : AppCompatActivity() {
-    //TODO: create service to retrieve and store pricing data at 11:59pm for asset graph
-    //TODO: change preference to save symbol instead of full name
-
-
     private lateinit var CoinShares: PieChart
     private lateinit var AssetShares: PieChart
     private lateinit var PortfolioValuesChart: LineChart
@@ -142,20 +138,9 @@ class VaultActivity : AppCompatActivity() {
                 Min = it.Price.toFloat()
         }
 
-//        for (i in 1 .. 24)
-//        {
-//            var tempData = DateAsset("4/$i/2018", (Math.random() * 4000))
-//            PortfolioData.add(tempData)
-//            if (tempData.Price > Max)
-//                Max = tempData.Price.toFloat()
-//            if (tempData.Price < Min)
-//                Min = tempData.Price.toFloat()
-//        }
         PortfolioData.withIndex().forEach {
             PortfolioEntries.add(Entry(it.index.toFloat(), it.value.Price.toFloat()))
         }
-
-        Log.i("Data", PortfolioEntries.toString())
     }
 
     private fun setPortfolioData() {
@@ -212,7 +197,7 @@ class VaultActivity : AppCompatActivity() {
             i++
         }
         xAxis.setValueFormatter({ value, axis ->
-            PortfolioData[(value % xValues.size).toInt()].Date
+            PortfolioData[(value).toInt()].Date
         })
 
         var leftAxis = PortfolioValuesChart.axisLeft;
@@ -255,8 +240,6 @@ class VaultActivity : AppCompatActivity() {
         PortfolioValuesChart.data = data;
         PortfolioValuesChart.invalidate();
         initPortfolioRecycler()
-
-
     }
 
     private fun initPortfolioRecycler() {
@@ -269,7 +252,7 @@ class VaultActivity : AppCompatActivity() {
 
     //region Assets USD Pie Chart
     private fun initAssetShares() {
-        CoinPrices = getSharedPreferences("Prices", Context.MODE_PRIVATE)
+        CoinPrices = applicationContext.getSharedPreferences("Prices", Context.MODE_PRIVATE)
         AssetShares = findViewById<PieChart>(R.id.VaultPieChartAssets) as PieChart
         AssetShares.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
             override fun onNothingSelected() {
@@ -345,7 +328,7 @@ class VaultActivity : AppCompatActivity() {
         // NOTE: The order of the entries when being added to the entries array determines their position around the center of
         // the chart.
         coindata.entries.forEach {
-            if (it.value != "USD") {
+            if (it.key != "USD") {
                 var pricetemp: Float = coinAmt[it.key].toString().toFloat() * it.value.toString().toFloat()
                 PriceData.add(DateAsset(it.key.toUpperCase(), pricetemp.toDouble()))
                 PriceEntries.add(PieEntry(pricetemp, it.key.toUpperCase()))
@@ -407,7 +390,7 @@ class VaultActivity : AppCompatActivity() {
 
     //region Coin Amount Pie Chart
     private fun initCoinShares() {
-        CoinHoldings = getSharedPreferences("Coins", Context.MODE_PRIVATE)
+        CoinHoldings = applicationContext.getSharedPreferences("Coins", Context.MODE_PRIVATE)
         CoinShares = findViewById<PieChart>(R.id.VaultPieChart) as PieChart
         CoinShares.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
             override fun onNothingSelected() {

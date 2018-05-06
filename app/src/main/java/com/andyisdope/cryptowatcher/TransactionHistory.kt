@@ -15,6 +15,7 @@ import com.andyisdope.cryptowatcher.model.Transaction
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import java.math.BigDecimal
 import java.util.*
 
 //TODO: parse dates into long for range check
@@ -69,7 +70,7 @@ class TransactionHistory : AppCompatActivity() {
             val buytemp = BuyNet.await()
             sellsTotal.text = "$ $selltemp"
             buysTotal.text = "$ $buytemp"
-            if (selltemp + buytemp > 0)
+            if (BigDecimal(selltemp + buytemp) > BigDecimal(0.0))
                 netTotal.setTextColor(Color.GREEN)
             else
                 netTotal.setTextColor(Color.RED)
