@@ -28,6 +28,9 @@ android {
         }
     }
     sourceSets { main { assets.srcDirs = ['src/main/assets', 'src/main/assets/'] } }
+    dataBinding {
+        enabled = true
+    }
 }
 
 dependencies {
