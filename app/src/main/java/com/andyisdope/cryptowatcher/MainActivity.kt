@@ -12,6 +12,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.text.InputType
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.EditText
@@ -117,7 +118,7 @@ class MainActivity : AppCompatActivity() {
     private fun scheduleJob() {
         val comp = ComponentName(applicationContext, PortfolioService::class.java)
         val builder: JobInfo = JobInfo.Builder(1111, comp)
-                .setPeriodic(900000)//21600000
+                .setPeriodic(21600000)//21600000
                 .setPersisted(true)
                 .build()
         val scheduler: JobScheduler = getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
@@ -444,12 +445,11 @@ class MainActivity : AppCompatActivity() {
         var id = block.substringAfter("<tr id=\"id-")
         id = id.substring(0, id.indexOf("\""))
 
-        val data = block.split("</td")
-
+        val data = block.split("</td>")
         val place = data[0].substringAfter("<td class=\"text-center\">").trim()
 
-        var symbol = data[1].substringAfter("<span class=\"currency-symbol\"><a href=\"/currencies/$id/\">")
-        symbol = symbol.substring(0, symbol.indexOf("<"))
+        var symbol = data[2].substringAfter("col-symbol\">")
+        //symbol = symbol.substring(0, symbol.indexOf(","))
 
         var marketCap = data[3].substringAfter("data-sort=\"")
         marketCap = marketCap.substring(0, marketCap.indexOf("\""))
@@ -528,12 +528,12 @@ class MainActivity : AppCompatActivity() {
         var platform = block.substringAfter("data-platformsymbol=\"")
         platform = platform.substring(0, platform.indexOf("\""))
 
-        val data = block.split("</td")
+        val data = block.split("</td>")
 
         val place = data[0].substringAfter("<td class=\"text-center\">").trim()
 
-        var symbol = data[1].substringAfter("<span class=\"currency-symbol\"><a href=\"/currencies/$id/\">")
-        symbol = symbol.substring(0, symbol.indexOf("<"))
+        var symbol = data[2].substringAfter("col-symbol\">")
+        //symbol = symbol.substring(0, symbol.indexOf("<"))
 
         var marketCap = data[3].substringAfter("data-sort=\"")
         marketCap = marketCap.substring(0, marketCap.indexOf("\""))

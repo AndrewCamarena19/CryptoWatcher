@@ -81,40 +81,17 @@
             android:id="@+id/TransactionDateStart"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:ems="10"
-            android:hint="Start Date e.g (10/31/2018)"
+            android:imeOptions="actionDone"
+            android:hint="Select Month to display 30 day history (e.g 04/2018)"
             android:inputType="datetime"
+            android:textAlignment="center"
             android:textSize="14sp"
-            app:layout_constraintEnd_toStartOf="@+id/textView6"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/TransctionBuys" />
-
-        <TextView
-            android:id="@+id/textView6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:text="To: "
-            android:textSize="18sp"
-            app:layout_constraintBaseline_toBaselineOf="@+id/TransactionDateStart"
-            app:layout_constraintEnd_toStartOf="@+id/TransactionDateEnd"
-            app:layout_constraintStart_toEndOf="@+id/TransactionDateStart" />
-
-        <EditText
-            android:id="@+id/TransactionDateEnd"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:ems="10"
-            android:hint="End Date"
-            android:inputType="datetime"
-            android:textSize="14sp"
-            app:layout_constraintBaseline_toBaselineOf="@+id/TransactionDateStart"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/textView6" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/TransactionsList"
